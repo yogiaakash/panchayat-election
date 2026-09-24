@@ -25,6 +25,8 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
 let candidate=null,voters=[];
 
+const DEV_TO_LAT={"क":"k","ख":"kh","ग":"g","घ":"gh","च":"ch","छ":"chh","ज":"j","झ":"jh","ट":"t","ठ":"th","ड":"d","ढ":"dh","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"ph","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ा":"a","ि":"i","ी":"i","ु":"u","ू":"u","े":"e","ै":"ai","ो":"o","ौ":"au","ं":"n","ँ":"n","ः":"h","्":""};
+function latinize(v){return String(v??"").split("").map(ch=>DEV_TO_LAT[ch]??ch).join("").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function loginView(msg=""){
  logout.classList.add("hidden");
@@ -78,7 +80,7 @@ function dashboard(){
 }
 function filtered(){
  const q=document.getElementById("q").value.trim().toLocaleLowerCase("hi-IN"),w=document.getElementById("ward").value,co=document.getElementById("colony").value,h=document.getElementById("house").value,b=document.getElementById("booth").value;
- return voters.filter(v=>(!w||v.ward===w)&&(!co||v.colony===co)&&(!h||String(v.house_no)===String(h))&&(!b||v.polling_station===b)&&(!q||[v.name,v.epic,v.relative_name,v.house_no,v.colony,v.ward,v.polling_station].some(x=>String(x||"").toLocaleLowerCase("hi-IN").includes(q))));
+ return voters.filter(v=>(!w||v.ward===w)&&(!co||v.colony===co)&&(!h||String(v.house_no)===String(h))&&(!b||v.polling_station===b)&&(!q||[v.name,v.epic,v.relative_name,v.house_no,v.colony,v.ward,v.polling_station].some(x=>{const raw=String(x||"").toLocaleLowerCase("hi-IN");return raw.includes(q)||latinize(raw).includes(latinize(q))})));
 }
 function clearFilters(){["q","ward","colony","house","booth"].forEach(id=>document.getElementById(id).value="");renderRows();}
 function renderRows(){
