@@ -5,13 +5,13 @@
 <title>Panchayat Digital</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--p:#123b70;--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#657187;--line:#dfe5ee}
+:root{--p:#176451;--p2:#0f4f40;--bg:#f3f7f5;--card:#fff;--text:#17342c;--muted:#687b75;--line:#d9e7e1;--mint:#eaf5f1}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,"Noto Sans Devanagari",Arial,sans-serif;background:var(--bg);color:var(--text)}
-header{background:#fff;border-bottom:1px solid var(--line);padding:14px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
-.brand{font-weight:900;font-size:20px;color:var(--p)}main{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 5px 18px #1720330b}
+header{background:linear-gradient(135deg,var(--p2),var(--p));color:#fff;border-bottom:0;padding:15px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5;box-shadow:0 3px 14px #0b3b3028}
+.brand{font-weight:900;font-size:21px;color:#fff;letter-spacing:.2px}main{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 7px 22px #17342c0b}
 .login{max-width:420px;margin:70px auto}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat strong{display:block;font-size:28px;color:var(--p)}.stat span,.muted{color:var(--muted)}
-input,select,button{font:inherit}input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}label{display:block;margin:12px 0 5px;font-weight:700}.btn{border:0;border-radius:10px;padding:11px 15px;cursor:pointer}.primary{background:var(--p);color:#fff}.ghost{background:#eef3f9;color:var(--p)}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:9px;margin:14px 0}
-table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f8fafc}.tablewrap{overflow:auto}.hero{display:flex;gap:15px;align-items:center}.hero img{width:76px;height:76px;object-fit:cover;border-radius:14px;border:1px solid var(--line)}.error{color:#b42318}.ok{color:#067647}.hidden{display:none}
+input,select,button{font:inherit}input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}label{display:block;margin:12px 0 5px;font-weight:700}.btn{border:0;border-radius:10px;padding:11px 15px;cursor:pointer}.primary{background:var(--p);color:#fff;font-weight:800}.ghost{background:var(--mint);color:var(--p2);font-weight:800}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:9px;margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f8fafc}.tablewrap{overflow:auto}.hero{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,var(--p2),var(--p));color:#fff;border:0}.hero .muted{color:#d6eee6}.hero img{width:82px;height:82px;object-fit:cover;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 10px #0003}.error{color:#b42318}.ok{color:#067647}.hidden{display:none}
 @media(max-width:800px){.grid{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.hero{align-items:flex-start}}
 @media print{header,.filters,.noprint{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}main{margin:0;max-width:none}}
 </style>
@@ -49,7 +49,7 @@ async function load(){
  if(!user){loginView();return}
  const {data:c,error:ce}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).maybeSingle();
  if(ce||!c){loginView("इस login से कोई candidate account linked नहीं है।");await sb.auth.signOut();return}
- if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}
+ if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}\n if(c.subscription_expiry && new Date(c.subscription_expiry+"T23:59:59") < new Date()){loginView("Candidate subscription expire हो चुका है। Admin से संपर्क करें।");await sb.auth.signOut();return}
  candidate=c;
  const {data:v,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).limit(10000);
  if(ve){loginView("Voter data load error: "+ve.message);return}
