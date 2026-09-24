@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panchayat Digital</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--p:#123b70;--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#657187;--line:#dfe5ee}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,"Noto Sans Devanagari",Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:14px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.brand{font-weight:900;font-size:20px;color:var(--p)}main{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 5px 18px #1720330b}
+.login{max-width:420px;margin:70px auto}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat strong{display:block;font-size:28px;color:var(--p)}.stat span,.muted{color:var(--muted)}
+input,select,button{font:inherit}input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}label{display:block;margin:12px 0 5px;font-weight:700}.btn{border:0;border-radius:10px;padding:11px 15px;cursor:pointer}.primary{background:var(--p);color:#fff}.ghost{background:#eef3f9;color:var(--p)}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f8fafc}.tablewrap{overflow:auto}.hero{display:flex;gap:15px;align-items:center}.hero img{width:76px;height:76px;object-fit:cover;border-radius:14px;border:1px solid var(--line)}.error{color:#b42318}.ok{color:#067647}.hidden{display:none}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.hero{align-items:flex-start}}
+@media print{header,.filters,.noprint{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}main{margin:0;max-width:none}}
+</style>
+</head>
+<body>
+<header><div class="brand">Panchayat Digital</div><button id="logout" class="btn ghost hidden">Logout</button></header>
+<main id="app"></main>
+<script>
+const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const app=document.getElementById("app"), logout=document.getElementById("logout");
+let candidate=null,voters=[];
+
+const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function loginView(msg=""){
+ logout.classList.add("hidden");
+ app.innerHTML=`<div class="card login"><h2>Candidate Login</h2><p class="muted">अपने अधिकृत Email और Password से लॉगिन करें।</p>
+ <label>Email</label><input id="email" type="email" autocomplete="username">
+ <label>Password</label><input id="password" type="password" autocomplete="current-password">
+ <button class="btn primary" style="width:100%;margin-top:16px" onclick="signIn()">Login</button>
+ <p id="msg" class="error">${e(msg)}</p></div>`;
+}
+async function signIn(){
+ const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
+ document.getElementById("msg").textContent="Signing in…";
+ const {error}=await sb.auth.signInWithPassword({email,password});
+ if(error){document.getElementById("msg").textContent=error.message;return}
+ await load();
+}
+logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];loginView()};
+async function load(){
+ const {data:{user}}=await sb.auth.getUser();
+ if(!user){loginView();return}
+ const {data:c,error:ce}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).maybeSingle();
+ if(ce||!c){loginView("इस login से कोई candidate account linked नहीं है।");await sb.auth.signOut();return}
+ if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}
+ candidate=c;
+ const {data:v,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).limit(10000);
+ if(ve){loginView("Voter data load error: "+ve.message);return}
+ voters=v||[];logout.classList.remove("hidden");dashboard();
+}
+function uniq(k){return [...new Set(voters.map(x=>x[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"))}
+function options(k,label){return `<option value="">${label}</option>`+uniq(k).map(x=>`<option>${e(x)}</option>`).join("")}
+function dashboard(){
+ const c=candidate;
+ app.innerHTML=`<div class="card hero">
+ ${c.photo_path?`<img src="${e(c.photo_path)}">`:""}
+ <div><div class="muted">Candidate Dashboard</div><h2 style="margin:3px 0">${e(c.hindi_name||c.name)}</h2>
+ <div>${e(c.post||"")} • ग्राम पंचायत ${e(c.gram_panchayat||"")}</div><div class="muted">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div></div></div>
+ <div class="grid" style="margin-top:14px">
+ <div class="card stat"><strong id="total">0</strong><span>कुल मतदाता</span></div>
+ <div class="card stat"><strong id="male">0</strong><span>पुरुष</span></div>
+ <div class="card stat"><strong id="female">0</strong><span>महिला</span></div>
+ <div class="card stat"><strong id="houses">0</strong><span>मकान</span></div></div>
+ <div class="card" style="margin-top:14px"><div class="filters">
+ <input id="q" placeholder="नाम / EPIC / रिश्तेदार / मकान खोजें">
+ <select id="ward">${options("ward","सभी वार्ड")}</select>
+ <select id="colony">${options("colony","सभी कॉलोनी")}</select>
+ <select id="house">${options("house_no","सभी मकान")}</select>
+ <button class="btn primary" onclick="printHouse()">House PDF / Print</button></div>
+ <div id="result"></div></div>`;
+ ["q","ward","colony","house"].forEach(id=>document.getElementById(id).addEventListener(id==="q"?"input":"change",renderRows));
+ renderRows();
+}
+function filtered(){
+ const q=document.getElementById("q").value.trim().toLowerCase(),w=document.getElementById("ward").value,co=document.getElementById("colony").value,h=document.getElementById("house").value;
+ return voters.filter(v=>(!w||v.ward===w)&&(!co||v.colony===co)&&(!h||v.house_no===h)&&(!q||[v.name,v.epic,v.relative_name,v.house_no].some(x=>String(x||"").toLowerCase().includes(q))));
+}
+function renderRows(){
+ const a=filtered(), isMale=x=>/पुरुष|male|^m$/i.test(x.gender||""), isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
+ document.getElementById("total").textContent=a.length;document.getElementById("male").textContent=a.filter(isMale).length;document.getElementById("female").textContent=a.filter(isFemale).length;
+ document.getElementById("houses").textContent=new Set(a.map(x=>x.house_no).filter(Boolean)).size;
+ document.getElementById("result").innerHTML=`<div class="muted" style="margin-bottom:8px">${a.length} records</div><div class="tablewrap"><table><thead><tr><th>क्र.</th><th>नाम</th><th>पिता/पति/अन्य</th><th>EPIC</th><th>मकान</th><th>कॉलोनी</th><th>वार्ड</th><th>आयु</th><th>लिंग</th><th>मतदान केंद्र</th></tr></thead><tbody>${a.slice(0,1000).map(v=>`<tr><td>${e(v.serial_no)}</td><td><b>${e(v.name)}</b></td><td>${e(v.relative_name)}</td><td>${e(v.epic)}</td><td>${e(v.house_no)}</td><td>${e(v.colony)}</td><td>${e(v.ward)}</td><td>${e(v.age)}</td><td>${e(v.gender)}</td><td>${e(v.polling_station)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function printHouse(){
+ const a=filtered(); if(!a.length){alert("कोई voter नहीं मिला।");return}
+ const old=document.title;document.title=`${candidate.gram_panchayat||"Panchayat"}_Voter_List`;window.print();document.title=old;
+}
+sb.auth.onAuthStateChange(()=>{});
+load();
+</script></body></html>
