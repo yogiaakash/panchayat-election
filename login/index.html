@@ -49,7 +49,8 @@ async function load(){
  if(!user){loginView();return}
  const {data:c,error:ce}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).maybeSingle();
  if(ce||!c){loginView("इस login से कोई candidate account linked नहीं है।");await sb.auth.signOut();return}
- if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}\n if(c.subscription_expiry && new Date(c.subscription_expiry+"T23:59:59") < new Date()){loginView("Candidate subscription expire हो चुका है। Admin से संपर्क करें।");await sb.auth.signOut();return}
+ if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}
+ if(c.subscription_expiry && new Date(c.subscription_expiry+"T23:59:59") < new Date()){loginView("Candidate subscription expire हो चुका है। Admin से संपर्क करें।");await sb.auth.signOut();return}
  candidate=c;
  const {data:v,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).limit(10000);
  if(ve){loginView("Voter data load error: "+ve.message);return}
