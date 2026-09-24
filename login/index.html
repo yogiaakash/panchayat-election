@@ -51,7 +51,10 @@ async function load(){
  if(ce||!c){loginView("इस login से कोई candidate account linked नहीं है।");await sb.auth.signOut();return}
  if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}
  if(c.subscription_expiry && new Date(c.subscription_expiry+"T23:59:59") < new Date()){loginView("Candidate subscription expire हो चुका है। Admin से संपर्क करें।");await sb.auth.signOut();return}
- candidate=c;
+ candidate={...c};
+ for(const [col,key] of [["photo_path","photo_url"],["symbol_path","symbol_url"],["banner_path","banner_url"]]){
+   if(c[col]){const {data:signed}=await sb.storage.from("candidate-branding").createSignedUrl(c[col],3600);candidate[key]=signed?.signedUrl||""}
+ }
  const {data:v,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).limit(10000);
  if(ve){loginView("Voter data load error: "+ve.message);return}
  voters=v||[];logout.classList.remove("hidden");dashboard();
@@ -64,9 +67,9 @@ function options(k,label,base=voters){return `<option value="">${label}</option>
 function dashboard(){
  const c=candidate;
  app.innerHTML=`<div class="card hero">
- ${c.photo_path?`<img src="${e(c.photo_path)}">`:""}
+ ${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo">`:`<div style="width:82px;height:82px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`}
  <div><div class="muted">Candidate Dashboard</div><h2 style="margin:3px 0">${e(c.hindi_name||c.name)}</h2>
- <div>${e(c.post||"")} • ग्राम पंचायत ${e(c.gram_panchayat||"")}</div><div class="muted">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div></div></div>
+ <div>${e(c.post||"")} • ग्राम पंचायत ${e(c.gram_panchayat||"")}</div><div class="muted">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div>${c.symbol_url?`<img src="${e(c.symbol_url)}" alt="Election symbol" style="width:42px;height:42px;border-radius:9px;margin-top:7px;background:#fff;padding:3px">`:""}</div></div>${c.banner_url?`<div style="margin-top:12px"><img src="${e(c.banner_url)}" alt="Candidate banner" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px"></div>`:""}
  <div class="grid" style="margin-top:14px">
  <div class="card stat"><strong id="total">0</strong><span>कुल मतदाता</span></div>
  <div class="card stat"><strong id="male">0</strong><span>पुरुष</span></div>
