@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panchayat Digital — Demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Devanagari",sans-serif;background:#f4f7fb;color:#15243b}
+header{background:#153b67;color:#fff;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:22px;font-weight:800}.demo{background:#ffdf75;color:#4a3600;padding:7px 12px;border-radius:20px;font-weight:800}
+main{max-width:1200px;margin:auto;padding:24px}.hero{background:white;border-radius:18px;padding:22px;box-shadow:0 8px 28px #163b6812;display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+.avatar{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:#e8f0fb;font-size:34px}
+.profile{display:flex;gap:16px;align-items:center}.profile h1{margin:0 0 6px;font-size:25px}.muted{color:#65748a}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}.card{background:#fff;border-radius:15px;padding:18px;box-shadow:0 5px 20px #163b680d}.num{font-size:28px;font-weight:800;color:#153b67}
+.tools{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:10px;margin-bottom:14px}input,select{width:100%;padding:12px;border:1px solid #cad5e3;border-radius:9px;background:#fff}
+.tablewrap{overflow:auto;background:#fff;border-radius:15px;box-shadow:0 5px 20px #163b680d}table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:12px;border-bottom:1px solid #edf1f6;text-align:left}th{background:#eef4fb;color:#153b67}
+.btn{border:0;background:#174d86;color:#fff;padding:9px 12px;border-radius:8px;cursor:pointer}.notice{margin:16px 0;background:#fff8dc;border:1px solid #f2d56b;padding:12px;border-radius:10px}
+@media(max-width:800px){.stats{grid-template-columns:1fr 1fr}.tools{grid-template-columns:1fr}.hero{align-items:flex-start}}@media(max-width:480px){.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand">Panchayat Digital</div><div class="demo">DEMO • SAMPLE DATA ONLY</div></header>
+<main>
+<section class="hero">
+ <div class="profile"><div class="avatar">👤</div><div><h1>राजेश शर्मा</h1><div><b>सरपंच प्रत्याशी — ग्राम पंचायत रामपुरा</b></div><div class="muted">Sample Candidate Profile • Rajasthan</div></div></div>
+ <button class="btn" onclick="window.print()">Demo Report / PDF</button>
+</section>
+<div class="notice">यह केवल software demonstration है। नीचे दिखाए गए नाम, EPIC और अन्य voter details काल्पनिक sample data हैं।</div>
+<section class="stats">
+ <div class="card"><div class="muted">कुल मतदाता</div><div class="num" id="total">12</div></div>
+ <div class="card"><div class="muted">पुरुष</div><div class="num" id="male">6</div></div>
+ <div class="card"><div class="muted">महिला</div><div class="num" id="female">6</div></div>
+ <div class="card"><div class="muted">मकान</div><div class="num" id="houses">6</div></div>
+</section>
+<section class="card"><h2 style="margin-top:0">मतदाता खोज एवं फ़िल्टर</h2>
+<div class="tools">
+<input id="q" placeholder="नाम / Voter ID / पिता-पति / मकान नंबर खोजें…" oninput="render()">
+<select id="ward" onchange="render()"><option value="">सभी वार्ड</option><option>001</option><option>002</option></select>
+<select id="colony" onchange="render()"><option value="">सभी कॉलोनी</option><option>मुख्य बाजार</option><option>शिव कॉलोनी</option><option>नई आबादी</option></select>
+<select id="house" onchange="render()"><option value="">सभी मकान</option><option>1</option><option>12</option><option>27</option><option>45</option><option>71</option><option>88</option></select>
+</div></section>
+<div class="tablewrap"><table><thead><tr><th>क्र.</th><th>Voter ID</th><th>नाम</th><th>पिता/पति</th><th>मकान</th><th>कॉलोनी</th><th>वार्ड</th><th>आयु</th><th>लिंग</th><th>Slip</th></tr></thead><tbody id="rows"></tbody></table></div>
+</main>
+<script>
+const V=[
+[1,'DEMO0001','कैलाश कुमार','नरेन्द्र कुमार','1','मुख्य बाजार','001',48,'पुरुष'],
+[2,'DEMO0002','ललिता देवी','कैलाश कुमार','1','मुख्य बाजार','001',43,'महिला'],
+[3,'DEMO0003','मीना देवी','कैलाश कुमार','1','मुख्य बाजार','001',29,'महिला'],
+[4,'DEMO0004','मोहन लाल','गोपाल लाल','12','शिव कॉलोनी','001',55,'पुरुष'],
+[5,'DEMO0005','सुनीता देवी','मोहन लाल','12','शिव कॉलोनी','001',50,'महिला'],
+[6,'DEMO0006','अजय कुमार','मोहन लाल','12','शिव कॉलोनी','001',24,'पुरुष'],
+[7,'DEMO0007','राकेश मीणा','रामलाल मीणा','27','नई आबादी','001',37,'पुरुष'],
+[8,'DEMO0008','कविता मीणा','राकेश मीणा','27','नई आबादी','001',34,'महिला'],
+[9,'DEMO0009','सुरेश शर्मा','हरिप्रसाद शर्मा','45','मुख्य बाजार','002',61,'पुरुष'],
+[10,'DEMO0010','निर्मला शर्मा','सुरेश शर्मा','45','मुख्य बाजार','002',58,'महिला'],
+[11,'DEMO0011','दीपक कुमार','श्यामलाल','71','शिव कॉलोनी','002',31,'पुरुष'],
+[12,'DEMO0012','पूजा देवी','दीपक कुमार','88','नई आबादी','002',28,'महिला']];
+function slip(v){alert('DEMO VOTER SLIP\\n\\nनाम: '+v[2]+'\\nVoter ID: '+v[1]+'\\nमकान: '+v[4]+'\\nवार्ड: '+v[6]+'\\n\\nSample Data Only');}
+function render(){
+ let q=document.getElementById('q').value.toLowerCase(),w=ward.value,c=colony.value,h=house.value;
+ let a=V.filter(v=>(!q||v.join(' ').toLowerCase().includes(q))&&(!w||v[6]==w)&&(!c||v[5]==c)&&(!h||v[4]==h));
+ rows.innerHTML=a.map(v=>`<tr>${v.map((x,i)=>i<9?`<td>${x}</td>`:'').join('')}<td><button class="btn" onclick='slip(${JSON.stringify(v)})'>देखें</button></td></tr>`).join('');
+ total.textContent=a.length; male.textContent=a.filter(v=>v[8]=='पुरुष').length; female.textContent=a.filter(v=>v[8]=='महिला').length; houses.textContent=new Set(a.map(v=>v[4])).size;
+} render();
+</script></body></html>
