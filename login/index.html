@@ -23,7 +23,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px;bord
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
-let candidate=null,voters=[];
+let candidate=null,voters=[],page=1; const PER=40;
 
 const DEV_TO_LAT={"क":"k","ख":"kh","ग":"g","घ":"gh","च":"ch","छ":"chh","ज":"j","झ":"jh","ट":"t","ठ":"th","ड":"d","ढ":"dh","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"ph","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ा":"a","ि":"i","ी":"i","ु":"u","ू":"u","े":"e","ै":"ai","ो":"o","ौ":"au","ं":"n","ँ":"n","ः":"h","्":""};
 function latinize(v){return String(v??"").split("").map(ch=>DEV_TO_LAT[ch]??ch).join("").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
@@ -55,8 +55,11 @@ async function load(){
  if(ve){loginView("Voter data load error: "+ve.message);return}
  voters=v||[];logout.classList.remove("hidden");dashboard();
 }
-function uniq(k){return [...new Set(voters.map(x=>x[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"))}
-function options(k,label){return `<option value="">${label}</option>`+uniq(k).map(x=>`<option>${e(x)}</option>`).join("")}
+const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0900-\u097f]+/g,"");
+const sk=s=>norm(s).replace(/chh/g,"ch").replace(/sh/g,"s").replace(/ph/g,"f").replace(/bh/g,"b").replace(/dh/g,"d").replace(/th/g,"t").replace(/kh/g,"k").replace(/gh/g,"g").replace(/jh/g,"j").replace(/w/g,"v").replace(/[aeiouy]/g,"");
+function smart(a){return [...new Set(a.filter(x=>x!==null&&x!==undefined&&String(x)!==""))].sort((a,b)=>{const an=Number(a),bn=Number(b);return !isNaN(an)&&!isNaN(bn)?an-bn:String(a).localeCompare(String(b),"hi")})}
+function uniq(k,base=voters){return smart(base.map(x=>x[k]))}
+function options(k,label,base=voters){return `<option value="">${label}</option>`+uniq(k,base).map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}
 function dashboard(){
  const c=candidate;
  app.innerHTML=`<div class="card hero">
@@ -78,17 +81,22 @@ function dashboard(){
  ["q","ward","colony","house","booth"].forEach(id=>document.getElementById(id).addEventListener(id==="q"?"input":"change",renderRows));
  renderRows();
 }
-function filtered(){
- const q=document.getElementById("q").value.trim().toLocaleLowerCase("hi-IN"),w=document.getElementById("ward").value,co=document.getElementById("colony").value,h=document.getElementById("house").value,b=document.getElementById("booth").value;
- return voters.filter(v=>(!w||v.ward===w)&&(!co||v.colony===co)&&(!h||String(v.house_no)===String(h))&&(!b||v.polling_station===b)&&(!q||[v.name,v.epic,v.relative_name,v.house_no,v.colony,v.ward,v.polling_station].some(x=>{const raw=String(x||"").toLocaleLowerCase("hi-IN");return raw.includes(q)||latinize(raw).includes(latinize(q))})));
+function matchQ(v,q){if(!q)return true;const nq=norm(q),sq=sk(q);const fields=[v.name,v.epic,v.relative_name,v.house_no,v.colony,v.ward,v.polling_station];if(fields.some(x=>norm(x).includes(nq)))return true;if(sq.length>=2)return fields.some(x=>sk(x).includes(sq));return false}
+function filtered(ignoreQ=false){
+ const q=ignoreQ?"":document.getElementById("q").value.trim(),w=document.getElementById("ward").value,co=document.getElementById("colony").value,h=document.getElementById("house").value,b=document.getElementById("booth").value;
+ return voters.filter(v=>(!w||String(v.ward)===String(w))&&(!co||String(v.colony)===String(co))&&(!h||String(v.house_no)===String(h))&&(!b||String(v.polling_station)===String(b))&&matchQ(v,q));
 }
-function clearFilters(){["q","ward","colony","house","booth"].forEach(id=>document.getElementById(id).value="");renderRows();}
+function cascade(from){const w=document.getElementById("ward").value,c=document.getElementById("colony").value;if(from==="ward"){document.getElementById("colony").value="";document.getElementById("house").value=""}if(from==="colony")document.getElementById("house").value="";const bw=w?voters.filter(v=>String(v.ward)===String(w)):voters;const co=document.getElementById("colony");co.innerHTML=options("colony","सभी कॉलोनी",bw);co.disabled=!w;const cv=co.value;const bc=cv?bw.filter(v=>String(v.colony)===String(cv)):bw;const ho=document.getElementById("house");ho.innerHTML=options("house_no","सभी मकान",bc);ho.disabled=!w||!co.value;renderRows()}
+function clearFilters(){document.getElementById("q").value="";document.getElementById("ward").value="";document.getElementById("colony").innerHTML="<option value=\"\">पहले वार्ड चुनें</option>";document.getElementById("house").innerHTML="<option value=\"\">पहले कॉलोनी चुनें</option>";document.getElementById("colony").disabled=true;document.getElementById("house").disabled=true;document.getElementById("booth").value="";page=1;renderRows();}
 function renderRows(){
  const a=filtered(), isMale=x=>/पुरुष|male|^m$/i.test(x.gender||""), isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
  document.getElementById("total").textContent=a.length;document.getElementById("male").textContent=a.filter(isMale).length;document.getElementById("female").textContent=a.filter(isFemale).length;
  document.getElementById("houses").textContent=new Set(a.map(x=>x.house_no).filter(Boolean)).size;
- document.getElementById("result").innerHTML=`<div class="muted" style="margin-bottom:8px">${a.length} records</div><div class="tablewrap"><table><thead><tr><th>क्र.</th><th>नाम</th><th>पिता/पति/अन्य</th><th>EPIC</th><th>मकान</th><th>कॉलोनी</th><th>वार्ड</th><th>आयु</th><th>लिंग</th><th>मतदान केंद्र</th></tr></thead><tbody>${a.slice(0,1000).map(v=>`<tr><td>${e(v.serial_no)}</td><td><b>${e(v.name)}</b></td><td>${e(v.relative_name)}</td><td>${e(v.epic)}</td><td>${e(v.house_no)}</td><td>${e(v.colony)}</td><td>${e(v.ward)}</td><td>${e(v.age)}</td><td>${e(v.gender)}</td><td>${e(v.polling_station)}</td></tr>`).join("")}</tbody></table></div>`;
+ const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages);const chunk=a.slice((page-1)*PER,page*PER);
+ document.getElementById("result").innerHTML=`<div class="muted" style="margin-bottom:8px">${a.length} records</div><div class="tablewrap"><table><thead><tr><th>क्र.</th><th>नाम</th><th>पिता/पति/अन्य</th><th>EPIC</th><th>मकान</th><th>कॉलोनी</th><th>वार्ड</th><th>आयु</th><th>लिंग</th><th>मतदान केंद्र</th><th>पर्ची</th></tr></thead><tbody>${chunk.map(v=>`<tr><td>${e(v.serial_no)}</td><td><b>${e(v.name)}</b></td><td>${e(v.relative_name)}</td><td>${e(v.epic)}</td><td>${e(v.house_no)}</td><td>${e(v.colony)}</td><td>${e(v.ward)}</td><td>${e(v.age)}</td><td>${e(v.gender)}</td><td>${e(v.polling_station)}</td><td><button class="btn ghost" onclick='voterSlip(${JSON.stringify(JSON.stringify(v))})'>Slip</button></td></tr>`).join("")}</tbody></table></div><div class="noprint" style="display:flex;justify-content:center;gap:10px;align-items:center;margin-top:12px"><button class="btn ghost" onclick="prevPage()">← Previous</button><b>Page ${page} / ${pages}</b><button class="btn ghost" onclick="nextPage()">Next →</button></div>`;
 }
+function prevPage(){if(page>1){page--;renderRows()}}function nextPage(){if(page<Math.ceil(filtered().length/PER)){page++;renderRows()}}
+function voterSlip(j){const v=JSON.parse(j);const w=window.open("","_blank");if(!w)return;w.document.write(`<html><head><meta charset="utf-8"><title>Voter Slip</title><style>body{font-family:"Nirmala UI",Arial;padding:25px}.s{max-width:650px;margin:auto;border:2px solid #222;padding:20px}.s h2{text-align:center}.r{display:grid;grid-template-columns:180px 1fr;border-top:1px solid #ddd;padding:8px}</style></head><body><div class="s"><h2>${e(candidate.gram_panchayat)} — मतदाता पर्ची</h2>${[["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["मकान",v.house_no],["कॉलोनी",v.colony],["वार्ड",v.ward],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]].map(x=>`<div class="r"><b>${e(x[0])}</b><span>${e(x[1]||"-")}</span></div>`).join("")}</div><script>setTimeout(()=>print(),250)<\/script></body></html>`);w.document.close()}
 function printHouse(){
  const a=filtered(); if(!a.length){alert("कोई voter नहीं मिला।");return}
  const old=document.title;document.title=`${candidate.gram_panchayat||"Panchayat"}_Voter_List`;window.print();document.title=old;
