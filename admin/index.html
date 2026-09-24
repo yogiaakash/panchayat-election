@@ -23,7 +23,9 @@ app.innerHTML=`<div class=card><h2>Create Paid Candidate</h2><div class=grid>
 <div class=card><h2>Voter Excel Import</h2><label>Candidate</label><select id=cid>${(c||[]).map(x=>`<option value="${x.id}">${esc(x.hindi_name||x.name)} — ${esc(x.gram_panchayat)}</option>`).join("")}</select>
 <label>Excel File</label><input id=file type=file accept=".xlsx,.xls"><button style="margin-top:12px" onclick="importExcel()">Import Voters</button><p id=istatus></p></div>
 <div class=card><h2>Candidates</h2><div style="overflow:auto"><table><tr><th>Name</th><th>Panchayat</th><th>Payment</th><th>Active</th><th>Expiry</th></tr>${(c||[]).map(x=>`<tr><td>${esc(x.hindi_name||x.name)}</td><td>${esc(x.gram_panchayat)}</td><td>${esc(x.payment_status)}</td><td>${x.active?"Yes":"No"}</td><td>${esc(x.subscription_expiry)}</td></tr>`).join("")}</table></div></div>
-<button onclick="sb.auth.signOut().then(login)">Logout</button>`}
+<button onclick="sb.auth.signOut().then(login)">Logout</button>`;
+ initHierarchy();
+}
 async function createCandidate(){status.textContent="Creating…";let body={name:name.value,hindi_name:hindi.value,post:post.value,district:district.value,panchayat_samiti:ps.value,gram_panchayat:gp.value,mobile:mobile.value,email:email.value,password:password.value,slug:slug.value,subscription_expiry:expiry.value||null};let {data,error}=await sb.functions.invoke("admin-create-candidate",{body});status.textContent=error?(error.message):(data.error||"Candidate created successfully");if(!error&&!data.error){status.className="good";renderAdmin()}}
 const aliases={serial_no:["क्रम संख्या"],epic:["वोटर कार्ड नंबर"],name:["मतदाता का नाम"],relative_name:["पिता / पति / अन्य का नाम"],house_no:["मकान नंबर"],colony:["कॉलोनी / क्षेत्र का नाम"],polling_station:["मतदान केंद्र का नाम"],age:["आयु"],gender:["लिंग"],ward:["वार्ड संख्या"],panchayat:["पंचायत का नाम"]};
 function pick(r,arr){for(const k of arr)if(r[k]!==undefined)return r[k];return null}
