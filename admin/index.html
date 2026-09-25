@@ -28,7 +28,35 @@ app.innerHTML=`<div class=card><h2>Create Paid Candidate</h2><div class=grid>
 }
 async function file64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(",")[1]);r.onerror=reject;r.readAsDataURL(file)})}
 async function uploadBrand(candidate_id,kind,file){if(!file)return;const base64=await file64(file);const {data,error}=await sb.functions.invoke("admin-manage-candidate",{body:{action:"branding",candidate_id,kind,base64,content_type:file.type,file_name:file.name}});if(error||data?.error)throw new Error(error?.message||data.error)}
-async function createCandidate(){status.textContent="Creating live candidate…";status.className="muted";let body={name:name.value,hindi_name:hindi.value,post:post.value,district:district.value,panchayat_samiti:ps.value,gram_panchayat:gp.value,mobile:mobile.value,email:email.value,password:password.value,slug:slug.value,subscription_expiry:expiry.value||null};let {data,error}=await sb.functions.invoke("admin-create-candidate",{body});if(error||data?.error){status.textContent=error?.message||data.error;status.className="bad";return}try{await uploadBrand(data.candidate.id,"photo",photo.files[0]);await uploadBrand(data.candidate.id,"symbol",symbol.files[0]);await uploadBrand(data.candidate.id,"banner",banner.files[0]);status.textContent="Live candidate created successfully — login is ready.";status.className="good";await renderAdmin()}catch(e){status.textContent="Candidate created, but branding upload failed: "+e.message;status.className="bad";await renderAdmin()}}
+async function createCandidate(){
+ const el=id=>document.getElementById(id), st=el("status");
+ st.textContent="Creating live candidate…";st.className="muted";
+ const body={
+  name:el("name").value.trim(),hindi_name:el("hindi").value.trim(),post:el("post").value.trim(),
+  district:el("district").value,panchayat_samiti:el("ps").value,gram_panchayat:el("gp").value,
+  mobile:el("mobile").value.trim(),email:el("email").value.trim(),password:el("password").value,
+  slug:el("slug").value.trim(),subscription_expiry:el("expiry").value||null
+ };
+ if(!body.name||!body.gram_panchayat||!body.email||!body.password||!body.slug){
+  st.textContent="Name, Gram Panchayat, Email, Password और URL Slug required हैं.";st.className="bad";return;
+ }
+ const {data,error}=await sb.functions.invoke("admin-create-candidate",{body});
+ if(error||data?.error){
+  let msg=data?.error||error?.message||"Candidate create failed";
+  try{if(error?.context){const j=await error.context.json();msg=j?.error||msg}}catch(_){}
+  st.textContent="Create failed: "+msg;st.className="bad";return;
+ }
+ try{
+  await uploadBrand(data.candidate.id,"photo",el("photo").files[0]);
+  await uploadBrand(data.candidate.id,"symbol",el("symbol").files[0]);
+  await uploadBrand(data.candidate.id,"banner",el("banner").files[0]);
+  alert("Candidate login created successfully.");
+  await renderAdmin();
+ }catch(e){
+  alert("Candidate login created, but branding upload failed: "+e.message);
+  await renderAdmin();
+ }
+}
 async function manageCandidate(j){const x=JSON.parse(j);const name=prompt("Candidate Name",x.name||"");if(name===null)return;const hindi_name=prompt("Hindi Name",x.hindi_name||"");if(hindi_name===null)return;const mobile=prompt("Mobile",x.mobile||"");if(mobile===null)return;const expiry=prompt("Expiry YYYY-MM-DD",x.subscription_expiry||"");if(expiry===null)return;const payment=prompt("Payment: paid / partial / pending",x.payment_status||"paid");if(payment===null)return;const active=confirm((x.active?"Deactivate":"Activate")+" this candidate?\nOK = "+(!x.active?"ACTIVE":"INACTIVE")+"\nCancel = keep current status");const newActive=active?!x.active:x.active;const {data,error}=await sb.functions.invoke("admin-manage-candidate",{body:{action:"update",candidate_id:x.id,name,hindi_name,mobile,subscription_expiry:expiry||null,payment_status:payment,active:newActive}});if(error||data?.error){alert(error?.message||data.error);return}await renderAdmin()}
 async function quickBrand(candidate_id,kind){const inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.onchange=async()=>{try{await uploadBrand(candidate_id,kind,inp.files[0]);alert(kind+" uploaded");await renderAdmin()}catch(e){alert(e.message)}};inp.click()}
 const aliases={serial_no:["क्रम संख्या"],epic:["वोटर कार्ड नंबर"],name:["मतदाता का नाम"],relative_name:["पिता / पति / अन्य का नाम"],house_no:["मकान नंबर"],colony:["कॉलोनी / क्षेत्र का नाम"],polling_station:["मतदान केंद्र का नाम"],age:["आयु"],gender:["लिंग"],ward:["वार्ड संख्या"],panchayat:["पंचायत का नाम"]};
