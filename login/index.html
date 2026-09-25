@@ -85,7 +85,17 @@ function filtered(ignoreQ=false){
  const q=ignoreQ?"":document.getElementById("q").value.trim(),w=document.getElementById("ward").value,co=document.getElementById("colony").value,h=document.getElementById("house").value,b=document.getElementById("booth").value;
  return voters.filter(v=>(!w||String(v.ward)===String(w))&&(!co||String(v.colony)===String(co))&&(!h||String(v.house_no)===String(h))&&(!b||String(v.polling_station)===String(b))&&matchQ(v,q));
 }
-function cascade(from){const w=document.getElementById("ward").value,c=document.getElementById("colony").value;if(from==="ward"){document.getElementById("colony").value="";document.getElementById("house").value=""}if(from==="colony")document.getElementById("house").value="";const bw=w?voters.filter(v=>String(v.ward)===String(w)):voters;const co=document.getElementById("colony");co.innerHTML=options("colony","सभी कॉलोनी",bw);co.disabled=!w;const cv=co.value;const bc=cv?bw.filter(v=>String(v.colony)===String(cv)):bw;const ho=document.getElementById("house");ho.innerHTML=options("house_no","सभी मकान",bc);ho.disabled=!w||!co.value;renderRows()}
+function cascade(from){
+ const w=document.getElementById("ward").value,co=document.getElementById("colony"),ho=document.getElementById("house");
+ if(from==="ward"){
+  co.innerHTML=options("colony","सभी कॉलोनी",w?voters.filter(v=>String(v.ward)===String(w)):[]);
+  co.disabled=!w;ho.innerHTML='<option value="">पहले कॉलोनी चुनें</option>';ho.disabled=true;
+ }else{
+  const cv=co.value,base=(w&&cv)?voters.filter(v=>String(v.ward)===String(w)&&String(v.colony)===String(cv)):[];
+  ho.innerHTML=options("house_no","सभी मकान",base);ho.disabled=!(w&&cv);
+ }
+ page=1;renderRows();
+}
 function clearFilters(){document.getElementById("q").value="";document.getElementById("ward").value="";document.getElementById("colony").innerHTML="<option value=\"\">पहले वार्ड चुनें</option>";document.getElementById("house").innerHTML="<option value=\"\">पहले कॉलोनी चुनें</option>";document.getElementById("colony").disabled=true;document.getElementById("house").disabled=true;document.getElementById("booth").value="";page=1;renderRows();}
 function houseCount(v){return voters.filter(x=>String(x.ward)===String(v.ward)&&String(x.colony)===String(v.colony)&&String(x.house_no)===String(v.house_no)).length}
 function showDetail(v){detailBody.innerHTML=[["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["मकान",v.house_no],["कॉलोनी",v.colony],["वार्ड",v.ward],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]].map(x=>`<div class="drow"><span>${e(x[0])}</span><b>${e(x[1]??"-")}</b></div>`).join("");detailDlg.showModal()}
