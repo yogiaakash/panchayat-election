@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Panchayat Digital</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 :root{--p:#176451;--p2:#0f4f40;--bg:#f3f7f5;--card:#fff;--text:#17342c;--muted:#687b75;--line:#d9e7e1;--mint:#eaf5f1}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,"Noto Sans Devanagari",Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -101,7 +102,12 @@ function cascade(from){
 function clearFilters(){document.getElementById("q").value="";document.getElementById("ward").value="";document.getElementById("colony").innerHTML="<option value=\"\">पहले वार्ड चुनें</option>";document.getElementById("house").innerHTML="<option value=\"\">पहले कॉलोनी चुनें</option>";document.getElementById("colony").disabled=true;document.getElementById("house").disabled=true;document.getElementById("booth").value="";page=1;renderRows();}
 function houseCount(v){return voters.filter(x=>String(x.ward)===String(v.ward)&&String(x.colony)===String(v.colony)&&String(x.house_no)===String(v.house_no)).length}
 function showDetail(v){detailBody.innerHTML=[["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["मकान",v.house_no],["कॉलोनी",v.colony],["वार्ड",v.ward],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]].map(x=>`<div class="drow"><span>${e(x[0])}</span><b>${e(x[1]??"-")}</b></div>`).join("");detailDlg.showModal()}
-async function shareInfo(v){const t=`मतदाता सूचना\n${v.name||""}\nVoter ID: ${v.epic||""}\nWard: ${v.ward||""}\nHouse: ${v.house_no||""}\nFor voter-list reference only.`;if(navigator.share){try{await navigator.share({title:"Voter Information",text:t});return}catch(x){if(x.name==="AbortError")return}}try{await navigator.clipboard.writeText(t);alert("Voter information copied.")}catch(x){alert(t)}}
+async function shareInfo(v){const t=`मतदाता सूचना
+${v.name||""}
+Voter ID: ${v.epic||""}
+Ward: ${v.ward||""}
+House: ${v.house_no||""}
+For voter-list reference only.`;if(navigator.share){try{await navigator.share({title:"Voter Information",text:t});return}catch(x){if(x.name==="AbortError")return}}try{await navigator.clipboard.writeText(t);alert("Voter information copied.")}catch(x){alert(t)}}
 function familyPanel(){const b=familyBox,w=ward.value,co=colony.value,h=house.value,a=(w&&co&&h)?voters.filter(v=>String(v.ward)===String(w)&&String(v.colony)===String(co)&&String(v.house_no)===String(h)):[];if(!a.length){b.style.display="none";return}b.style.display="block";b.innerHTML=`<b>🏠 मकान ${e(h)} — ${a.length} मतदाता</b><div class="muted">${e(co)} • Ward ${e(w)}</div><div style="margin-top:8px">${a.map(v=>`<div style="padding:6px 0;border-top:1px solid #eee"><b>${e(v.name)}</b> · ${e(v.epic)}<br><small>${e(v.relative_name)} • ${e(v.age)} • ${e(v.gender)}</small></div>`).join("")}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn ghost" onclick="printHouse()">📄 Generate House PDF</button><button class="btn ghost" onclick="shareHouse()">↗ Share House PDF</button></div>`}
 function renderRows(){
  const a=filtered(),isMale=x=>/पुरुष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
@@ -122,7 +128,8 @@ async function makePdfFile(list,filename){if(!window.html2canvas||!window.jspdf)
 async function sharePdfFile(file,title,text){if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title,text,files:[file]});return}catch(x){if(x.name==="AbortError")return}}const u=URL.createObjectURL(file),a=document.createElement("a");a.href=u;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);alert("PDF तैयार है। WhatsApp में attachment के रूप में share करें।")}
 async function shareInfo(v){try{const file=await makePdfFile([v],`Voter_Slip_${v.epic||v.serial_no}.pdf`);await sharePdfFile(file,"Voter Information Slip","मतदाता सूची संदर्भ हेतु सूचना पर्ची")}catch(x){alert("PDF share तैयार नहीं हो सका: "+x.message)}}
 function fam(){const w=ward.value,co=colony.value,h=house.value;return w&&co&&h?voters.filter(v=>String(v.ward)===String(w)&&String(v.colony)===String(co)&&String(v.house_no)===String(h)):[]}
-async function printHouse(){const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}\nasync function shareHouse(){const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);await sharePdfFile(file,"House Voter Information Slips","मतदाता सूची संदर्भ हेतु मकान की मतदाता सूचना पर्चियां")}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}
+async function printHouse(){const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}
+async function shareHouse(){const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);await sharePdfFile(file,"House Voter Information Slips","मतदाता सूची संदर्भ हेतु मकान की मतदाता सूचना पर्चियां")}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}
 sb.auth.onAuthStateChange(()=>{});
 load();
 </script></body></html>
