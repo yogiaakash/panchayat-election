@@ -24,7 +24,7 @@ app.innerHTML=`<div class=card><h2>Create Paid Candidate</h2><div class=grid>
 <label>Excel File</label><input id=file type=file accept=".xlsx,.xls">
 <label style="display:flex;gap:9px;align-items:center;margin-top:12px"><input id=replaceExisting type=checkbox checked style="width:auto"> Replace existing voter list (पुराना voter data हटाकर नई list डालें)</label>
 <button style="margin-top:12px" onclick="importExcel()">Replace / Import Voters</button><p id=istatus></p></div>
-<div class=card><h2>Live Candidates</h2><div style="overflow:auto"><table><tr><th>Name</th><th>Panchayat</th><th>Payment</th><th>Status</th><th>Expiry</th><th>Manage</th></tr>${(c||[]).map(x=>`<tr><td><b>${esc(x.hindi_name||x.name)}</b><br><span class="muted">${esc(x.mobile||"")}</span></td><td>${esc(x.gram_panchayat)}</td><td>${esc(x.payment_status)}</td><td><span class="${x.active?"good":"bad"}">${x.active?"ACTIVE":"INACTIVE"}</span></td><td>${esc(x.subscription_expiry||"-")}</td><td style="min-width:250px"><button style="width:auto;padding:8px 10px;margin:2px" onclick=\'manageCandidate(${JSON.stringify(JSON.stringify(x))})\'>Edit / Status</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'photo\')">Photo</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'symbol\')">Symbol</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'banner\')">Banner</button></td></tr>`).join("")}</table></div></div>
+<div class=card><h2>Live Candidates</h2><div style="overflow:auto"><table><tr><th>Name</th><th>Panchayat</th><th>Payment</th><th>Status</th><th>Expiry</th><th>Manage</th></tr>${(c||[]).map(x=>`<tr><td><b>${esc(x.hindi_name||x.name)}</b><br><span class="muted">${esc(x.mobile||"")}</span></td><td>${esc(x.gram_panchayat)}</td><td>${esc(x.payment_status)}</td><td><span class="${x.active?"good":"bad"}">${x.active?"ACTIVE":"INACTIVE"}</span></td><td>${esc(x.subscription_expiry||"-")}</td><td style="min-width:250px"><button style="width:auto;padding:8px 10px;margin:2px" onclick=\'manageCandidate(${JSON.stringify(JSON.stringify(x))})\'>Edit / Status</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'photo\')">Photo</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'symbol\')">Symbol</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'banner\')">Banner</button><button style="width:auto;padding:8px 10px;margin:2px;background:#b42318" onclick='deleteCandidate(${JSON.stringify(JSON.stringify(x))})'>Delete Profile</button></td></tr>`).join("")}</table></div></div>
 <button onclick="sb.auth.signOut().then(login)">Logout</button>`;
  initHierarchy();
 }
@@ -58,6 +58,17 @@ async function createCandidate(){
   alert("Candidate login created, but branding upload failed: "+e.message);
   await renderAdmin();
  }
+}
+async function deleteCandidate(j){
+ const x=JSON.parse(j);
+ const label=(x.hindi_name||x.name||"Candidate")+" — "+(x.gram_panchayat||"");
+ if(!confirm("DELETE PROFILE?\n\n"+label+"\n\nइससे candidate login, सभी voters, imports/payments और branding हट जाएगी. यह वापस नहीं आएगा."))return;
+ const typed=prompt("Confirm करने के लिए DELETE लिखें");
+ if(typed!=="DELETE")return alert("Delete cancelled");
+ const {data,error}=await sb.functions.invoke("admin-manage-candidate",{body:{action:"delete",candidate_id:x.id}});
+ if(error||data?.error){let msg=data?.error||error?.message||"Delete failed";try{if(error?.context){const j=await error.context.json();msg=j?.error||msg}}catch(_){} return alert("Delete failed: "+msg)}
+ alert("Profile deleted successfully.");
+ await renderAdmin();
 }
 async function manageCandidate(j){const x=JSON.parse(j);const name=prompt("Candidate Name",x.name||"");if(name===null)return;const hindi_name=prompt("Hindi Name",x.hindi_name||"");if(hindi_name===null)return;const mobile=prompt("Mobile",x.mobile||"");if(mobile===null)return;const expiry=prompt("Expiry YYYY-MM-DD",x.subscription_expiry||"");if(expiry===null)return;const payment=prompt("Payment: paid / partial / pending",x.payment_status||"paid");if(payment===null)return;const active=confirm((x.active?"Deactivate":"Activate")+" this candidate?\nOK = "+(!x.active?"ACTIVE":"INACTIVE")+"\nCancel = keep current status");const newActive=active?!x.active:x.active;const {data,error}=await sb.functions.invoke("admin-manage-candidate",{body:{action:"update",candidate_id:x.id,name,hindi_name,mobile,subscription_expiry:expiry||null,payment_status:payment,active:newActive}});if(error||data?.error){alert(error?.message||data.error);return}await renderAdmin()}
 async function quickBrand(candidate_id,kind){const inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.onchange=async()=>{try{await uploadBrand(candidate_id,kind,inp.files[0]);alert(kind+" uploaded");await renderAdmin()}catch(e){alert(e.message)}};inp.click()}
