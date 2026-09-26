@@ -62,9 +62,14 @@ async function load(){
      if(!signErr && signed?.signedUrl) candidate[key]=signed.signedUrl;
    }
  }
- const {data:v,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).limit(10000);
- if(ve){loginView("Voter data load error: "+ve.message);return}
- voters=v||[];logout.classList.remove("hidden");dashboard();
+ let allVoters=[];
+ for(let from=0;;from+=1000){
+   const {data:batch,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).range(from,from+999);
+   if(ve){loginView("Voter data load error: "+ve.message);return}
+   allVoters.push(...(batch||[]));
+   if(!batch||batch.length<1000)break;
+ }
+ voters=allVoters;logout.classList.remove("hidden");dashboard();
 }
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0900-\u097f]+/g,"");
 const sk=s=>norm(s).replace(/chh/g,"ch").replace(/sh/g,"s").replace(/ph/g,"f").replace(/bh/g,"b").replace(/dh/g,"d").replace(/th/g,"t").replace(/kh/g,"k").replace(/gh/g,"g").replace(/jh/g,"j").replace(/w/g,"v").replace(/[aeiouy]/g,"");
