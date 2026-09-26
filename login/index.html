@@ -70,8 +70,12 @@ async function load(){
  for(const [col,key] of [["photo_path","photo_url"],["symbol_path","symbol_url"],["banner_path","banner_url"]]){
    candidate[key]="";
    if(c[col]){
-     const {data:signed,error:signErr}=await sb.storage.from("candidate-branding").createSignedUrl(c[col],86400);
+     const {data:signed,error:signErr}=await sb.storage.from("candidate-branding").createSignedUrl(c[col],604800);
      if(!signErr && signed?.signedUrl) candidate[key]=signed.signedUrl;
+     else {
+       const {data:dl,error:dlErr}=await sb.storage.from("candidate-branding").download(c[col]);
+       if(!dlErr && dl) candidate[key]=URL.createObjectURL(dl);
+     }
    }
  }
  let allVoters=[];
@@ -90,7 +94,7 @@ function uniq(k,base=voters){return smart(base.map(x=>x[k]))}
 function options(k,label,base=voters){return `<option value="">${label}</option>`+uniq(k,base).map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}
 function dashboard(){
  const c=candidate;
- app.innerHTML=`<div class="card hero">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><div style="display:none;width:82px;height:82px;border-radius:50%;border:3px solid #fff;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`:`<div style="width:82px;height:82px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`}<div><div class="muted">PANCHAYAT DIGITAL</div><h2 style="margin:3px 0">${e(c.hindi_name||c.name)}</h2><div>${e(c.post||"")} • ग्राम पंचायत ${e(c.gram_panchayat||"")}</div><div class="muted">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div></div></div>
+ app.innerHTML=`<div class="card hero">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><div style="display:none;width:82px;height:82px;border-radius:50%;border:3px solid #fff;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`:`<div style="width:82px;height:82px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`}<div><div class="muted">PANCHAYAT DIGITAL</div><h2 style="margin:3px 0">${e([c.name,c.hindi_name].filter(Boolean).join(" "))}</h2><div>${e(c.post||"")} • ग्राम पंचायत ${e(c.gram_panchayat||"")}</div><div class="muted">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div></div></div>
  <div class="quicknav"><button class="quick" onclick="showTab('info')"><span class="ico">👥</span>मतदाता जानकारी</button><button class="quick" onclick="showTab('slip')"><span class="ico">📄</span>मतदाता पर्ची</button><button class="quick" onclick="showTab('stats')"><span class="ico">A↕Z</span>सांख्यिकी + A–Z</button></div>
  <div class="tabs"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
  <section id="tabSlip" class="tabpane"><div class="card"><h3>📄 Voter Slip Download</h3><p class="muted">Ward चुनकर 9 slips per A4 page PDF बनाएं।</p><select id="slipWard">${options("ward","वार्ड चुनें")}</select><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" onclick="downloadWardPdf()">📄 Ward-wise PDF</button><button class="btn ghost" onclick="shareWardPdf()">↗ Share Ward PDF</button></div></div></section>
