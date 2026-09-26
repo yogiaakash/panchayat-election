@@ -66,18 +66,8 @@ async function load(){
  if(ce||!c){loginView("इस login से कोई candidate account linked नहीं है।");await sb.auth.signOut();return}
  if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}
  if(c.subscription_expiry && new Date(c.subscription_expiry+"T23:59:59") < new Date()){loginView("Candidate subscription expire हो चुका है। Admin से संपर्क करें।");await sb.auth.signOut();return}
- candidate={...c};
- for(const [col,key] of [["photo_path","photo_url"],["symbol_path","symbol_url"],["banner_path","banner_url"]]){
-   candidate[key]="";
-   if(c[col]){
-     const {data:signed,error:signErr}=await sb.storage.from("candidate-branding").createSignedUrl(c[col],604800);
-     if(!signErr && signed?.signedUrl) candidate[key]=signed.signedUrl;
-     else {
-       const {data:dl,error:dlErr}=await sb.storage.from("candidate-branding").download(c[col]);
-       if(!dlErr && dl) candidate[key]=URL.createObjectURL(dl);
-     }
-   }
- }
+ candidate={...c,photo_url:"",symbol_url:"",banner_url:""};
+ try{const {data:branding,error:be}=await sb.functions.invoke("candidate-branding-urls");if(!be&&branding)candidate={...candidate,...branding}}catch(_){}
  let allVoters=[];
  for(let from=0;;from+=1000){
    const {data:batch,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).range(from,from+999);
