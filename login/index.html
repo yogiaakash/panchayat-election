@@ -141,6 +141,33 @@ function neutralSlipHtml(v){return `<section class="vslip">
   <div class="sliprows">${rr(v).map(x=>`<div class="sliprow"><b>${e(x[0])}</b><span>${e(x[1]??"-")}</span></div>`).join("")}</div>
 </section>`}
 async function makePdfFile(list,filename){if(!window.html2canvas||!window.jspdf)throw new Error("PDF library not loaded");const host=document.createElement("div");host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1";document.body.appendChild(host);const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});try{for(let i=0;i<list.length;i++){host.innerHTML=slipDoc(neutralSlipHtml(list[i]),"Voter Information Slip").match(/<body>([\s\S]*)<\/body>/i)[1];const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.vslip{width:794px;min-height:1123px;border:1px solid #66736e;padding:24px 25px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.gp{text-align:center;font-size:24px;font-weight:900;margin-top:0}.cand{text-align:center;font-size:22px;font-weight:900;margin-top:7px}.civic{text-align:center;font-size:15px;color:#555;margin-top:8px}.title{text-align:center;font-size:27px;font-weight:900;margin-top:10px}.ref{text-align:center;font-size:13px;color:#777;margin:7px 0 43px}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:62px;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:15px;padding:12px 5px;color:#444}.sliprow span{font-size:19px;padding:12px 5px;overflow-wrap:anywhere}';host.prepend(st);const canvas=await html2canvas(host,{scale:1.5,backgroundColor:"#fff",useCORS:true});const img=canvas.toDataURL("image/jpeg",.92);if(i)pdf.addPage();pdf.addImage(img,"JPEG",0,0,210,297)}return new File([pdf.output("blob")],filename,{type:"application/pdf"})}finally{host.remove()}}
+async function makeWardGridPdf(list,filename){
+ if(!window.html2canvas||!window.jspdf)throw new Error("PDF library not loaded");
+ const host=document.createElement("div");host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1";document.body.appendChild(host);
+ const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+ const wardNo=String(list[0]?.ward||"");
+ const card=v=>`<div class="wgcard">
+   <div class="wgtop"><b>ग्राम पंचायत: ${e(candidate.gram_panchayat||"")}</b><span>वार्ड: ${e(v.ward||wardNo)}</span></div>
+   <div class="wgtitle">मतदाता सूचना पर्ची</div>
+   <div class="wgline"><b>क्रम:</b> ${e(v.serial_no||"-")} <b>EPIC:</b> ${e(v.epic||"-")}</div>
+   <div class="wgline"><b>मतदाता नाम:</b> ${e(v.name||"-")}</div>
+   <div class="wgline"><b>पिता / पति:</b> ${e(v.relative_name||"-")}</div>
+   <div class="wgline"><b>मकान नं.:</b> ${e(v.house_no||"-")} <b>लिंग/आयु:</b> ${e(v.gender||"-")} / ${e(v.age||"-")}</div>
+   <div class="wgline"><b>क्षेत्र:</b> ${e(v.colony||"-")}</div>
+   <div class="wgline booth"><b>मतदान केंद्र:</b> ${e(v.polling_station||"-")}</div>
+   <div class="wgfoot">मतदाता सूची संदर्भ हेतु</div>
+ </div>`;
+ try{
+  for(let p=0;p<list.length;p+=9){
+   const chunk=list.slice(p,p+9);
+   host.innerHTML=`<div class="wgpage"><div class="wghead"><b>मतदाता सूचना पर्चियां</b><span>पंचायत: ${e(candidate.gram_panchayat||"")} &nbsp; वार्ड: ${e(wardNo)} &nbsp; Page ${Math.floor(p/9)+1} of ${Math.ceil(list.length/9)}</span></div><div class="wggrid">${chunk.map(card).join("")}</div></div>`;
+   const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.wgpage{width:794px;height:1123px;padding:22px 20px 18px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.wghead{height:28px;display:flex;justify-content:space-between;align-items:center;font-size:12px;border-bottom:1px solid #777;margin-bottom:8px}.wghead b{font-size:14px}.wggrid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;height:1045px}.wgcard{border:1.5px dashed #7c8b85;position:relative;overflow:hidden;background:#fff;padding-bottom:25px}.wgtop{min-height:56px;background:#eef7f2;padding:8px 7px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:3px;font-size:13px;color:#175844}.wgtitle{background:#176451;color:#fff;font-weight:900;font-size:13px;padding:5px 7px}.wgline{font-size:11px;line-height:1.35;padding:4px 6px 2px;border-bottom:1px dotted #bbb;overflow-wrap:anywhere}.wgline b{font-weight:900}.booth{font-size:10px}.wgfoot{position:absolute;left:0;right:0;bottom:0;background:#eaf5f1;color:#176451;text-align:center;font-weight:800;font-size:10px;padding:5px;border-top:1px solid #bdd8ce}';host.prepend(st);
+   const canvas=await html2canvas(host,{scale:1.5,backgroundColor:"#fff",useCORS:true});
+   if(p)pdf.addPage();pdf.addImage(canvas.toDataURL("image/jpeg",.93),"JPEG",0,0,210,297);
+  }
+  return new File([pdf.output("blob")],filename,{type:"application/pdf"});
+ }finally{host.remove()}
+}
 async function sharePdfFile(file,title,text){if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title,text,files:[file]});return}catch(x){if(x.name==="AbortError")return}}const u=URL.createObjectURL(file),a=document.createElement("a");a.href=u;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);alert("PDF तैयार है। WhatsApp में attachment के रूप में share करें।")}
 async function shareInfo(v){try{const file=await makePdfFile([v],`Voter_Slip_${v.epic||v.serial_no}.pdf`);await sharePdfFile(file,"Voter Information Slip","मतदाता सूची संदर्भ हेतु सूचना पर्ची")}catch(x){alert("PDF share तैयार नहीं हो सका: "+x.message)}}
 function selectedWardVoters(){
@@ -152,7 +179,7 @@ async function downloadWardPdf(){
  const a=selectedWardVoters(); if(!a.length)return;
  try{
   const w=document.getElementById("ward").value;
-  const file=await makePdfFile(a,`Ward_${w}_Voter_Slips.pdf`);
+  const file=await makeWardGridPdf(a,`Ward_${w}_Voter_Slips.pdf`);
   const u=URL.createObjectURL(file),ln=document.createElement("a");
   ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();
   setTimeout(()=>URL.revokeObjectURL(u),3000);
@@ -162,7 +189,7 @@ async function shareWardPdf(){
  const a=selectedWardVoters(); if(!a.length)return;
  try{
   const w=document.getElementById("ward").value;
-  const file=await makePdfFile(a,`Ward_${w}_Voter_Slips.pdf`);
+  const file=await makeWardGridPdf(a,`Ward_${w}_Voter_Slips.pdf`);
   await sharePdfFile(file,`Ward ${w} Voter Information`,"मतदाता सूची संदर्भ हेतु वार्ड PDF");
  }catch(x){alert("Ward PDF share तैयार नहीं हो सका: "+x.message)}
 }
