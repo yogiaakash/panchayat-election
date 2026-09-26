@@ -145,25 +145,35 @@ async function makeWardGridPdf(list,filename){
  if(!window.html2canvas||!window.jspdf)throw new Error("PDF library not loaded");
  const host=document.createElement("div");host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1";document.body.appendChild(host);
  const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
- const wardNo=String(list[0]?.ward||"");
- const card=v=>`<div class="wgcard">
-   <div class="wgtop"><b>ग्राम पंचायत: ${e(candidate.gram_panchayat||"")}</b><span>वार्ड: ${e(v.ward||wardNo)}</span></div>
-   <div class="wgtitle">मतदाता सूचना पर्ची</div>
-   <div class="wgline"><b>क्रम:</b> ${e(v.serial_no||"-")} <b>EPIC:</b> ${e(v.epic||"-")}</div>
-   <div class="wgline"><b>मतदाता नाम:</b> ${e(v.name||"-")}</div>
-   <div class="wgline"><b>पिता / पति:</b> ${e(v.relative_name||"-")}</div>
-   <div class="wgline"><b>मकान नं.:</b> ${e(v.house_no||"-")} <b>लिंग/आयु:</b> ${e(v.gender||"-")} / ${e(v.age||"-")}</div>
-   <div class="wgline"><b>क्षेत्र:</b> ${e(v.colony||"-")}</div>
-   <div class="wgline booth"><b>मतदान केंद्र:</b> ${e(v.polling_station||"-")}</div>
-   <div class="wgfoot">मतदाता सूची संदर्भ हेतु</div>
+ const wardNo=String(list[0]?.ward||"").padStart(3,"0"), totalPages=Math.ceil(list.length/9);
+ const photo=candidate.photo_url||"";
+ const candName=candidate.hindi_name||candidate.name||"";
+ const post=candidate.post||"";
+ const gp=candidate.gram_panchayat||"";
+ const card=v=>`<div class="slip">
+   <div class="candbox">
+    <div class="candtext"><div class="gp">ग्राम पंचायत:<br><strong>${e(gp)}</strong></div><div class="cname">${e(candName)}</div><div class="post">${e(post)}</div></div>
+    <div class="photo">${photo?`<img src="${e(photo)}" crossorigin="anonymous">`:"<div class='ph'>PHOTO</div>"}</div>
+   </div>
+   <div class="orange"><b>मतदाता पर्ची</b><span>मतदाता जानकारी</span></div>
+   <div class="panrow"><b>पंचायत :</b><span>${e(gp)}</span><b>वार्ड :</b><strong>${e(String(v.ward||wardNo).padStart(3,"0"))}</strong></div>
+   <div class="details">
+    <div class="r split"><span><b>क्रम:</b> ${e(v.serial_no||"-")}</span><span><b>EPIC:</b> ${e(v.epic||"-")}</span></div>
+    <div class="r"><b>मतदाता नाम :</b> ${e(v.name||"-")}</div>
+    <div class="r"><b>पिता / पति :</b> ${e(v.relative_name||"-")}</div>
+    <div class="r split"><span><b>मकान नं.:</b> ${e(v.house_no||"-")}</span><span><b>लिंग/आयु:</b> ${e(v.gender||"-")} / ${e(v.age||"-")}</span></div>
+    <div class="r"><b>क्षेत्र :</b> ${e(v.colony||"-")}</div>
+    <div class="r booth"><b>मतदान केंद्र :</b> ${e(v.polling_station||"-")}</div>
+   </div>
+   <div class="foot">मतदाता सूची संदर्भ हेतु</div>
  </div>`;
  try{
   for(let p=0;p<list.length;p+=9){
-   const chunk=list.slice(p,p+9);
-   host.innerHTML=`<div class="wgpage"><div class="wghead"><b>मतदाता सूचना पर्चियां</b><span>पंचायत: ${e(candidate.gram_panchayat||"")} &nbsp; वार्ड: ${e(wardNo)} &nbsp; Page ${Math.floor(p/9)+1} of ${Math.ceil(list.length/9)}</span></div><div class="wggrid">${chunk.map(card).join("")}</div></div>`;
-   const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.wgpage{width:794px;height:1123px;padding:22px 20px 18px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.wghead{height:28px;display:flex;justify-content:space-between;align-items:center;font-size:12px;border-bottom:1px solid #777;margin-bottom:8px}.wghead b{font-size:14px}.wggrid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;height:1045px}.wgcard{border:1.5px dashed #7c8b85;position:relative;overflow:hidden;background:#fff;padding-bottom:25px}.wgtop{min-height:56px;background:#eef7f2;padding:8px 7px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:3px;font-size:13px;color:#175844}.wgtitle{background:#176451;color:#fff;font-weight:900;font-size:13px;padding:5px 7px}.wgline{font-size:11px;line-height:1.35;padding:4px 6px 2px;border-bottom:1px dotted #bbb;overflow-wrap:anywhere}.wgline b{font-weight:900}.booth{font-size:10px}.wgfoot{position:absolute;left:0;right:0;bottom:0;background:#eaf5f1;color:#176451;text-align:center;font-weight:800;font-size:10px;padding:5px;border-top:1px solid #bdd8ce}';host.prepend(st);
-   const canvas=await html2canvas(host,{scale:1.5,backgroundColor:"#fff",useCORS:true});
-   if(p)pdf.addPage();pdf.addImage(canvas.toDataURL("image/jpeg",.93),"JPEG",0,0,210,297);
+   const chunk=list.slice(p,p+9),pageNo=Math.floor(p/9)+1;
+   host.innerHTML=`<div class="page"><div class="pagehead"><b>पंचायत आम चुनाव, 2026</b><b>पंचायत: ${e(gp)} &nbsp; वार्ड: ${e(wardNo)}</b><span>Page ${pageNo} of ${totalPages}</span></div><div class="rule"></div><div class="grid">${chunk.map(card).join("")}</div></div>`;
+   const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.page{width:794px;height:1123px;padding:13px 14px 12px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.pagehead{height:29px;display:grid;grid-template-columns:1fr 1.4fr .6fr;align-items:center;font-size:11px}.pagehead b:nth-child(2){text-align:center}.pagehead span{text-align:right}.rule{border-top:1px solid #555;margin:1px 0 8px}.grid{height:1054px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px}.slip{border:1.4px dashed #7d8783;position:relative;overflow:hidden;background:#fff;padding:5px 5px 25px}.candbox{height:121px;display:grid;grid-template-columns:1fr 78px;gap:5px;padding:8px 3px 4px}.candtext{text-align:center;display:flex;flex-direction:column;justify-content:center}.gp{font-size:18px;line-height:1.08;font-weight:800;color:#f56a00}.gp strong{font-size:20px}.cname{font-size:13px;line-height:1.15;font-weight:900;color:#176b3b;margin-top:5px}.post{font-size:11px;font-weight:800}.photo{display:flex;align-items:center;justify-content:center}.photo img,.ph{width:72px;height:94px;border:1px solid #555;border-radius:10px;object-fit:cover;background:#eee}.ph{display:flex;align-items:center;justify-content:center;font-size:9px;color:#777}.orange{height:31px;background:#f56a00;color:#fff;margin:0 -5px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;font-size:11px}.orange b{font-size:14px}.panrow{height:43px;display:grid;grid-template-columns:auto 1fr auto auto;gap:5px;align-items:center;border-bottom:1px solid #999;font-size:10px}.panrow span{border:1px solid #777;border-radius:4px;text-align:center;padding:4px 3px;font-weight:800}.panrow strong{font-size:12px}.details{font-size:9.4px;line-height:1.25}.r{padding:3px 2px;border-bottom:1px dashed #bbb;overflow-wrap:anywhere}.split{display:grid;grid-template-columns:1fr 1.25fr;gap:5px}.booth{font-size:8.6px;min-height:30px}.foot{position:absolute;left:5px;right:5px;bottom:5px;height:24px;background:#e7f4e7;border-top:2px solid #77a778;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800}';host.prepend(st);
+   const canvas=await html2canvas(host,{scale:1.65,backgroundColor:"#fff",useCORS:true,allowTaint:false});
+   if(p)pdf.addPage();pdf.addImage(canvas.toDataURL("image/jpeg",.94),"JPEG",0,0,210,297);
   }
   return new File([pdf.output("blob")],filename,{type:"application/pdf"});
  }finally{host.remove()}
