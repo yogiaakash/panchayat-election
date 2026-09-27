@@ -6,3 +6,13 @@
   from = "/login"
   to = "/login/"
   status = 301
+
+[[redirects]]
+  from = "/buy"
+  to = "/buy/"
+  status = 301
+
+[[redirects]]
+  from = "/register"
+  to = "/buy/"
+  status = 301
