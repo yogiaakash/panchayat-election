@@ -5,7 +5,7 @@
 <script>
 const sb=supabase.createClient("https://ieoltipygxawhsvlxnsj.supabase.co","sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH"), ADMIN_EMAIL="akashyogi1990@gmail.com", app=document.getElementById("app");
 const esc=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
-function login(){app.innerHTML=`<div class="adminnav"><button id="anCreate" class="active" onclick="showAdminTab('create')">➕ Create New User</button><button id="anVoters" onclick="showAdminTab('voters')">📥 Voter List Upload</button><button id="anManage" onclick="showAdminTab('manage')">👥 Manage Users</button><button id="anRequests" onclick="showAdminTab('requests')">🧾 Pending Purchases</button><button id="anTools" onclick="showAdminTab('tools')">⚙️ Admin Tools</button></div>
+function login(){app.innerHTML=`
 <section id="apCreate" class="adminpane active"><div class="card" style="max-width:420px;margin:70px auto"><h2>Admin Login</h2><p class="muted">${ADMIN_EMAIL}</p><label>Password</label><input id=p type=password><button style="margin-top:15px" onclick="go()">Login</button><p id=m class=bad></p><hr><p class=muted>पहली बार? नीचे “Create/Link Admin Account” दबाएँ।</p><input id=np type=password placeholder="New password (min 8 chars)"><button style="margin-top:10px;background:#52677f" onclick="signup()">Create/Link Admin Account</button></div>`}
 async function signup(){let password=np.value;if(password.length<8){m.textContent="Password कम से कम 8 characters रखें";return} let {data,error}=await sb.auth.signUp({email:ADMIN_EMAIL,password}); if(error){m.textContent=error.message;return} m.textContent="Account request created. Email confirmation required हो सकती है। Login के बाद admin linking complete करनी होगी.";m.className="good"}
 async function go(){let {error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:p.value});if(error){m.textContent=error.message;return} await home()}
@@ -15,7 +15,7 @@ async function home(){let {data:{user}}=await sb.auth.getUser();if(!user) return
  renderAdmin();
 }
 async function renderAdmin(){let {data:c}=await sb.from("candidates").select("*").order("created_at",{ascending:false});
-app.innerHTML=`<div class=card><h2>Create Paid Candidate</h2><div class=grid>
+app.innerHTML=`<div class="adminnav"><button id="anCreate" class="active" onclick="showAdminTab('create')">➕ Create New User</button><button id="anVoters" onclick="showAdminTab('voters')">📥 Voter List Upload</button><button id="anManage" onclick="showAdminTab('manage')">👥 Manage Users</button><button id="anRequests" onclick="showAdminTab('requests')">🧾 Pending Purchases</button><button id="anTools" onclick="showAdminTab('tools')">⚙️ Admin Tools</button></div><div class=card><h2>Create Paid Candidate</h2><div class=grid>
 <div><label>Name</label><input id=name></div><div><label>Hindi Name</label><input id=hindi></div><div><label>Post</label><input id=post value="Sarpanch"></div>
 <div><label>District</label><select id="district" onchange="loadSamitis()"></select></div><div><label>Panchayat Samiti</label><select id="ps" onchange="loadGPs()"></select></div><div><label>Gram Panchayat</label><select id="gp"></select></div>
 <div><label>Mobile</label><input id=mobile></div><div><label>Candidate Email</label><input id=email type=email></div><div><label>Temporary Password</label><input id=password type=password></div>
