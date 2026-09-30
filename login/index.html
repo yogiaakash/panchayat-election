@@ -67,6 +67,15 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 .demoFeature{border:1px solid #e7d9b2;background:#fff;border-radius:15px;padding:14px 7px;font-weight:800;font-size:12px;text-align:center;cursor:pointer;color:#18392d}
 .demoFeature span{display:block;font-size:26px;background:#e9f7f0;border-radius:12px;width:43px;line-height:43px;margin:0 auto 7px}
 .demoInfoCard{background:#fff;border:1px solid #dce9e1;border-radius:17px;padding:14px;margin-top:12px;box-shadow:0 4px 14px #214d3510}
+.demoInfoLead{font-size:11.5px;line-height:1.45;color:#6b7f74;margin:-3px 0 11px}
+.demoInfoList{display:grid;gap:8px}
+.demoInfoRow{border:1px solid #e2ece6;border-radius:13px;background:#f8fbf9;padding:10px 11px}
+.demoInfoRow>div{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.demoInfoRow b,.demoInfoRow span{font-size:15px;line-height:1.25;font-weight:850}
+.demoInfoRow b{color:#087451}
+.demoInfoRow span{color:#243e33}
+.demoInfoRow small{display:block;margin-top:4px;font-size:10.5px;line-height:1.4;color:#718279}
+
 .demoTitle{font-weight:900;color:#064c39;margin-bottom:11px;font-size:16px}
 .demoGrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .demoStat{border-radius:12px;background:#f5faf7;padding:11px 4px;text-align:center}
@@ -533,13 +542,14 @@ function dashboard(){
    </div>
    <div class="demoInfoCard">
     <div class="demoTitle">📊 पंचायत की जानकारी</div>
-    <div class="demoGrid3">
-     <div class="demoStat"><b>${total}</b><small>मतदाता</small></div>
-     <div class="demoStat"><b>${wards}</b><small>वार्ड</small></div>
-     <div class="demoStat"><b>${contacted}</b><small>Contacted</small></div>
-     <div class="demoStat"><b>${visited}</b><small>Visited</small></div>
-     <div class="demoStat"><b>${Math.max(0,pending)}</b><small>Pending</small></div>
-     <div class="demoStat"><b>${additions}</b><small>Addition</small></div>
+    <div class="demoInfoLead">इस पंचायत के मतदाता, वार्ड और संपर्क प्रगति का संक्षिप्त सार</div>
+    <div class="demoInfoList">
+     <div class="demoInfoRow"><div><b>${total}</b><span>- कुल मतदाता</span></div><small>पंचायत की वर्तमान मतदाता सूची में उपलब्ध कुल मतदाता</small></div>
+     <div class="demoInfoRow"><div><b>${wards}</b><span>- कुल वार्ड</span></div><small>इस पंचायत में उपलब्ध अलग-अलग वार्डों की संख्या</small></div>
+     <div class="demoInfoRow"><div><b>${contacted}</b><span>- संपर्क किए गए</span></div><small>जिन मतदाताओं से फोन या अन्य माध्यम से संपर्क दर्ज किया गया</small></div>
+     <div class="demoInfoRow"><div><b>${visited}</b><span>- घर पर भेंट</span></div><small>जिन मतदाताओं या परिवारों से घर पर मिलना दर्ज किया गया</small></div>
+     <div class="demoInfoRow"><div><b>${Math.max(0,pending)}</b><span>- संपर्क बाकी</span></div><small>जिन मतदाताओं का संपर्क या भेंट अभी दर्ज नहीं हुआ</small></div>
+     <div class="demoInfoRow"><div><b>${additions}</b><span>- नाम जोड़ने की प्रविष्टियाँ</span></div><small>Supp-2 / नाम जोड़ने हेतु दर्ज सक्रिय entries</small></div>
     </div>
    </div>
   </div>
