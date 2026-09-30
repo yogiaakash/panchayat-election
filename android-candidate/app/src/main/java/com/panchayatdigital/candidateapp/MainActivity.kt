@@ -10,20 +10,28 @@ import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var web: WebView
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         web = WebView(this)
         setContentView(web)
+
         web.settings.javaScriptEnabled = true
         web.settings.domStorageEnabled = true
         web.settings.allowFileAccess = false
         web.settings.allowContentAccess = false
         web.webViewClient = WebViewClient()
         web.webChromeClient = WebChromeClient()
-        web.loadUrl("https://panchayat-election.akashyogi1990.workers.dev/login/")
+
+        // GitHub Pages is automatically deployed from main, so the APK always
+        // receives the latest candidate dashboard UI after a successful deploy.
+        web.loadUrl("https://yogiaakash.github.io/panchayat-election/login/")
+
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() { if (web.canGoBack()) web.goBack() else finish() }
+            override fun handleOnBackPressed() {
+                if (web.canGoBack()) web.goBack() else finish()
+            }
         })
     }
 }
