@@ -468,6 +468,48 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 .miniSlip .mh{background:#087451;color:#fff;text-align:center;padding:3px;font-weight:900;margin:-5px -5px 4px}
 .miniSlip .orange{background:#e87516;color:#fff;padding:2px 3px;font-weight:900;margin:3px -2px}
 </style>
+<style id="home-final-fix">
+/* FINAL HOME UI SAFETY OVERRIDES */
+html,body{margin:0!important;padding:0!important}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI","Nirmala UI",Arial,sans-serif!important;background:#dce8e0!important;color:#18392d!important}
+main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!important;min-height:100vh!important;background:#f3f7f4!important;box-shadow:0 0 30px #1e4e3219!important;overflow:visible!important}
+#demoHome .demoHead{background:linear-gradient(125deg,#064b37,#09966a)!important;color:#fff!important;padding:14px 14px 16px!important;border-bottom:4px solid #d5a638!important}
+#demoHome .demoHeadRow{display:grid!important;grid-template-columns:60px minmax(0,1fr)!important;gap:10px!important;align-items:center!important;padding-right:54px!important;min-height:66px!important}
+#demoHome .demoAvatar{width:60px!important;height:60px!important;border-radius:50%!important;border:2.5px solid #d5a638!important;background:#fff!important;display:grid!important;place-items:center!important;overflow:hidden!important;box-shadow:0 2px 8px #003d2b22!important}
+#demoHome .demoAvatar img{width:100%!important;height:100%!important;object-fit:cover!important}
+#demoHome .demoCandidateName{display:block!important;font-size:20px!important;font-weight:950!important;line-height:1.12!important;color:#fff!important}
+#demoHome .demoPost{display:inline-block!important;font-size:11px!important;font-weight:850!important;margin-top:4px!important;padding:3px 8px!important;border-radius:999px!important;color:#fff8df!important;background:#ffffff1c!important;border:1px solid #ffe28a66!important}
+#demoHome .demoGp{display:block!important;font-size:13px!important;font-weight:850!important;line-height:1.18!important;margin-top:5px!important;color:#fff!important}
+#demoHome .demoSub{display:block!important;font-size:10px!important;line-height:1.28!important;color:#e8f5ef!important;margin-top:2px!important}
+#demoHome .demoMain{display:block!important;padding:12px!important}
+#demoHome .demoGrid2{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important}
+#demoHome .demoFeature{display:block!important;width:100%!important;min-height:98px!important;box-sizing:border-box!important;border:1px solid #e7d9b2!important;background:#fff!important;border-radius:15px!important;padding:14px 7px!important;font-family:inherit!important;font-weight:800!important;font-size:12px!important;line-height:1.25!important;text-align:center!important;cursor:pointer!important;color:#18392d!important;appearance:none!important;-webkit-appearance:none!important;box-shadow:none!important}
+#demoHome .demoFeature span{display:block!important;font-size:26px!important;background:#e9f7f0!important;border-radius:12px!important;width:43px!important;height:43px!important;line-height:43px!important;margin:0 auto 7px!important}
+#demoHome .demoInfoCard{display:block!important;background:#fff!important;border:1px solid #dce9e1!important;border-radius:17px!important;padding:14px!important;margin-top:12px!important;box-shadow:0 4px 14px #214d3510!important}
+#demoHome .demoTitle{font-weight:900!important;color:#064c39!important;margin-bottom:11px!important;font-size:16px!important;line-height:1.25!important}
+#demoHome .demoInfoLead{font-size:11.5px!important;line-height:1.45!important;color:#6b7f74!important;margin:-3px 0 11px!important}
+#demoHome .demoInfoList{display:grid!important;gap:8px!important}
+#demoHome .demoInfoRow{border:1px solid #e2ece6!important;border-radius:13px!important;background:#f8fbf9!important;padding:10px 11px!important}
+#demoHome .demoInfoRow>div{display:flex!important;align-items:baseline!important;gap:5px!important;flex-wrap:wrap!important}
+#demoHome .demoInfoRow b,#demoHome .demoInfoRow span{font-size:15px!important;line-height:1.25!important;font-weight:850!important}
+#demoHome .demoInfoRow b{color:#087451!important}
+#demoHome .demoInfoRow span{color:#243e33!important}
+#demoHome .demoInfoRow small{display:block!important;margin-top:4px!important;font-size:10.5px!important;line-height:1.4!important;color:#718279!important}
+#demoHome .demoGenderBreak{display:flex!important;align-items:center!important;gap:6px!important;margin-top:6px!important;font-size:11px!important;color:#4f655a!important}
+#demoHome .demoBottomNav{position:fixed!important;bottom:0!important;left:50%!important;transform:translateX(-50%)!important;max-width:470px!important;width:100%!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;background:#fff!important;border-top:1px solid #dce9e1!important;padding:7px 0 8px!important;z-index:100!important}
+#demoHome .demoBottomNav button{background:none!important;border:0!important;color:#657a6e!important;font-family:inherit!important;font-size:10px!important;padding:4px 1px!important}
+#demoHome .demoBottomNav button b{display:block!important;font-size:21px!important;margin-bottom:2px!important}
+#demoHome .demoBottomNav button.active{color:#087451!important;font-weight:900!important}
+@media(max-width:360px){
+ #demoHome .demoHead{padding:10px 9px 11px!important}
+ #demoHome .demoHeadRow{grid-template-columns:52px minmax(0,1fr)!important;gap:8px!important;padding-right:48px!important;min-height:58px!important}
+ #demoHome .demoAvatar{width:52px!important;height:52px!important}
+ #demoHome .demoCandidateName{font-size:17px!important}
+ #demoHome .demoPost{font-size:10px!important;margin-top:3px!important;padding:3px 7px!important}
+ #demoHome .demoGp{font-size:12px!important;margin-top:4px!important}
+ #demoHome .demoSub{font-size:9px!important;line-height:1.25!important}
+}
+</style>
 </head>
 <body>
 <header><div class="brand">Panchayat Digital</div><button id="logout" class="btn ghost hidden">Logout</button></header>
