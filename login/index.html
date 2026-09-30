@@ -525,7 +525,7 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
-let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(); const PER=40;
+let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(),familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।"; const PER=40;
 
 
 const HI_VOWELS={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ऋ":"ri","ए":"e","ऐ":"ai","ओ":"o","औ":"au"};
@@ -637,17 +637,20 @@ async function load(){
    if(!batch||batch.length<1000)break;
  }
  voters=allVoters;
- const [{data:cs},{data:ar},{data:ho,error:hoe},{data:vm,error:vme}]=await Promise.all([
+ const [{data:cs},{data:ar},{data:ho,error:hoe},{data:vm,error:vme},{data:ss,error:sse}]=await Promise.all([
    sb.from("voter_contact_status").select("*").eq("panchayat_id",access.panchayat_id),
    sb.from("voter_addition_requests").select("*").eq("panchayat_id",access.panchayat_id).order("created_at",{ascending:false}),
    sb.from("voter_house_overrides").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id),
-   sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id)
+   sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id),
+   sb.from("candidate_share_settings").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id).maybeSingle()
  ]);
  if(hoe){console.error("House override load error",hoe)}
  contactMap=new Map((cs||[]).map(x=>[String(x.voter_id),x]));
  additionRows=ar||[];
  houseOverrideMap=new Map((ho||[]).map(x=>[String(x.voter_id),x]));
  voterMobileMap=new Map((vm||[]).map(x=>[String(x.voter_id),x]));
+ if(ss?.family_share_message) familyShareMessage=ss.family_share_message;
+ if(sse) console.error("Share message load error",sse);
  if(vme) console.error("Voter mobile load error",vme);
  logout.classList.remove("hidden");dashboard();
 }
@@ -1223,7 +1226,16 @@ async function shareHouse(){
  const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}
  openFamilySharePopup(a);
 }
-function openFamilySharePopup(a){
+async function saveFamilyShareMessage(){
+ const ta=document.getElementById("familyShareMessage");if(!ta)return;
+ const msg=ta.value.trim();if(!msg){alert("Message खाली नहीं हो सकता।");return}
+ const {data,error}=await sb.from("candidate_share_settings").upsert({
+  user_id:currentUser.id,panchayat_id:currentAccess.panchayat_id,family_share_message:msg,updated_at:new Date().toISOString()
+ },{onConflict:"user_id,panchayat_id"}).select().single();
+ if(error){alert("Message save नहीं हुआ: "+error.message);return}
+ familyShareMessage=data.family_share_message;
+ alert("WhatsApp message save हो गया। अब यही message आगे भी रहेगा।");
+}function openFamilySharePopup(a){
  const saved=a.map(v=>({v,m:voterMobileMap.get(String(v.id))?.mobile_number||""}));
  const opts=saved.map((x,i)=>"<option value=\""+i+"\">"+e(x.v.name)+(x.m?" • 📱 "+e(x.m):" • मोबाइल दर्ज नहीं")+"</option>").join("");
  const def=saved.find(x=>x.m)?.m||"";
