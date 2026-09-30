@@ -62,15 +62,44 @@ logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];loginV
 async function load(){
  const {data:{user}}=await sb.auth.getUser();
  if(!user){loginView();return}
- const {data:c,error:ce}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).maybeSingle();
- if(ce||!c){loginView("इस login से कोई candidate account linked नहीं है।");await sb.auth.signOut();return}
- if(!c.active){loginView("Candidate account अभी active नहीं है। Admin से संपर्क करें।");await sb.auth.signOut();return}
- if(c.subscription_expiry && new Date(c.subscription_expiry+"T23:59:59") < new Date()){loginView("Candidate subscription expire हो चुका है। Admin से संपर्क करें।");await sb.auth.signOut();return}
- candidate={...c,photo_url:"",symbol_url:"",banner_url:""};
- try{const {data:branding,error:be}=await sb.functions.invoke("candidate-branding-urls");if(!be&&branding)candidate={...candidate,...branding}}catch(_){}
+
+ // New model: access belongs to Panchayat, not only to a candidate.
+ const {data:access,error:ae}=await sb.from("panchayat_access")
+   .select("panchayat_id,candidate_id,access_level,status,expires_at")
+   .eq("user_id",user.id).eq("status","active")
+   .or("expires_at.is.null,expires_at.gt."+new Date().toISOString())
+   .limit(1).maybeSingle();
+
+ if(ae||!access){
+   loginView("इस login को किसी पंचायत का active access नहीं मिला है। Admin से संपर्क करें।");
+   await sb.auth.signOut();return;
+ }
+
+ const {data:p,error:pe}=await sb.from("panchayats").select("*").eq("id",access.panchayat_id).maybeSingle();
+ if(pe||!p){loginView("Panchayat profile load नहीं हो सका।");await sb.auth.signOut();return}
+
+ // Candidate branding is optional. A Panchayat-access user can work without a candidate row.
+ let c=null;
+ if(access.candidate_id){
+   const {data:linked}=await sb.from("candidates").select("*").eq("id",access.candidate_id).maybeSingle();
+   c=linked||null;
+ }
+ if(!c){
+   const {data:owned}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).eq("active",true).limit(1).maybeSingle();
+   c=owned||null;
+ }
+ candidate=c?{...c,gram_panchayat:p.gram_panchayat,panchayat_samiti:p.panchayat_samiti,district:p.district,photo_url:"",symbol_url:"",banner_url:""}:{
+   id:null,name:"Panchayat Workspace",hindi_name:"पंचायत कार्यक्षेत्र",post:"",active:true,
+   gram_panchayat:p.gram_panchayat,panchayat_samiti:p.panchayat_samiti,district:p.district,
+   photo_url:"",symbol_url:"",banner_url:""
+ };
+ if(c){
+   try{const {data:branding,error:be}=await sb.functions.invoke("candidate-branding-urls");if(!be&&branding)candidate={...candidate,...branding}}catch(_){}
+ }
+
  let allVoters=[];
  for(let from=0;;from+=1000){
-   const {data:batch,error:ve}=await sb.from("voters").select("*").eq("candidate_id",c.id).order("id",{ascending:true}).range(from,from+999);
+   const {data:batch,error:ve}=await sb.from("voters").select("*").eq("panchayat_id",access.panchayat_id).order("id",{ascending:true}).range(from,from+999);
    if(ve){loginView("Voter data load error: "+ve.message);return}
    allVoters.push(...(batch||[]));
    if(!batch||batch.length<1000)break;
