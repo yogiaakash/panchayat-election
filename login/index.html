@@ -113,8 +113,48 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
 let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,contactMap=new Map(),additionRows=[]; const PER=40;
 
-const DEV_TO_LAT={"क":"k","ख":"kh","ग":"g","घ":"gh","च":"ch","छ":"chh","ज":"j","झ":"jh","ट":"t","ठ":"th","ड":"d","ढ":"dh","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"ph","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ा":"a","ि":"i","ी":"i","ु":"u","ू":"u","े":"e","ै":"ai","ो":"o","ौ":"au","ं":"n","ँ":"n","ः":"h","्":""};
-function latinize(v){return String(v??"").split("").map(ch=>DEV_TO_LAT[ch]??ch).join("").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
+
+const HI_VOWELS={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ऋ":"ri","ए":"e","ऐ":"ai","ओ":"o","औ":"au"};
+const HI_MATRAS={"ा":"aa","ि":"i","ी":"ee","ु":"u","ू":"oo","ृ":"ri","े":"e","ै":"ai","ो":"o","ौ":"au"};
+const HI_CONS={"क":"k","ख":"kh","ग":"g","घ":"gh","ङ":"ng","च":"ch","छ":"chh","ज":"j","झ":"jh","ञ":"ny","ट":"t","ठ":"th","ड":"d","ढ":"dh","ण":"n","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"ph","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ळ":"l"};
+const NAME_WORD_OVERRIDES={
+ "सिंह":"Singh","कंवर":"Kanwar","कँवर":"Kanwar","चन्द":"Chand","चंद्र":"Chandra","चन्द्र":"Chandra",
+ "कुमार":"Kumar","कुमारी":"Kumari","देवी":"Devi","लाल":"Lal","राम":"Ram","श्याम":"Shyam","मोहन":"Mohan",
+ "हनुमान":"Hanuman","कैलाश":"Kailash","सुभाष":"Subhash","भारद्वाज":"Bhardwaj","गुर्जर":"Gurjar","शर्मा":"Sharma",
+ "शेखावत":"Shekhawat","बुनकर":"Bunkar","मल":"Mal","बाबूलाल":"Babulal","बाबु":"Babu","बाबू":"Babu"
+};
+function translitWord(word){
+ if(!word)return "";
+ if(NAME_WORD_OVERRIDES[word])return NAME_WORD_OVERRIDES[word];
+ let out="";
+ for(let i=0;i<word.length;i++){
+  const ch=word[i];
+  if(HI_VOWELS[ch]){out+=HI_VOWELS[ch];continue}
+  if(HI_CONS[ch]){
+   out+=HI_CONS[ch];
+   const nx=word[i+1];
+   if(nx==="्"){i++;continue}
+   if(HI_MATRAS[nx]!==undefined){out+=HI_MATRAS[nx];i++;continue}
+   out+="a";continue;
+  }
+  if(ch==="ं"||ch==="ँ"){out+="n";continue}
+  if(ch==="ः"){out+="h";continue}
+  if(/[A-Za-z0-9]/.test(ch)){out+=ch;continue}
+ }
+ out=out.toLowerCase()
+   .replace(/aa/g,"a")
+   .replace(/ee/g,"i")
+   .replace(/oo/g,"u")
+   .replace(/([bcdfghjklmnpqrstvwxyz])a([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz])/g,"$1$2$3")
+   .replace(/jaba/g,"jba")
+   .replace(/nvara$/,"nwar")
+   .replace(/sinha$/,"singh")
+   .replace(/a$/,"");
+ return out.charAt(0).toUpperCase()+out.slice(1);
+}
+function latinize(v){
+ return String(v??"").trim().split(/\s+/).map(translitWord).filter(Boolean).join(" ");
+}
 const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function loginView(msg=""){
  document.querySelector("header").style.display="flex";
