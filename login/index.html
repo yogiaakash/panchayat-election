@@ -349,21 +349,22 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 @media(max-width:360px){.moduleOpen #workspaceAfterHome{padding-top:96px}}
 .moduleOpen .demoHead{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:470px;z-index:60;box-shadow:0 6px 18px #0b3d2c33}
 .demoHead{position:relative;padding:14px 14px 16px;border-bottom:4px solid #d5a638}
-.demoHeadRow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:11px;align-items:center;padding-right:58px;min-height:72px}
-.demoAvatar{width:64px;height:64px;border-radius:50%;border:3px solid #d5a638;background:#fff;font-size:24px;font-weight:900;color:#087451}
+.demoHeadRow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding-right:58px;min-height:76px}
+.demoAvatar{width:64px;height:64px;border-radius:50%;border:3px solid #d5a638;background:#fff;font-size:24px;font-weight:900;color:#087451;box-shadow:0 3px 10px #003d2b28}
 .demoAvatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
-.demoCandidateName{display:block;font-size:19px;font-weight:900;line-height:1.18;white-space:normal;overflow-wrap:anywhere;margin:0}
-.demoPost{font-size:12.5px;line-height:1.25;margin-top:4px;color:#ffe28a}
-.demoGp{font-size:12.5px;line-height:1.28;margin-top:4px}
-.demoSub{font-size:10.5px;line-height:1.3;opacity:.96}
+.demoCandidateName{display:block;font-size:21px;font-weight:950;line-height:1.15;letter-spacing:-.25px;white-space:normal;overflow-wrap:anywhere;margin:0;color:#fff}
+.demoPost{display:inline-block;font-size:12px;line-height:1.2;font-weight:850;margin-top:6px;padding:4px 9px;border-radius:999px;color:#fff8df;background:#ffffff1c;border:1px solid #ffe28a66}
+.demoGp{display:block;font-size:14px;line-height:1.25;font-weight:850;margin-top:7px;color:#fff}
+.demoSub{display:block;font-size:10.5px;line-height:1.45;font-weight:600;opacity:.96;color:#e8f5ef}
 .demoLogout{position:absolute;top:12px;right:10px;margin:0;padding:6px 8px;border-radius:8px;font-size:10px;line-height:1;background:#ffffff18}
 @media(max-width:360px){
  .demoHead{padding:12px 10px 14px}
- .demoHeadRow{grid-template-columns:56px minmax(0,1fr);gap:9px;padding-right:50px}
+ .demoHeadRow{grid-template-columns:56px minmax(0,1fr);gap:9px;padding-right:50px;min-height:68px}
  .demoAvatar{width:56px;height:56px}
- .demoCandidateName{font-size:17px}
- .demoPost,.demoGp{font-size:11.5px}
- .demoSub{font-size:9.5px}
+ .demoCandidateName{font-size:18px;letter-spacing:-.15px}
+ .demoPost{font-size:10.5px;margin-top:5px;padding:3px 8px}
+ .demoGp{font-size:12.5px;margin-top:6px}
+ .demoSub{font-size:9.5px;line-height:1.4}
  .demoLogout{right:7px;top:9px;padding:5px 6px;font-size:9px}
 }
 </style>
