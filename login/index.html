@@ -75,6 +75,10 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 .demoInfoRow b{color:#087451}
 .demoInfoRow span{color:#243e33}
 .demoInfoRow small{display:block;margin-top:4px;font-size:10.5px;line-height:1.4;color:#718279}
+.demoGenderBreak{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:#4f655a}
+.demoGenderBreak span,.demoGenderBreak b{font-size:11px;line-height:1.2}
+.demoGenderBreak b{color:#087451;font-weight:900}
+
 
 .demoTitle{font-weight:900;color:#064c39;margin-bottom:11px;font-size:16px}
 .demoGrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -511,6 +515,8 @@ function dashboard(){
  const c=candidate;
  const total=voters.length;
  const wards=new Set(voters.map(v=>String(v.ward||"")).filter(Boolean)).size;
+ const maleCount=voters.filter(v=>/पुरुष|पुरूष|male|^m$/i.test(v.gender||"")).length;
+ const femaleCount=voters.filter(v=>/स्त्री|महिला|female|^f$/i.test(v.gender||"")).length;
  const statuses=[...contactMap.values()];
  const contacted=statuses.filter(x=>x.contact_status==="contacted").length;
  const visited=statuses.filter(x=>x.contact_status==="met").length;
@@ -544,7 +550,7 @@ function dashboard(){
     <div class="demoTitle">📊 पंचायत की जानकारी</div>
     <div class="demoInfoLead">इस पंचायत के मतदाता, वार्ड और संपर्क प्रगति का संक्षिप्त सार</div>
     <div class="demoInfoList">
-     <div class="demoInfoRow"><div><b>${total}</b><span>- कुल मतदाता</span></div><small>पंचायत की वर्तमान मतदाता सूची में उपलब्ध कुल मतदाता</small></div>
+     <div class="demoInfoRow"><div><b>${total}</b><span>- कुल मतदाता</span></div><small>पंचायत की वर्तमान मतदाता सूची में उपलब्ध कुल मतदाता</small><div class="demoGenderBreak"><span><b>${maleCount}</b> पुरुष</span><span>•</span><span><b>${femaleCount}</b> महिला</span></div></div>
      <div class="demoInfoRow"><div><b>${wards}</b><span>- कुल वार्ड</span></div><small>इस पंचायत में उपलब्ध अलग-अलग वार्डों की संख्या</small></div>
      <div class="demoInfoRow"><div><b>${contacted}</b><span>- संपर्क किए गए</span></div><small>जिन मतदाताओं से फोन या अन्य माध्यम से संपर्क दर्ज किया गया</small></div>
      <div class="demoInfoRow"><div><b>${visited}</b><span>- घर पर भेंट</span></div><small>जिन मतदाताओं या परिवारों से घर पर मिलना दर्ज किया गया</small></div>
