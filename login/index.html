@@ -91,7 +91,18 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 .exactCurrent{padding:10px;background:#fff6df;border-radius:11px;font-size:12px;line-height:1.6}
 .exactFamilyBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 @media(max-width:649px){.exactSearchGrid2{grid-template-columns:1fr 1fr}.exactFamilyBtns{grid-template-columns:1fr 1fr}}
-</style></head>
+<style id="ward-pdf-demo-style">
+.progressWrap{display:none;margin-top:14px;padding:13px;border-radius:13px;background:#f5faf7;border:1px solid #dce9e1}
+.progressTrack{height:14px;background:#dce9e1;border-radius:20px;overflow:hidden;margin:9px 0}
+.progressFill{height:100%;width:0;background:linear-gradient(90deg,#087451,#13a674);transition:width .18s}
+.progressText{text-align:center;font-size:13px;font-weight:900;color:#087451}
+.slipPreview{display:none;margin-top:13px;border:1px solid #d7e3dc;border-radius:12px;padding:8px;background:#fafcfb}
+.slipGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.miniSlip{min-height:112px;border:1px dashed #7f978b;background:#fff;padding:5px;font-size:7px;line-height:1.35}
+.miniSlip .mh{background:#087451;color:#fff;text-align:center;padding:3px;font-weight:900;margin:-5px -5px 4px}
+.miniSlip .orange{background:#e87516;color:#fff;padding:2px 3px;font-weight:900;margin:3px -2px}
+</style>
+</head>
 <body>
 <header><div class="brand">Panchayat Digital</div><button id="logout" class="btn ghost hidden">Logout</button></header>
 <main id="app"></main>
@@ -232,8 +243,39 @@ function dashboard(){
  <div id="workspaceAfterHome">
   <div id="opsReports" class="card hidden" style="margin:12px 0"></div>
   <div class="tabs"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
-  <section id="tabSlip" class="tabpane"><div class="card"><h3>📄 Voter Slip Download</h3><p class="muted">Ward चुनकर 9 slips per A4 page PDF बनाएं।</p><select id="slipWard" onchange="updateSlipCount()">${options("ward","वार्ड चुनें")}</select><div id="slipCount" class="muted" style="margin-top:8px">Ward चुनें</div><div id="pdfProgressBox" class="hidden" style="margin-top:10px"><div style="height:10px;background:#e7eee9;border-radius:999px;overflow:hidden"><div id="pdfProgressBar" style="height:100%;width:0;background:#087451"></div></div><div id="pdfProgressText" class="muted" style="margin-top:5px">0%</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" onclick="downloadWardPdf()">📄 Generate / Download PDF</button><button class="btn ghost" onclick="shareWardPdf()">↗ Share Ward PDF</button></div></div></section>
-  <section id="tabInfo" class="tabpane active">
+  <section id="tabSlip" class="tabpane">
+ <div class="card">
+  <div class="title">📄 Ward-wise Voter Slip PDF Generator</div>
+  <div class="muted">एक Ward चुनें। उस Ward के सभी मतदाताओं की voter slips एक PDF में तैयार होंगी।</div>
+  <label>Ward चुनें</label>
+  <select id="slipWard" onchange="updateSlipCount()">${options("ward","Ward चुनें")}</select>
+  <div id="slipCount" class="notice" style="margin-top:8px">पहले Ward चुनें</div>
+  <button id="generateWardBtn" class="btn green full" style="margin-top:10px" onclick="generateExactWardPdf()">📄 Ward-wise Voter Slip PDF Generate करें</button>
+  <div id="pdfProgress" class="progressWrap">
+   <div class="row"><b>PDF तैयार हो रही है…</b><span id="pdfPercent">0%</span></div>
+   <div class="progressTrack"><div id="pdfFill" class="progressFill"></div></div>
+   <div id="pdfProgressText" class="progressText">0% Generated</div>
+   <div id="pdfProgressDetail" class="muted" style="text-align:center;margin-top:5px">मतदाता पर्चियाँ तैयार की जा रही हैं</div>
+  </div>
+  <div id="pdfReady" class="hidden" style="margin-top:12px">
+   <div class="notice"><b>✓ PDF Ready</b><br><span id="pdfReadyText"></span></div>
+   <div class="grid2"><button class="btn soft" onclick="toggleSlipPreview()">👁 Preview</button><button class="btn gold" onclick="shareGeneratedWardPdf()">↗ Share PDF</button></div>
+  </div>
+  <div id="slipPreview" class="slipPreview">
+   <div class="row" style="margin-bottom:7px"><b>Sample Page Preview</b><span class="muted">3 × 3 slips</span></div>
+   <div id="slipGrid" class="slipGrid"></div>
+  </div>
+ </div>
+ <div class="card">
+  <div class="title">अन्य PDF विकल्प</div>
+  <div class="stack">
+   <button class="btn soft" onclick="openWorkspace('info')">Individual Voter Slip</button>
+   <button class="btn soft" onclick="openWorkspace('info')">House / Family Voter Slips</button>
+   <button class="btn soft" onclick="openAZWorkspace()">A–Z List PDF</button>
+  </div>
+ </div>
+</section>
+<section id="tabInfo" class="tabpane active">
    <div class="exactSearchCard">
     <div class="exactSearchTitle">🔎 मतदाता खोजें</div>
     <label>मतदाता खोजें — हिंदी / English</label>
@@ -269,6 +311,12 @@ function renderVisitRows(){const box=document.getElementById("vrRows");if(!box)r
 function renderSupp2Rows(){const box=document.getElementById("srRows");if(!box)return;const w=document.getElementById("srWard")?.value||"",s=document.getElementById("srStatus")?.value||"";const a=additionRows.filter(x=>(!w||String(x.ward)===w)&&(!s||x.status===s));const labels={addition_required:"नाम जोड़ना आवश्यक",physical_follow_up:"Physical Follow-up",submitted:"Submitted",verified_added:"Verified Added",closed:"Closed"};box.innerHTML=`<div class="muted">${a.length} provisional records — official voter list से अलग</div><div class="tablewrap"><table><tr><th>Ward</th><th>Colony</th><th>House</th><th>Name</th><th>Relative</th><th>Status</th><th>Update</th></tr>${a.map(x=>`<tr><td>${e(x.ward)}</td><td>${e(x.colony)}</td><td>${e(x.house_no)}</td><td><b>${e(x.name)}</b></td><td>${e(x.relative_name)}</td><td>${e(labels[x.status]||x.status)}</td><td><select onchange="updateSupp2Status('${e(x.id)}',this.value)"><option value="">Change…</option><option value="addition_required">नाम जोड़ना आवश्यक</option><option value="physical_follow_up">Physical Follow-up</option><option value="submitted">Submitted</option><option value="verified_added">Verified Added</option><option value="closed">Closed</option></select></td></tr>`).join("")}</table></div>`}
 async function updateSupp2Status(id,status){if(!status)return;const {data,error}=await sb.from("voter_addition_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id).eq("panchayat_id",currentAccess.panchayat_id).select().single();if(error){alert(error.message);return}additionRows=additionRows.map(x=>String(x.id)===String(id)?data:x);updateFieldSummary();renderSupp2Rows()}
 function showTab(k){["slip","info","stats"].forEach(x=>{document.getElementById("tab"+x[0].toUpperCase()+x.slice(1)).classList.toggle("active",x===k);document.getElementById("tb"+x[0].toUpperCase()+x.slice(1)).classList.toggle("active",x===k)});if(k==="stats"){renderPanchayatStats();renderAZ()}}
+let generatedWardPdfFile=null;
+function updateSlipCount(){const el=document.getElementById("slipWard"),info=document.getElementById("slipCount");if(!el||!info)return;const w=el.value;if(!w){info.textContent="पहले Ward चुनें";return}const n=voters.filter(v=>String(v.ward)===String(w)).length;info.innerHTML=`<b>Ward ${e(w)}</b> • ${n} voters • सभी की slips एक PDF में`;}
+function renderExactSlipPreview(list,w){const grid=document.getElementById("slipGrid");if(!grid)return;const demo=list.length?list:voters.slice(0,1);grid.innerHTML=Array.from({length:9},(_,i)=>{const p=demo[i%demo.length]||{};return `<div class="miniSlip"><div class="mh">ग्राम पंचायत ${e(candidate.gram_panchayat||"")}</div><div class="orange">मतदाता पर्ची</div><b>Ward:</b> ${e(w)}<br><b>क्रम:</b> ${e(p.serial_no??(i+1))} &nbsp; <b>EPIC:</b> ${e(p.epic||"-")}<br><b>नाम:</b> ${e(p.name||"-")}<br><b>पिता/पति:</b> ${e(p.relative_name||"-")}<br><b>मकान:</b> ${e(p.house_no||"-")}<br><b>क्षेत्र:</b> ${e(p.colony||"-")}<br><b>आयु:</b> ${e(p.age||"-")}</div>`}).join("");}
+function toggleSlipPreview(){const x=document.getElementById("slipPreview");if(x)x.style.display=x.style.display==="block"?"none":"block";}
+async function generateExactWardPdf(){const w=document.getElementById("slipWard")?.value;if(!w){alert("पहले Ward चुनें।");return}const list=voters.filter(v=>String(v.ward)===String(w));if(!list.length){alert("इस Ward में voter data नहीं मिला।");return}const box=document.getElementById("pdfProgress"),ready=document.getElementById("pdfReady"),preview=document.getElementById("slipPreview"),btn=document.getElementById("generateWardBtn");box.style.display="block";ready.classList.add("hidden");preview.style.display="none";btn.disabled=true;generatedWardPdfFile=null;let pct=8;const setp=(p,detail)=>{pct=Math.max(pct,p);document.getElementById("pdfFill").style.width=pct+"%";document.getElementById("pdfPercent").textContent=pct+"%";document.getElementById("pdfProgressText").textContent=pct+"% Generated";document.getElementById("pdfProgressDetail").textContent=detail};try{setp(15,`0 / ${list.length} voter slips तैयार`);await new Promise(r=>setTimeout(r,80));setp(35,`${Math.ceil(list.length*.35)} / ${list.length} voter slips तैयार`);generatedWardPdfFile=await makePdfFile(list,`Ward_${w}_Voter_Slips.pdf`);setp(90,`${list.length} / ${list.length} voter slips तैयार`);renderExactSlipPreview(list,w);setp(100,`${list.length} / ${list.length} voter slips तैयार`);document.getElementById("pdfReadyText").textContent=`Ward ${w} voter slip PDF तैयार है`;ready.classList.remove("hidden");const u=URL.createObjectURL(generatedWardPdfFile),a=document.createElement("a");a.href=u;a.download=generatedWardPdfFile.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);}catch(err){alert("PDF तैयार नहीं हो सकी: "+err.message)}finally{btn.disabled=false}}
+async function shareGeneratedWardPdf(){if(!generatedWardPdfFile){alert("पहले PDF Generate करें।");return}await sharePdfFile(generatedWardPdfFile,"Ward Voter Information Slips","मतदाता सूची संदर्भ हेतु Ward voter slips");}
 function renderPanchayatStats(){const box=document.getElementById("pStats");if(!box)return;const male=voters.filter(x=>/पुरुष|male|^m$/i.test(x.gender||"")).length,female=voters.filter(x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"")).length;const wards=smart(voters.map(x=>x.ward));const houses=new Set(voters.map(x=>String(x.ward)+"|"+String(x.colony)+"|"+String(x.house_no))).size,colonies=new Set(voters.map(x=>String(x.ward)+"|"+String(x.colony))).size;const ages=voters.map(x=>Number(x.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1):"-";const groups=[["18–25",ages.filter(a=>a>=18&&a<=25).length],["26–40",ages.filter(a=>a>=26&&a<=40).length],["41–60",ages.filter(a=>a>=41&&a<=60).length],["60+",ages.filter(a=>a>60).length]];box.innerHTML=`<div class="grid stats"><div class="stat"><strong>${voters.length}</strong><span>Total Voters</span></div><div class="stat"><strong>${male}</strong><span>Male</span></div><div class="stat"><strong>${female}</strong><span>Female</span></div><div class="stat"><strong>${wards.length}</strong><span>Wards</span></div><div class="stat"><strong>${colonies}</strong><span>Colonies</span></div><div class="stat"><strong>${houses}</strong><span>Houses</span></div><div class="stat"><strong>${avg}</strong><span>Avg Age</span></div></div><h4>Ward-wise Voters</h4><div class="tablewrap"><table><tr><th>Ward</th><th>Voters</th><th>Colonies</th><th>Houses</th></tr>${wards.map(w=>{const a=voters.filter(v=>String(v.ward)===String(w));return `<tr><td><b>${e(w)}</b></td><td>${a.length}</td><td>${new Set(a.map(v=>v.colony)).size}</td><td>${new Set(a.map(v=>String(v.colony)+"|"+String(v.house_no))).size}</td></tr>`}).join("")}</table></div><h4>Age Groups</h4><div class="grid stats">${groups.map(g=>`<div class="stat"><strong>${g[1]}</strong><span>${g[0]}</span></div>`).join("")}</div>`}
 function azData(){const w=document.getElementById("azWard")?.value||"",q=(document.getElementById("azQ")?.value||"").trim().toLowerCase();return voters.filter(v=>(!w||String(v.ward)===w)&&(!q||String(v.name||"").toLowerCase().includes(q)||latinize(v.name||"").includes(q))).slice().sort((a,b)=>latinize(a.name||"").localeCompare(latinize(b.name||""))||String(a.name||"").localeCompare(String(b.name||""),"hi"))}
 function renderAZ(){const a=azData(),box=document.getElementById("azResult");if(!box)return;box.innerHTML=`<div class="muted" style="margin:8px 0">${a.length} voters</div><div class="tablewrap"><table class="aztable"><thead><tr><th>क्रम</th><th>नाम</th><th>पिता/पति</th><th>EPIC</th><th>Ward</th><th>House</th></tr></thead><tbody>${a.map(v=>`<tr><td>${e(v.serial_no)}</td><td><b>${e(v.name)}</b></td><td>${e(v.relative_name)}</td><td>${e(v.epic)}</td><td>${e(v.ward)}</td><td>${e(v.house_no)}</td></tr>`).join("")}</tbody></table></div>`}
@@ -401,7 +449,6 @@ async function makeWardGridPdf(list,filename,onProgress){
 }
 async function sharePdfFile(file,title,text){if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title,text,files:[file]});return}catch(x){if(x.name==="AbortError")return}}const u=URL.createObjectURL(file),a=document.createElement("a");a.href=u;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);alert("PDF तैयार है। WhatsApp में attachment के रूप में share करें।")}
 async function shareInfo(v){try{const file=await makePdfFile([v],`Voter_Slip_${v.epic||v.serial_no}.pdf`);await sharePdfFile(file,"Voter Information Slip","मतदाता सूची संदर्भ हेतु सूचना पर्ची")}catch(x){alert("PDF share तैयार नहीं हो सका: "+x.message)}}
-function updateSlipCount(){const w=document.getElementById("slipWard")?.value||"";const n=w?voters.filter(v=>String(v.ward)===String(w)).length:0;const x=document.getElementById("slipCount");if(x)x.textContent=w?`Ward ${w}: ${n} voters • ${Math.ceil(n/9)} A4 pages`:"Ward चुनें"}
 function setPdfProgress(done,total){const box=document.getElementById("pdfProgressBox"),bar=document.getElementById("pdfProgressBar"),txt=document.getElementById("pdfProgressText");if(!box||!bar||!txt)return;box.classList.remove("hidden");const pct=total?Math.round(done*100/total):0;bar.style.width=pct+"%";txt.textContent=`PDF तैयार हो रहा है: ${done}/${total} voters • ${pct}%`}
 function resetPdfProgress(){const box=document.getElementById("pdfProgressBox");if(box)setTimeout(()=>box.classList.add("hidden"),1800)}
 function selectedWardVoters(){
