@@ -92,7 +92,8 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 .exactFamilyBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 @media(max-width:649px){.exactSearchGrid2{grid-template-columns:1fr 1fr}.exactFamilyBtns{grid-template-columns:1fr 1fr}}
 /* Candidate header stability fix */
-.demoHead{position:sticky;top:0;z-index:60;padding:14px 14px 16px;border-bottom:4px solid #d5a638;box-shadow:0 6px 18px #0b3d2c33}
+.moduleOpen .demoHead{position:sticky;top:0;z-index:60;box-shadow:0 6px 18px #0b3d2c33}
+.demoHead{position:relative;padding:14px 14px 16px;border-bottom:4px solid #d5a638}
 .demoHeadRow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:11px;align-items:center;padding-right:58px;min-height:72px}
 .demoAvatar{width:64px;height:64px;border-radius:50%;border:3px solid #d5a638;background:#fff;font-size:24px;font-weight:900;color:#087451}
 .demoAvatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
@@ -391,6 +392,7 @@ function dashboard(){
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
 }
 function showWorkspace(){
+ document.getElementById("app")?.classList.add("moduleOpen");
  const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.display="none";
  const home=document.getElementById("demoHome");if(home)home.style.display="block";
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="block";
@@ -415,6 +417,7 @@ function setModuleVisibility(mode){
  }
 }
 function scrollToHome(){
+ document.getElementById("app")?.classList.remove("moduleOpen");
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="none";
  const ops=document.getElementById("opsReports");if(ops){ops.classList.add("hidden");ops.innerHTML=""}
  const home=document.getElementById("demoHome");if(home)home.style.display="block";
