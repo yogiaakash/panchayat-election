@@ -516,6 +516,8 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 
 .mobileEditBox{margin-top:12px;padding:12px;border:1px solid #dce9e1;border-radius:13px;background:#f8fbf9}.mobileEditBox label{display:block;font-size:11px;font-weight:800;color:#40574c;margin:0 0 5px}.mobileEditBox input{width:100%;box-sizing:border-box;min-height:44px;border:1px solid #cddfd5;border-radius:12px;padding:10px 11px;font-size:14px;background:#fff}
 .familyShareOr{text-align:center;margin:7px 0;font-size:11px;color:#718279}.houseDlg textarea{width:100%;box-sizing:border-box;border:1px solid #cddfd5;border-radius:12px;padding:10px;font:inherit;background:#fff}.houseDlg select,.houseDlg input{width:100%;box-sizing:border-box;min-height:44px}
+
+.signupCard{max-width:520px;margin:18px auto}.signupCard label{display:block;margin-top:10px;font-size:12px;font-weight:800;color:#40574c}.signupCard input,.signupCard select{width:100%;box-sizing:border-box;min-height:44px;border:1px solid #cddfd5;border-radius:11px;padding:9px 11px;background:#fff;font:inherit}.signupCard h2{color:#064c39}.freeAccessBanner{margin:10px 12px;padding:12px;border-radius:14px;background:#fff8df;border:1px solid #ead28b;color:#5c4b20}.freeAccessBanner b{color:#087451}.freeAccessBanner button{margin-top:8px}
 </style>
 </head>
 <body>
@@ -525,7 +527,7 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
-let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(),familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।"; const PER=40;
+let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(),familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।",signupPanchayats=[]; const PER=40;
 
 
 const HI_VOWELS={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ऋ":"ri","ए":"e","ऐ":"ai","ओ":"o","औ":"au"};
@@ -575,11 +577,74 @@ const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt
 function loginView(msg=""){
  document.querySelector("header").style.display="flex";
  logout.classList.add("hidden");
- app.innerHTML=`<div class="card login"><h2>Candidate Login</h2><p class="muted">अपने अधिकृत Email और Password से लॉगिन करें।</p>
- <label>Email</label><input id="email" type="email" autocomplete="username">
+ app.innerHTML=`<div class="card login"><h2>Candidate Login</h2><p class="muted">अपने Email और Password से लॉगिन करें।</p>
+ <label>Email / Login ID</label><input id="email" type="email" autocomplete="username">
  <label>Password</label><input id="password" type="password" autocomplete="current-password">
  <button class="btn primary" style="width:100%;margin-top:16px" onclick="signIn()">Login</button>
+ <button class="btn soft full" style="margin-top:9px" onclick="signupView()">➕ नया Candidate Account बनाएं</button>
  <p id="msg" class="error">${e(msg)}</p></div>`;
+}
+async function loadSignupPanchayats(){
+ const {data,error}=await sb.from("panchayats").select("id,district,panchayat_samiti,gram_panchayat").order("district").order("panchayat_samiti").order("gram_panchayat");
+ if(error){document.getElementById("signupMsg").textContent="Panchayat list load नहीं हुई: "+error.message;return}
+ signupPanchayats=data||[];
+ const ds=[...new Set(signupPanchayats.map(x=>x.district).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
+ const el=document.getElementById("suDistrict");if(el)el.innerHTML='<option value="">जिला चुनें</option>'+ds.map(x=>'<option>'+e(x)+'</option>').join("");
+}
+function signupView(){
+ document.querySelector("header").style.display="flex";logout.classList.add("hidden");
+ app.innerHTML=`<div class="card login signupCard"><h2>📝 Candidate Account बनाएं</h2><p class="muted">अपनी जानकारी भरें और अपनी Panchayat चुनें। Signup के बाद Free Access में 10% voter data मिलेगा।</p>
+ <label>Candidate Name *</label><input id="suName" placeholder="पूरा नाम">
+ <label>Candidate Name (Hindi)</label><input id="suNameHi" placeholder="नाम हिंदी में">
+ <label>Election Post *</label><select id="suPost"><option value="">Post चुनें</option><option>Sarpanch</option><option>Ward Panch</option><option>Panchayat Samiti Member</option><option>Zila Parishad Member</option></select>
+ <label>District *</label><select id="suDistrict" onchange="signupFilterPS()"><option>Loading…</option></select>
+ <label>Panchayat Samiti *</label><select id="suPS" onchange="signupFilterGP()" disabled><option>पहले जिला चुनें</option></select>
+ <label>Gram Panchayat *</label><select id="suGP" disabled><option>पहले Panchayat Samiti चुनें</option></select>
+ <label>Mobile *</label><input id="suMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर">
+ <label>WhatsApp Number</label><input id="suWhatsApp" type="tel" inputmode="numeric" maxlength="10">
+ <label>Email / Login ID *</label><input id="suEmail" type="email" autocomplete="username">
+ <label>Password *</label><input id="suPassword" type="password" autocomplete="new-password">
+ <label>Confirm Password *</label><input id="suPassword2" type="password" autocomplete="new-password">
+ <label>Candidate Photo</label><input id="suPhoto" type="file" accept="image/*" onchange="previewSignupPhoto()"><div id="suPhotoPreview"></div>
+ <button class="btn primary full" style="margin-top:16px" onclick="createCandidateAccount()">Create Account</button>
+ <button class="btn ghost full" style="margin-top:8px" onclick="loginView()">← वापस Login</button>
+ <p id="signupMsg" class="error"></p></div>`;
+ loadSignupPanchayats();
+}
+function signupFilterPS(){
+ const d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS");
+ const rows=signupPanchayats.filter(x=>x.district===d),vals=[...new Set(rows.map(x=>x.panchayat_samiti).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
+ ps.disabled=!d;ps.innerHTML='<option value="">Panchayat Samiti चुनें</option>'+vals.map(x=>'<option>'+e(x)+'</option>').join("");
+ const gp=document.getElementById("suGP");gp.disabled=true;gp.innerHTML='<option value="">पहले Panchayat Samiti चुनें</option>';
+}
+function signupFilterGP(){
+ const d=document.getElementById("suDistrict").value,psv=document.getElementById("suPS").value,gp=document.getElementById("suGP");
+ const vals=[...new Set(signupPanchayats.filter(x=>x.district===d&&x.panchayat_samiti===psv).map(x=>x.gram_panchayat).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
+ gp.disabled=!psv;gp.innerHTML='<option value="">Gram Panchayat चुनें</option>'+vals.map(x=>'<option>'+e(x)+'</option>').join("");
+}
+function previewSignupPhoto(){
+ const f=document.getElementById("suPhoto")?.files?.[0],box=document.getElementById("suPhotoPreview");if(!f||!box)return;
+ const r=new FileReader();r.onload=()=>{box.innerHTML='<img src="'+e(r.result)+'" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #d5a638;margin-top:8px">'};r.readAsDataURL(f);
+}
+async function createCandidateAccount(){
+ const msg=document.getElementById("signupMsg");msg.textContent="Account बनाया जा रहा है…";
+ const name=document.getElementById("suName").value.trim(),nameHi=document.getElementById("suNameHi").value.trim(),post=document.getElementById("suPost").value,
+ d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS").value,gp=document.getElementById("suGP").value,mobile=document.getElementById("suMobile").value.replace(/\D/g,""),wa=document.getElementById("suWhatsApp").value.replace(/\D/g,""),
+ email=document.getElementById("suEmail").value.trim(),pw=document.getElementById("suPassword").value,pw2=document.getElementById("suPassword2").value;
+ const p=signupPanchayats.find(x=>x.district===d&&x.panchayat_samiti===ps&&x.gram_panchayat===gp);
+ if(!name||!post||!p||mobile.length!==10||!email||pw.length<6||pw!==pw2){msg.textContent="कृपया सभी required details सही भरें। Password कम से कम 6 characters का होना चाहिए।";return}
+ let photo="";
+ const file=document.getElementById("suPhoto")?.files?.[0];
+ if(file){photo=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.readAsDataURL(file)})}
+ const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{candidate_name:name,candidate_name_hindi:nameHi,election_post:post,mobile,whatsapp:wa,district:d,panchayat_samiti:ps,gram_panchayat:gp,panchayat_id:p.id}}});
+ if(error){msg.textContent=error.message;return}
+ if(data.user) localStorage.setItem("pendingCandidatePhoto:"+data.user.id,photo);
+ if(data.session){
+   if(photo) await sb.from("candidate_profiles").update({photo_url:photo}).eq("user_id",data.user.id);
+   msg.textContent="Account बन गया। Free Access activate हो रहा है…";await load();
+ }else{
+   msg.textContent="Account बन गया। Email verification पूरा करके फिर Login करें। आपका selected Panchayat सुरक्षित है।";
+ }
 }
 async function signIn(){
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
@@ -619,6 +684,8 @@ async function load(){
  if(!c){
    const {data:owned}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).eq("active",true).limit(1).maybeSingle();
    c=owned||null;
+   const {data:profile}=await sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle();
+   if(profile&&!c)c=profile;
  }
  candidate=c?{...c,gram_panchayat:p.gram_panchayat,panchayat_samiti:p.panchayat_samiti,district:p.district,photo_url:"",symbol_url:"",banner_url:""}:{
    id:null,name:"Panchayat Workspace",hindi_name:"पंचायत कार्यक्षेत्र",post:"",active:true,
@@ -636,7 +703,9 @@ async function load(){
    allVoters.push(...(batch||[]));
    if(!batch||batch.length<1000)break;
  }
- voters=allVoters;
+ const freeLimit=Math.max(1,Math.ceil(allVoters.length*0.10));
+ const isLifetime=["lifetime","paid"].includes(String(access.access_level||"").toLowerCase());
+ voters=isLifetime?allVoters:allVoters.slice(0,freeLimit);
  const [{data:cs},{data:ar},{data:ho,error:hoe},{data:vm,error:vme},{data:ss,error:sse}]=await Promise.all([
    sb.from("voter_contact_status").select("*").eq("panchayat_id",access.panchayat_id),
    sb.from("voter_addition_requests").select("*").eq("panchayat_id",access.panchayat_id).order("created_at",{ascending:false}),
@@ -665,6 +734,8 @@ function dashboard(){
  document.querySelector("header").style.display="none";
  const c=candidate;
  const total=voters.length;
+ const totalMaster=allVoters.length;
+ const limited=!["lifetime","paid"].includes(String(currentAccess?.access_level||"").toLowerCase());
  const wards=new Set(voters.map(v=>String(v.ward||"")).filter(Boolean)).size;
  const maleCount=voters.filter(v=>/पुरुष|पुरूष|male|^m$/i.test(v.gender||"")).length;
  const femaleCount=voters.filter(v=>/स्त्री|महिला|female|^f$/i.test(v.gender||"")).length;
@@ -688,6 +759,7 @@ function dashboard(){
     <button class="demoLogout" onclick="logout.click()">Logout</button>
    </div>
   </div>
+  ${limited?`<div class="freeAccessBanner"><b>🟡 Free Access</b><br>${total} / ${totalMaster} voters दिखाई दे रहे हैं (10%).<br>PDF limit: अधिकतम 2 pages.<button class="btn primary full" onclick="showUpgradePrompt()">🔓 Full Access Unlock करें</button></div>`:""}
   <div class="demoMain">
    <div class="demoGrid2">
     <button class="demoFeature" onclick="openWorkspace('info')"><span>🔎</span>मतदाता खोज</button>
@@ -800,6 +872,7 @@ function dashboard(){
  <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
 }
+function showUpgradePrompt(){alert("Full Access के लिए One-Time Payment करें। Payment integration अगला step है।");}
 function showWorkspace(){
  document.getElementById("app")?.classList.add("moduleOpen");
  const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.setProperty("display","none","important");
