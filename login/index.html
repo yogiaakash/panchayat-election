@@ -893,8 +893,32 @@ async function showUpgradePrompt(){
  const {data:pay}=await sb.from("lifetime_payment_records").select("*").eq("user_id",currentUser.id).eq("panchayat_id",currentAccess.panchayat_id).eq("status","paid").limit(1).maybeSingle();
  if(pay){alert("आपके account में Lifetime Full Access पहले से active है।");return}
  const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||4999;
- if(!confirm("🔓 Lifetime Full Access\\n\\nएक बार का भुगतान: ₹"+amount.toLocaleString("en-IN")+"\\n\\nRazorpay Checkout connect होने के बाद payment करके 100% voter data unlock होगा.\\n\\nक्या आप आगे बढ़ना चाहते हैं?"))return;
- alert("Payment database तैयार है। Razorpay merchant credentials जोड़कर secure Checkout connect करना अगला step है.");
+ if(!confirm("🔓 Lifetime Full Access\\n\\nएक बार का भुगतान: ₹"+amount.toLocaleString("en-IN")+"\\n\\nक्या आप payment के लिए आगे बढ़ना चाहते हैं?"))return;
+ try{
+  if(!window.Razorpay){
+   await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://checkout.razorpay.com/v1/checkout.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Razorpay Checkout load नहीं हुआ"));document.head.appendChild(sc)});
+  }
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session)throw new Error("Login session नहीं मिला");
+  const res=await fetch(SUPABASE_URL+"/functions/v1/create-lifetime-payment-order",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify({panchayat_id:currentAccess.panchayat_id})});
+  const order=await res.json();if(!res.ok)throw new Error(order.error||"Payment order नहीं बन सका");
+  const options={
+   key:order.key_id,amount:order.amount,currency:order.currency,name:"Panchayat Digital",description:"Lifetime Full Access",order_id:order.order_id,
+   prefill:{name:candidate?.candidate_name||"",email:currentUser.email||"",contact:candidate?.mobile||""},
+   theme:{color:"#0b6b4f"},
+   handler:async function(resp){
+    try{
+     const {data:{session:sess}}=await sb.auth.getSession();
+     const vr=await fetch(SUPABASE_URL+"/functions/v1/verify-lifetime-payment",{method:"POST",headers:{Authorization:"Bearer "+sess.access_token,"Content-Type":"application/json"},body:JSON.stringify({...resp,panchayat_id:currentAccess.panchayat_id})});
+     const out=await vr.json();if(!vr.ok||!out.success)throw new Error(out.error||"Payment verification failed");
+     alert("🎉 Payment successful! Lifetime Full Access activate हो गया है।");
+     await load();
+    }catch(err){alert("Payment हुआ हो सकता है, लेकिन verification पूरा नहीं हुआ: "+err.message+". कृपया payment ID सुरक्षित रखें और support से संपर्क करें।")}
+   },
+   modal:{ondismiss:function(){}}
+  };
+  const rz=new Razorpay(options);rz.on("payment.failed",function(r){alert("Payment failed: "+(r.error?.description||"कृपया दोबारा प्रयास करें।"))});rz.open();
+ }catch(err){alert(err.message||"Payment शुरू नहीं हो सका।")}
 }
 function showWorkspace(){
  document.getElementById("app")?.classList.add("moduleOpen");
