@@ -333,7 +333,7 @@ function scrollToHome(){document.getElementById("demoHome")?.scrollIntoView({beh
 function openWorkspace(k){showTab(k);document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"})}
 function openVisitWorkspace(){showTab("info");renderOpsReport("visit")}
 function openAdditionWorkspace(){showTab("info");renderOpsReport("supp2")}
-function openAZWorkspace(){showTab("stats");setTimeout(()=>document.querySelector(".aztools")?.scrollIntoView({behavior:"smooth",block:"start"}),100)}
+function openAZWorkspace(){showTab("stats");setTimeout(()=>document.getElementById("azLetters")?.closest(".card")?.scrollIntoView({behavior:"smooth",block:"start"}),100)}
 function focusVisit(){showTab("info");renderOpsReport("visit")}
 function focusAddition(){showTab("info");renderOpsReport("supp2")}
 function renderOpsReport(mode){
