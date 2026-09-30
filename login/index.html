@@ -91,6 +91,7 @@ const DEV_TO_LAT={"क":"k","ख":"kh","ग":"g","घ":"gh","च":"ch","छ":"ch
 function latinize(v){return String(v??"").split("").map(ch=>DEV_TO_LAT[ch]??ch).join("").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function loginView(msg=""){
+ document.querySelector("header").style.display="flex";
  logout.classList.add("hidden");
  app.innerHTML=`<div class="card login"><h2>Candidate Login</h2><p class="muted">अपने अधिकृत Email और Password से लॉगिन करें।</p>
  <label>Email</label><input id="email" type="email" autocomplete="username">
