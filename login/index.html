@@ -420,7 +420,7 @@ function dashboard(){
  </div>
 </section>
   <dialog id="detailDlg"><h3>मतदाता विवरण</h3><div id="detailBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="detailDlg.close()">Close</button></div></dialog>
-  <dialog id="houseDlg" class="houseDlg"><h3>🏠 मकान नंबर बदलें</h3><div id="houseBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="houseDlg.close()">बंद करें</button></div></dialog>
+  <dialog id="houseDlg" class="houseDlg"><h3>🏠 Local House / Family बदलें</h3><div id="houseBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="houseDlg.close()">बंद करें</button></div></dialog>
  </div>
  <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
@@ -673,7 +673,7 @@ function renderRows(){
  const totalEl=document.getElementById("total"),maleEl=document.getElementById("male"),femaleEl=document.getElementById("female"),wardsEl=document.getElementById("wards"),coloniesEl=document.getElementById("colonies"),housesEl=document.getElementById("houses");
  if(totalEl)totalEl.textContent=a.length;if(maleEl)maleEl.textContent=a.filter(isMale).length;if(femaleEl)femaleEl.textContent=a.filter(isFemale).length;if(wardsEl)wardsEl.textContent=new Set(a.map(x=>x.ward)).size;if(coloniesEl)coloniesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony))).size;if(housesEl)housesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony)+"|"+String(effectiveHouse(x)))).size;
  const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages);const chunk=a.slice((page-1)*PER,page*PER);
- result.innerHTML=`<div class="muted" style="margin:0 0 8px 2px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard exactVoterCard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">🏠 ${e(effectiveHouse(v))}</span><span class="pill">आयु ${e(v.age)}</span><span class="pill">${e(v.colony)}</span></div><div class="actions"><button class="btn soft det" data-i="${i}">Details</button><button class="btn soft pdfb" data-i="${i}">📄 PDF Slip</button><button class="btn soft shareb" data-i="${i}">↗ Share</button><button class="btn soft famb" data-i="${i}">🏠 Family</button><button class="btn soft housechg" data-i="${i}">✏ Change House Number</button></div></article>`).join("")||'<div class="empty">कोई मतदाता नहीं मिला</div>'}</div>${a.length?`<div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`:""}`;
+ result.innerHTML=`<div class="muted" style="margin:0 0 8px 2px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard exactVoterCard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">🏠 ${e(effectiveHouse(v))}</span><span class="pill">आयु ${e(v.age)}</span><span class="pill">${e(v.colony)}</span></div><div class="actions"><button class="btn soft det" data-i="${i}">Details</button><button class="btn soft pdfb" data-i="${i}">📄 PDF Slip</button><button class="btn soft shareb" data-i="${i}">↗ Share</button><button class="btn soft famb" data-i="${i}">🏠 Family</button><button class="btn soft housechg" data-i="${i}">✏ House</button></div></article>`).join("")||'<div class="empty">कोई मतदाता नहीं मिला</div>'}</div>${a.length?`<div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`:""}`;
  result.querySelectorAll(".det").forEach(x=>x.onclick=()=>showDetail(chunk[+x.dataset.i]));
  result.querySelectorAll(".pdfb").forEach(x=>x.onclick=()=>voterSlip(JSON.stringify(chunk[+x.dataset.i])));
  result.querySelectorAll(".shareb").forEach(x=>x.onclick=()=>shareInfo(chunk[+x.dataset.i]));
@@ -698,10 +698,9 @@ function houseMembersFor(v,houseNo){
 function openHouseOverride(v){
  const houses=houseCandidatesFor(v),current=String(effectiveHouse(v)||""),original=String(originalHouse(v)||""),houseBody=document.getElementById("houseBody");if(!houseBody)return;
  houseBody.innerHTML=`<div class="notice"><b>${e(v.name)}</b><br>Ward ${e(v.ward)} • ${e(v.colony||"-")}<br><span class="muted">Original House: ${e(original||"-")} • Local House: ${e(current||"-")}</span></div>
- <label>मौजूदा मकान नंबर चुनें</label>
- <select id="houseOverrideSelect" onchange="syncHouseOverrideInput(${Number(v.id)})"><option value="">मौजूदा मकान चुनें</option>${houses.map(h=>`<option value="${e(h)}" ${String(h)===current?"selected":""}>${e(h)}</option>`).join("")}</select><div style="margin-top:8px;text-align:center;font-size:11px;color:#6d7f76">या नया मकान नंबर दर्ज करें</div>
- <input id="houseOverrideInput" type="text" placeholder="जैसे 25-A, 25-B या 100" oninput="previewHouseFamily(${Number(v.id)})" autocomplete="off">
- <div id="houseFamilyPreview" class="houseFamilyPreview"></div>
+ <label>नया Local House चुनें</label>
+ <select id="houseOverrideSelect" onchange="previewHouseFamily(${Number(v.id)})"><option value="">House चुनें</option>${houses.map(h=>`<option value="${e(h)}" ${String(h)===current?"selected":""}>${e(h)}</option>`).join("")}</select>
+  <div id="houseFamilyPreview" class="houseFamilyPreview"></div>
  <div class="grid2" style="margin-top:10px">
   <button class="btn green" onclick="saveHouseOverride(${Number(v.id)})">✓ मकान नंबर Save</button>
   <button class="btn soft" onclick="resetHouseOverride(${Number(v.id)})">↺ Original House Restore</button>
@@ -709,24 +708,15 @@ function openHouseOverride(v){
  <div class="muted" style="margin-top:9px">यह केवल app की local family grouping बदलता है। Official voter list का मकान नंबर नहीं बदलेगा।</div>`;
  houseDlg.showModal();previewHouseFamily(v.id);
 }
-function syncHouseOverrideInput(voterId){
- const sel=document.getElementById("houseOverrideSelect"),inp=document.getElementById("houseOverrideInput");
- if(sel&&inp){inp.value="";previewHouseFamily(voterId)}
-}
-function selectedHouseValue(){
- const inp=document.getElementById("houseOverrideInput"),sel=document.getElementById("houseOverrideSelect");
- const typed=(inp?.value||"").trim();
- return typed || (sel?.value||"").trim();
-}
 function previewHouseFamily(voterId){
  const v=voters.find(x=>String(x.id)===String(voterId)),sel=document.getElementById("houseOverrideSelect"),box=document.getElementById("houseFamilyPreview");if(!v||!sel||!box)return;
- const h=selectedHouseValue();if(!h){box.innerHTML="";return}
+ const h=sel.value;if(!h){box.innerHTML="";return}
  const members=houseMembersFor(v,h);
  box.innerHTML=`<div class="exactCurrent" style="margin-top:10px"><b>House ${e(h)} में अभी ${members.length} अन्य सदस्य</b>${members.length?`<div style="margin-top:7px">${members.map(m=>`<div class="member"><b>${e(m.name)}</b><div class="muted">${e(m.relative_name||"-")} • आयु ${e(m.age||"-")} • ${e(m.epic||"-")}</div></div>`).join("")}</div>`:`<div class="muted" style="margin-top:5px">इस house में अभी कोई अन्य voter नहीं है।</div>`}</div>`;
 }
 async function saveHouseOverride(voterId){
- const v=voters.find(x=>String(x.id)===String(voterId));if(!v)return;
- const local=selectedHouseValue();if(!local){alert("नया मकान नंबर चुनें या दर्ज करें।");return}
+ const v=voters.find(x=>String(x.id)===String(voterId)),sel=document.getElementById("houseOverrideSelect");if(!v||!sel)return;
+ const local=sel.value.trim();if(!local){alert("नया House चुनें।");return}
  const row={user_id:currentUser.id,panchayat_id:currentAccess.panchayat_id,voter_id:v.id,original_house_no:String(v.house_no??""),local_house_no:local,updated_at:new Date().toISOString()};
  const {data,error}=await sb.from("voter_house_overrides").upsert(row,{onConflict:"user_id,panchayat_id,voter_id"}).select().single();
  if(error){alert("House save नहीं हुआ: "+error.message);return}
