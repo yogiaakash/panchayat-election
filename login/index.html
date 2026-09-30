@@ -793,7 +793,7 @@ function dashboard(){
 }
 function showWorkspace(){
  document.getElementById("app")?.classList.add("moduleOpen");
- const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.display="none";
+ const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.setProperty("display","none","important");
  const home=document.getElementById("demoHome");if(home)home.style.display="block";
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="block";
  const tabs=w?.querySelector(".tabs");if(tabs)tabs.style.display="none";
@@ -821,7 +821,7 @@ function scrollToHome(){
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="none";
  const ops=document.getElementById("opsReports");if(ops){ops.classList.add("hidden");ops.innerHTML=""}
  const home=document.getElementById("demoHome");if(home)home.style.display="block";
- const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.display="block";
+ const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.setProperty("display","block","important");
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function openWorkspace(k){
