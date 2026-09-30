@@ -22,7 +22,7 @@ main{max-width:850px}.hero{border-radius:18px}.filters{grid-template-columns:1fr
 :root{--emerald:#087451;--emerald2:#059669;--soft:#f4faf7;--ink:#10261f}
 body{background:linear-gradient(180deg,#eefaf5 0,#f8fbfa 45%,#eef5f2 100%)}
 header{border-radius:0 0 24px 24px;padding:18px 4%;background:linear-gradient(135deg,#046047,#079461)}
-.brand:before{content:"⌂";display:inline-grid;place-items:center;width:40px;height:40px;margin-right:10px;border-radius:12px;background:#16c784;color:white;font-size:25px;vertical-align:middle}
+.brand:before{content:none;display:none}
 main{max-width:980px}.card{border-radius:20px;box-shadow:0 8px 25px #0b5b3d12;border-color:#dcebe5}.hero{padding:18px;background:#fff;color:var(--ink);border:1px solid #dbe9e4}.hero .muted{color:#6b7d76}.hero h2{color:#10261f}.hero img{border-color:#0a8a61}
 .tabs{position:sticky;top:76px;z-index:4;background:#f6fbf9;padding:8px;border-radius:18px;box-shadow:0 5px 18px #124d3912}
 .tabbtn{min-height:58px;font-size:15px}.tabbtn.active{background:linear-gradient(135deg,#087451,#0aa36f);box-shadow:0 6px 16px #08745130}
@@ -38,9 +38,9 @@ main{max-width:980px}.card{border-radius:20px;box-shadow:0 8px 25px #0b5b3d12;bo
 :root{--gold:#d8aa3d;--goldSoft:#fff8e7;--deep:#075b43}
 body{background:#f4f8f5}
 header{background:linear-gradient(135deg,#075b43,#0b8b60);border-bottom:4px solid var(--gold);box-shadow:0 4px 18px #063d2d28}
-.brand{font-size:19px}.brand:before{background:#fff;color:#087451}
+.brand{font-size:19px}
 .hero{border:2px solid #e8d5a3;background:linear-gradient(180deg,#fff,#fffdf8);box-shadow:0 8px 25px #72540c12}
-.hero:after{content:"मतदाता सहायता एवं पंचायत कार्यक्षेत्र";display:block;margin-left:auto;align-self:flex-start;background:var(--goldSoft);color:#77570c;border:1px solid #efd78f;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}
+.hero:after{content:none;display:none}
 .quicknav{grid-template-columns:repeat(3,1fr)}
 .quick{border:1px solid #e4d5ad;background:linear-gradient(180deg,#fff,#fffdf8)}
 .quick .ico{background:#edf9f4;border:1px solid #d4eee3}
@@ -141,7 +141,7 @@ function uniq(k,base=voters){return smart(base.map(x=>x[k]))}
 function options(k,label,base=voters){return `<option value="">${label}</option>`+uniq(k,base).map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}
 function dashboard(){
  const c=candidate;
- app.innerHTML=`<div class="card hero">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><div style="display:none;width:82px;height:82px;border-radius:50%;border:3px solid #fff;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`:`<div style="width:82px;height:82px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`}<div><div class="muted">पंचायत डिजिटल</div><h2 style="margin:3px 0;font-size:25px">${e(c.hindi_name||c.name||"")}</h2><div style="font-size:16px;font-weight:800">${e(c.post||"सरपंच")} पद प्रत्याशी</div><div style="font-size:18px;margin-top:4px"><b>ग्राम पंचायत:</b> ${e(c.gram_panchayat||"")}</div><div class="muted" style="margin-top:3px">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div></div></div>
+ app.innerHTML=`<div class="card hero">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><div style="display:none;width:82px;height:82px;border-radius:50%;border:3px solid #fff;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`:`<div style="width:82px;height:82px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`}<div><h2 style="margin:3px 0;font-size:25px">${e(c.hindi_name||c.name||"")}</h2><div style="font-size:16px;font-weight:800">${c.post?e(c.post)+" पद प्रत्याशी":"अधिकृत पंचायत कार्यक्षेत्र"}</div><div style="font-size:18px;margin-top:4px"><b>ग्राम पंचायत:</b> ${e(c.gram_panchayat||"")}</div><div class="muted" style="margin-top:3px">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div></div></div>
  <div class="fieldtools" id="fieldTools"><div class="fieldcard" id="visitCard"><b>🚶 Visit Tracking</b><span class="muted">संपर्क / मुलाकात / Follow-up</span><div id="contactSummary" style="margin-top:8px;font-weight:900;color:#075b43"></div></div><div class="fieldcard" id="additionCard"><b>➕ New Voter (Supp-2)</b><span class="muted">मतदाता सूची में नाम न मिलने पर सर्वे एंट्री</span><div id="additionSummary" style="margin-top:8px;font-weight:900;color:#77570c"></div></div></div>
  <div id="opsReports" class="card hidden" style="margin:12px 0"></div>
  <div class="quicknav"><button class="quick" onclick="showTab('info')"><span class="ico">🔎</span>मतदाता खोज</button><button class="quick" onclick="showTab('slip')"><span class="ico">📄</span>Ward-wise Voter Slip PDF</button><button class="quick" onclick="focusVisit()"><span class="ico">🚶</span>Visit Tracking</button><button class="quick" onclick="focusAddition()"><span class="ico">➕</span>New Voter (Supp-2) Report</button><button class="quick" onclick="showTab('stats')"><span class="ico">📊</span>Panchayat Statistics</button><button class="quick" onclick="showTab('stats');setTimeout(()=>document.querySelector('.aztools')?.scrollIntoView({behavior:'smooth'}),100)"><span class="ico">🔤</span>A–Z Voter List</button></div>
