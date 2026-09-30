@@ -241,7 +241,7 @@ function dashboard(){
    </div>
   </div>
  </section>
- <div id="workspaceAfterHome">
+ <div id="workspaceAfterHome" style="display:none">
   <div id="opsReports" class="card hidden" style="margin:12px 0"></div>
   <div class="tabs"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
   <section id="tabSlip" class="tabpane">
@@ -329,11 +329,28 @@ function dashboard(){
  <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
 }
-function scrollToHome(){document.getElementById("demoHome")?.scrollIntoView({behavior:"smooth",block:"start"})}
-function openWorkspace(k){showTab(k);document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"})}
-function openVisitWorkspace(){showTab("info");renderOpsReport("visit")}
-function openAdditionWorkspace(){showTab("info");renderOpsReport("supp2")}
-function openAZWorkspace(){showTab("stats");setTimeout(()=>document.getElementById("azLetters")?.closest(".card")?.scrollIntoView({behavior:"smooth",block:"start"}),100)}
+function showWorkspace(){
+ const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="block";
+}
+function scrollToHome(){
+ const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="none";
+ const ops=document.getElementById("opsReports");if(ops){ops.classList.add("hidden");ops.innerHTML=""}
+ document.getElementById("demoHome")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function openWorkspace(k){
+ showWorkspace();showTab(k);
+ document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function openVisitWorkspace(){
+ showWorkspace();showTab("info");renderOpsReport("visit");
+}
+function openAdditionWorkspace(){
+ showWorkspace();showTab("info");renderOpsReport("supp2");
+}
+function openAZWorkspace(){
+ showWorkspace();showTab("stats");
+ setTimeout(()=>document.getElementById("azLetters")?.closest(".card")?.scrollIntoView({behavior:"smooth",block:"start"}),100);
+}
 function focusVisit(){showTab("info");renderOpsReport("visit")}
 function focusAddition(){showTab("info");renderOpsReport("supp2")}
 function renderOpsReport(mode){
