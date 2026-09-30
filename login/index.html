@@ -18,7 +18,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px;bord
 </style>
 <style>
 main{max-width:850px}.hero{border-radius:18px}.filters{grid-template-columns:1fr 1fr 1fr!important}.cards{display:grid;gap:10px}.vcard{padding:13px}.vtop{display:flex;justify-content:space-between;gap:8px}.vname{font-size:18px;font-weight:900}.vid{font:700 11px monospace;background:#eef3f1;padding:5px 7px;border-radius:8px;height:max-content}.vrel{font-size:13px;color:#53625c;margin-top:4px}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.pill{font-size:11px;background:#f2f5f3;border:1px solid #e0e6e3;padding:5px 7px;border-radius:999px}.housepill{background:#fff7e9;color:#795018}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.family{display:none;padding:14px;margin:12px 0}.pager{display:flex;justify-content:center;align-items:center;gap:10px;margin:14px}.pager button{background:#fff;border:1px solid #cad3cf;border-radius:10px;padding:9px;font-weight:800}dialog{width:min(94vw,560px);border:0;border-radius:18px}.drow{display:grid;grid-template-columns:120px 1fr;padding:8px 0;border-bottom:1px solid #eee}.drow span{font-size:11px;color:#6f7b76}@media(min-width:650px){.cards{grid-template-columns:1fr 1fr}}@media(max-width:649px){.filters{grid-template-columns:1fr!important}}
-</style><style>.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.tabbtn{padding:12px 8px;border:1px solid var(--line);background:#fff;border-radius:12px;font-weight:900;color:var(--p2);cursor:pointer}.tabbtn.active{background:var(--p);color:#fff}.tabpane{display:none}.tabpane.active{display:block}.aztable{width:100%;border-collapse:collapse}.aztable th,.aztable td{padding:8px;border-bottom:1px solid var(--line);font-size:13px}.aztools{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:10px 0}@media(max-width:649px){.tabs{grid-template-columns:1fr}.aztools{grid-template-columns:1fr}}</style><style>
+</style><style>.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.tabbtn{padding:12px 8px;border:1px solid var(--line);background:#fff;border-radius:12px;font-weight:900;color:var(--p2);cursor:pointer}.tabbtn.active{background:var(--p);color:#fff}.tabpane{display:none}.tabpane.active{display:block}.aztable{width:100%;border-collapse:collapse}.aztable th,.aztable td{padding:8px;border-bottom:1px solid var(--line);font-size:13px}@media(max-width:649px){.tabs{grid-template-columns:1fr}}</style><style>
 :root{--emerald:#087451;--emerald2:#059669;--soft:#f4faf7;--ink:#10261f}
 body{background:linear-gradient(180deg,#eefaf5 0,#f8fbfa 45%,#eef5f2 100%)}
 header{border-radius:0 0 24px 24px;padding:18px 4%;background:linear-gradient(135deg,#046047,#079461)}
@@ -464,12 +464,6 @@ function cascade(from){
 function clearFilters(){document.getElementById("q").value="";document.getElementById("ward").value="";document.getElementById("colony").innerHTML="<option value=\"\">पहले वार्ड चुनें</option>";document.getElementById("house").innerHTML="<option value=\"\">पहले कॉलोनी चुनें</option>";document.getElementById("colony").disabled=true;document.getElementById("house").disabled=true;document.getElementById("booth").value="";page=1;renderRows();}
 function houseCount(v){return voters.filter(x=>String(x.ward)===String(v.ward)&&String(x.colony)===String(v.colony)&&String(x.house_no)===String(v.house_no)).length}
 function showDetail(v){detailBody.innerHTML=[["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["मकान",v.house_no],["कॉलोनी",v.colony],["वार्ड",v.ward],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]].map(x=>`<div class="drow"><span>${e(x[0])}</span><b>${e(x[1]??"-")}</b></div>`).join("");detailDlg.showModal()}
-async function shareInfo(v){const t=`मतदाता सूचना
-${v.name||""}
-Voter ID: ${v.epic||""}
-Ward: ${v.ward||""}
-House: ${v.house_no||""}
-For voter-list reference only.`;if(navigator.share){try{await navigator.share({title:"Voter Information",text:t});return}catch(x){if(x.name==="AbortError")return}}try{await navigator.clipboard.writeText(t);alert("Voter information copied.")}catch(x){alert(t)}}
 function familyPanel(){
  const b=document.getElementById("familyBox");if(!b)return;
  const w=ward.value,co=colony.value,h=house.value;
