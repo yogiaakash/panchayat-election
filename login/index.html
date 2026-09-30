@@ -509,6 +509,10 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
  #demoHome .demoGp{font-size:12px!important;margin-top:4px!important}
  #demoHome .demoSub{font-size:9px!important;line-height:1.25!important}
 }
+
+/* Keep Home feature grid hidden while any module is open; header remains fixed. */
+.moduleOpen #demoHome .demoMain{display:none!important}
+.moduleOpen #demoHome{height:auto!important;min-height:0!important;overflow:visible!important}
 </style>
 </head>
 <body>
