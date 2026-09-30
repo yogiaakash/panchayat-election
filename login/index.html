@@ -49,6 +49,34 @@ header{background:linear-gradient(135deg,#075b43,#0b8b60);border-bottom:4px soli
 .houseTools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .sectionTitle{display:flex;align-items:center;gap:8px;font-weight:900;color:#075b43;margin-bottom:9px}.sectionTitle span{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#e9f8f1}
 @media(max-width:649px){.quicknav{grid-template-columns:1fr 1fr}.hero:after{display:none}.tabs{display:grid;grid-template-columns:repeat(3,1fr)}.tabbtn{font-size:12px;min-height:52px;padding:8px 5px}.vcard{border-left:4px solid #0b8b60}.fieldtools{grid-template-columns:1fr 1fr}.fieldcard{padding:11px;font-size:12px}.houseTools{grid-template-columns:1fr}}
+</style>
+<style id="exact-demo-home-theme">
+/* Exact uploaded-demo home shell */
+body{background:#dce8e0}
+main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;background:#f3f7f4;box-shadow:0 0 30px #1e4e3219}
+.demoHead{background:linear-gradient(125deg,#064b37,#09966a);color:#fff;padding:18px 16px 22px;border-bottom:4px solid #d5a638}
+.demoHeadRow{display:flex;align-items:center;gap:10px}
+.demoAvatar{width:68px;height:68px;border-radius:16px;background:#e9f7f0;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;border:2px solid #ffffff55}
+.demoAvatar img{width:100%;height:100%;object-fit:cover}
+.demoCandidateName{font-size:22px;font-weight:900;line-height:1.1}
+.demoPost{display:block;font-size:14px;font-weight:800;color:#ffe28a;margin-top:5px}
+.demoGp{display:block;margin-top:4px;font-size:13px;font-weight:800;line-height:1.25}
+.demoSub{display:block;font-size:10px;font-weight:500;line-height:1.35}
+.demoMain{padding:12px}
+.demoGrid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.demoFeature{border:1px solid #e7d9b2;background:#fff;border-radius:15px;padding:14px 7px;font-weight:800;font-size:12px;text-align:center;cursor:pointer;color:#18392d}
+.demoFeature span{display:block;font-size:26px;background:#e9f7f0;border-radius:12px;width:43px;line-height:43px;margin:0 auto 7px}
+.demoInfoCard{background:#fff;border:1px solid #dce9e1;border-radius:17px;padding:14px;margin-top:12px;box-shadow:0 4px 14px #214d3510}
+.demoTitle{font-weight:900;color:#064c39;margin-bottom:11px;font-size:16px}
+.demoGrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.demoStat{border-radius:12px;background:#f5faf7;padding:11px 4px;text-align:center}
+.demoStat b{display:block;color:#087451;font-size:20px}.demoStat small{font-size:10px;color:#667b70}
+.demoNotice{border-radius:12px;padding:10px;background:#f0f8f3;font-size:11px;color:#486658;margin-top:12px}
+.demoLogout{margin-left:auto;border:1px solid #ffffff88;background:#ffffff16;color:#fff;border-radius:9px;padding:7px 10px;font-weight:800;font-size:11px}
+.demoBottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:470px;width:100%;display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid #dce9e1;padding:7px 0 8px;z-index:20}
+.demoBottomNav button{background:none;border:0;color:#657a6e;font-size:10px;padding:4px 1px}.demoBottomNav button b{display:block;font-size:21px;margin-bottom:2px}.demoBottomNav button.active{color:#087451;font-weight:900}
+#workspaceAfterHome{padding:0 12px 12px}.tabs{position:static;margin:12px 0}.fieldtools{display:none!important}.quicknav{display:none!important}
+@media(max-width:649px){main#app{padding-left:0;padding-right:0;margin-top:0}.demoGrid2{grid-template-columns:1fr 1fr}}
 </style></head>
 <body>
 <header><div class="brand">Panchayat Digital</div><button id="logout" class="btn ghost hidden">Logout</button></header>
@@ -140,22 +168,68 @@ function smart(a){return [...new Set(a.filter(x=>x!==null&&x!==undefined&&String
 function uniq(k,base=voters){return smart(base.map(x=>x[k]))}
 function options(k,label,base=voters){return `<option value="">${label}</option>`+uniq(k,base).map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}
 function dashboard(){
+ document.querySelector("header").style.display="none";
  const c=candidate;
- app.innerHTML=`<div class="card hero">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><div style="display:none;width:82px;height:82px;border-radius:50%;border:3px solid #fff;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`:`<div style="width:82px;height:82px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-size:28px;font-weight:900">${e((c.hindi_name||c.name||"P").slice(0,1))}</div>`}<div><h2 style="margin:3px 0;font-size:25px">${e(c.hindi_name||c.name||"")}</h2><div style="font-size:16px;font-weight:800">${c.post?e(c.post)+" पद प्रत्याशी":"अधिकृत पंचायत कार्यक्षेत्र"}</div><div style="font-size:18px;margin-top:4px"><b>ग्राम पंचायत:</b> ${e(c.gram_panchayat||"")}</div><div class="muted" style="margin-top:3px">${e(c.panchayat_samiti||"")} • ${e(c.district||"")}</div></div></div>
- <div class="fieldtools" id="fieldTools"><div class="fieldcard" id="visitCard"><b>🚶 Visit Tracking</b><span class="muted">संपर्क / मुलाकात / Follow-up</span><div id="contactSummary" style="margin-top:8px;font-weight:900;color:#075b43"></div></div><div class="fieldcard" id="additionCard"><b>➕ New Voter (Supp-2)</b><span class="muted">मतदाता सूची में नाम न मिलने पर सर्वे एंट्री</span><div id="additionSummary" style="margin-top:8px;font-weight:900;color:#77570c"></div></div></div>
- <div id="opsReports" class="card hidden" style="margin:12px 0"></div>
- <div class="quicknav"><button class="quick" onclick="showTab('info')"><span class="ico">🔎</span>मतदाता खोज</button><button class="quick" onclick="showTab('slip')"><span class="ico">📄</span>Ward-wise Voter Slip PDF</button><button class="quick" onclick="focusVisit()"><span class="ico">🚶</span>Visit Tracking</button><button class="quick" onclick="focusAddition()"><span class="ico">➕</span>New Voter (Supp-2) Report</button><button class="quick" onclick="showTab('stats')"><span class="ico">📊</span>Panchayat Statistics</button><button class="quick" onclick="showTab('stats');setTimeout(()=>document.querySelector('.aztools')?.scrollIntoView({behavior:'smooth'}),100)"><span class="ico">🔤</span>A–Z Voter List</button></div>
- <div class="tabs"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
- <section id="tabSlip" class="tabpane"><div class="card"><h3>📄 Voter Slip Download</h3><p class="muted">Ward चुनकर 9 slips per A4 page PDF बनाएं।</p><select id="slipWard" onchange="updateSlipCount()">${options("ward","वार्ड चुनें")}</select><div id="slipCount" class="muted" style="margin-top:8px">Ward चुनें</div><div id="pdfProgressBox" class="hidden" style="margin-top:10px"><div style="height:10px;background:#e7eee9;border-radius:999px;overflow:hidden"><div id="pdfProgressBar" style="height:100%;width:0;background:#087451"></div></div><div id="pdfProgressText" class="muted" style="margin-top:5px">0%</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" onclick="downloadWardPdf()">📄 Generate / Download PDF</button><button class="btn ghost" onclick="shareWardPdf()">↗ Share Ward PDF</button></div></div></section>
- <section id="tabInfo" class="tabpane active"><div class="card stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;padding:10px;margin-bottom:12px"><div class="stat"><strong id="total">0</strong><span>Voters</span></div><div class="stat"><strong id="male">0</strong><span>Male</span></div><div class="stat"><strong id="female">0</strong><span>Female</span></div><div class="stat"><strong id="wards">0</strong><span>Wards</span></div><div class="stat"><strong id="colonies">0</strong><span>Colonies</span></div><div class="stat"><strong id="houses">0</strong><span>Houses</span></div></div><div class="card"><div class="sectionTitle"><span>🔍</span>मतदाता खोजें / Search Voter</div><div class="filters"><input id="q" placeholder="नाम / Name / Voter ID / रिश्तेदार"><select id="ward">${options("ward","सभी वार्ड")}</select><select id="colony" disabled><option value="">पहले वार्ड चुनें</option></select><select id="house" disabled><option value="">पहले कॉलोनी चुनें</option></select><select id="booth" style="display:none"><option value="">सभी मतदान केंद्र</option></select><button class="btn ghost" onclick="clearFilters()">Reset Filters</button></div></div><div id="familyBox" class="card family"></div><div id="result" style="margin-top:12px"></div></section>
- <section id="tabStats" class="tabpane">
- <div class="card"><div class="sectionTitle"><span>📊</span>Panchayat Statistics</div><div id="pStats"></div></div>
- <div class="card" style="margin-top:12px"><div class="sectionTitle"><span>🔤</span>A–Z Voter List</div>
- <div class="aztools"><input id="azQ" placeholder="English / Hindi name search" oninput="renderAZ()"><select id="azWard" onchange="renderAZ()"><option value="">पूरी पंचायत — Combined</option>${[...new Set(voters.map(v=>String(v.ward||"")))].filter(Boolean).sort().map(w=>`<option value="${e(w)}">Ward ${e(w)}</option>`).join("")}</select><button class="btn ghost" onclick="printAZ()">🖨 PDF</button><button class="btn ghost" onclick="downloadAZCsv()">⬇ CSV</button></div><div id="azResult"></div></div>
+ const total=voters.length;
+ const wards=new Set(voters.map(v=>String(v.ward||"")).filter(Boolean)).size;
+ const statuses=[...contactMap.values()];
+ const contacted=statuses.filter(x=>x.contact_status==="contacted").length;
+ const visited=statuses.filter(x=>x.contact_status==="met").length;
+ const pending=voters.length-visited-contacted;
+ const additions=additionRows.filter(x=>x.status!=="closed").length;
+ app.innerHTML=`
+ <section id="demoHome">
+  <div class="demoHead">
+   <div class="demoHeadRow">
+    <div class="demoAvatar">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" onerror="this.remove();this.parentNode.textContent='${e((c.hindi_name||c.name||"प").slice(0,1))}'">`:`${e((c.hindi_name||c.name||"प").slice(0,1))}`}</div>
+    <div style="min-width:0;flex:1">
+     <span class="demoCandidateName">${e(c.hindi_name||c.name||"")}</span>
+     <span class="demoPost">${c.post?e(c.post)+" पद प्रत्याशी":"अधिकृत पंचायत कार्यक्षेत्र"}</span>
+     <span class="demoGp">${e(c.gram_panchayat||"")}</span>
+     <span class="demoSub">पंचायत समिति: ${e(c.panchayat_samiti||"")}</span>
+     <span class="demoSub">जिला: ${e(c.district||"")}</span>
+    </div>
+    <button class="demoLogout" onclick="logout.click()">Logout</button>
+   </div>
+  </div>
+  <div class="demoMain">
+   <div class="demoGrid2">
+    <button class="demoFeature" onclick="openWorkspace('info')"><span>🔎</span>मतदाता खोज</button>
+    <button class="demoFeature" onclick="openWorkspace('slip')"><span>📄</span>Ward-wise Voter Slip PDF</button>
+    <button class="demoFeature" onclick="openVisitWorkspace()"><span>🚶</span>Visit Tracking</button>
+    <button class="demoFeature" onclick="openAdditionWorkspace()"><span>🆕</span>New Voter (Supp-2) Report</button>
+    <button class="demoFeature" onclick="openWorkspace('stats')"><span>📊</span>Panchayat Statistics</button>
+    <button class="demoFeature" onclick="openAZWorkspace()"><span>🔤</span>A–Z Voter List</button>
+   </div>
+   <div class="demoInfoCard">
+    <div class="demoTitle">📊 पंचायत की जानकारी</div>
+    <div class="demoGrid3">
+     <div class="demoStat"><b>${total}</b><small>मतदाता</small></div>
+     <div class="demoStat"><b>${wards}</b><small>वार्ड</small></div>
+     <div class="demoStat"><b>${contacted}</b><small>Contacted</small></div>
+     <div class="demoStat"><b>${visited}</b><small>Visited</small></div>
+     <div class="demoStat"><b>${Math.max(0,pending)}</b><small>Pending</small></div>
+     <div class="demoStat"><b>${additions}</b><small>Addition</small></div>
+    </div>
+   </div>
+  </div>
  </section>
- <dialog id="detailDlg"><h3>मतदाता विवरण</h3><div id="detailBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="detailDlg.close()">Close</button></div></dialog>`;
- updateFieldSummary();q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();renderAZ();
+ <div id="workspaceAfterHome">
+  <div id="opsReports" class="card hidden" style="margin:12px 0"></div>
+  <div class="tabs"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
+  <section id="tabSlip" class="tabpane"><div class="card"><h3>📄 Voter Slip Download</h3><p class="muted">Ward चुनकर 9 slips per A4 page PDF बनाएं।</p><select id="slipWard" onchange="updateSlipCount()">${options("ward","वार्ड चुनें")}</select><div id="slipCount" class="muted" style="margin-top:8px">Ward चुनें</div><div id="pdfProgressBox" class="hidden" style="margin-top:10px"><div style="height:10px;background:#e7eee9;border-radius:999px;overflow:hidden"><div id="pdfProgressBar" style="height:100%;width:0;background:#087451"></div></div><div id="pdfProgressText" class="muted" style="margin-top:5px">0%</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" onclick="downloadWardPdf()">📄 Generate / Download PDF</button><button class="btn ghost" onclick="shareWardPdf()">↗ Share Ward PDF</button></div></div></section>
+  <section id="tabInfo" class="tabpane active"><div class="card stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;padding:10px;margin-bottom:12px"><div class="stat"><strong id="total">0</strong><span>Voters</span></div><div class="stat"><strong id="male">0</strong><span>Male</span></div><div class="stat"><strong id="female">0</strong><span>Female</span></div><div class="stat"><strong id="wards">0</strong><span>Wards</span></div><div class="stat"><strong id="colonies">0</strong><span>Colonies</span></div><div class="stat"><strong id="houses">0</strong><span>Houses</span></div></div><div class="card"><div class="sectionTitle"><span>🔍</span>मतदाता खोजें / Search Voter</div><div class="filters"><input id="q" placeholder="नाम / Name / Voter ID / रिश्तेदार"><select id="ward">${options("ward","सभी वार्ड")}</select><select id="colony" disabled><option value="">पहले वार्ड चुनें</option></select><select id="house" disabled><option value="">पहले कॉलोनी चुनें</option></select><select id="booth" style="display:none"><option value="">सभी मतदान केंद्र</option></select><button class="btn ghost" onclick="clearFilters()">Reset Filters</button></div></div><div id="familyBox" class="card family"></div><div id="result" style="margin-top:12px"></div></section>
+  <section id="tabStats" class="tabpane"><div class="card"><div class="sectionTitle"><span>📊</span>Panchayat Statistics</div><div id="pStats"></div></div><div class="card" style="margin-top:12px"><div class="sectionTitle"><span>🔤</span>A–Z Voter List</div><div class="aztools"><input id="azQ" placeholder="English / Hindi name search" oninput="renderAZ()"><select id="azWard" onchange="renderAZ()"><option value="">पूरी पंचायत — Combined</option>${[...new Set(voters.map(v=>String(v.ward||"")))].filter(Boolean).sort().map(w=>`<option value="${e(w)}">Ward ${e(w)}</option>`).join("")}</select><button class="btn ghost" onclick="printAZ()">🖨 PDF</button><button class="btn ghost" onclick="downloadAZCsv()">⬇ CSV</button></div><div id="azResult"></div></div></section>
+  <dialog id="detailDlg"><h3>मतदाता विवरण</h3><div id="detailBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="detailDlg.close()">Close</button></div></dialog>
+ </div>
+ <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
+ q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();renderAZ();updateSlipCount();
 }
+function scrollToHome(){document.getElementById("demoHome")?.scrollIntoView({behavior:"smooth",block:"start"})}
+function openWorkspace(k){showTab(k);document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"})}
+function openVisitWorkspace(){showTab("info");renderOpsReport("visit")}
+function openAdditionWorkspace(){showTab("info");renderOpsReport("supp2")}
+function openAZWorkspace(){showTab("stats");setTimeout(()=>document.querySelector(".aztools")?.scrollIntoView({behavior:"smooth",block:"start"}),100)}
 function focusVisit(){showTab("info");renderOpsReport("visit")}
 function focusAddition(){showTab("info");renderOpsReport("supp2")}
 function renderOpsReport(mode){const box=document.getElementById("opsReports");if(!box)return;box.classList.remove("hidden");const wards=smart(voters.map(v=>v.ward));box.innerHTML=mode==="visit"?`<div class="sectionTitle"><span>🚶</span>Visit Tracking Report</div><div class="filters"><select id="vrWard" onchange="renderVisitRows()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option>${e(w)}</option>`).join("")}</select><select id="vrStatus" onchange="renderVisitRows()"><option value="">सभी Status</option><option value="pending">घर पर भेंट लंबित</option><option value="contacted">दूरभाष / अन्य माध्यम से संपर्क किया</option><option value="met">घर पर संपर्क / भेंट की</option><option value="follow_up">मतदाता नहीं मिला / Follow-up</option></select></div><div id="vrRows"></div>`:`<div class="sectionTitle"><span>➕</span>New Voter (Supp-2) Report</div><div class="filters"><select id="srWard" onchange="renderSupp2Rows()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option>${e(w)}</option>`).join("")}</select><select id="srStatus" onchange="renderSupp2Rows()"><option value="">सभी Status</option><option value="addition_required">नाम जोड़ना आवश्यक</option><option value="physical_follow_up">Physical Follow-up</option><option value="submitted">Submitted</option><option value="verified_added">Verified Added</option><option value="closed">Closed</option></select></div><div id="srRows"></div>`;mode==="visit"?renderVisitRows():renderSupp2Rows();box.scrollIntoView({behavior:"smooth",block:"start"})}
