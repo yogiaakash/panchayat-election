@@ -515,6 +515,7 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 .moduleOpen #demoHome{height:auto!important;min-height:0!important;overflow:visible!important}
 
 .mobileEditBox{margin-top:12px;padding:12px;border:1px solid #dce9e1;border-radius:13px;background:#f8fbf9}.mobileEditBox label{display:block;font-size:11px;font-weight:800;color:#40574c;margin:0 0 5px}.mobileEditBox input{width:100%;box-sizing:border-box;min-height:44px;border:1px solid #cddfd5;border-radius:12px;padding:10px 11px;font-size:14px;background:#fff}
+.familyShareOr{text-align:center;margin:7px 0;font-size:11px;color:#718279}.houseDlg textarea{width:100%;box-sizing:border-box;border:1px solid #cddfd5;border-radius:12px;padding:10px;font:inherit;background:#fff}.houseDlg select,.houseDlg input{width:100%;box-sizing:border-box;min-height:44px}
 </style>
 </head>
 <body>
@@ -791,7 +792,7 @@ function dashboard(){
  </div>
 </section>
   <dialog id="detailDlg"><h3>मतदाता विवरण</h3><div id="detailBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="detailDlg.close()">Close</button></div></dialog>
-  <dialog id="houseDlg" class="houseDlg"><h3>🏠 मकान नंबर बदलें</h3><div id="houseBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="houseDlg.close()">बंद करें</button></div></dialog>
+  <dialog id="houseDlg" class="houseDlg"><h3>🏠 मकान नंबर बदलें</h3><div id="houseBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="houseDlg.close()">बंद करें</button></div></dialog><dialog id="familyShareDlg" class="houseDlg"><h3>📲 Family Voter Slip Share</h3><div id="familyShareBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="familyShareDlg.close()">बंद करें</button></div></dialog>
  </div>
  <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
@@ -1218,7 +1219,38 @@ async function shareWardPdf(){
 }
 function fam(){const w=ward.value,co=colony.value,h=house.value;return w&&co&&h?voters.filter(v=>String(v.ward)===String(w)&&String(v.colony)===String(co)&&String(effectiveHouse(v))===String(h)):[]}
 async function printHouse(){const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}
-async function shareHouse(){const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);await sharePdfFile(file,"House Voter Information Slips","मतदाता सूची संदर्भ हेतु मकान की मतदाता सूचना पर्चियां")}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}
-sb.auth.onAuthStateChange(()=>{});
+async function shareHouse(){
+ const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}
+ openFamilySharePopup(a);
+}
+function openFamilySharePopup(a){
+ const saved=a.map(v=>({v,m:voterMobileMap.get(String(v.id))?.mobile_number||""}));
+ const opts=saved.map((x,i)=>"<option value=\""+i+"\">"+e(x.v.name)+(x.m?" • 📱 "+e(x.m):" • मोबाइल दर्ज नहीं")+"</option>").join("");
+ const def=saved.find(x=>x.m)?.m||"";
+ familyShareBody.innerHTML="<div class=\"muted\">इस मकान के किसी भी परिवार सदस्य को voter slips भेजें।</div><label>परिवार सदस्य</label><select id=\"familyShareMember\" onchange=\"pickFamilyShareMember()\"><option value=\"-1\">मोबाइल नंबर चुनें</option>"+opts+"</select><div class=\"familyShareOr\">या</div><label>मोबाइल नंबर</label><input id=\"familySharePhone\" type=\"tel\" inputmode=\"numeric\" maxlength=\"10\" placeholder=\"10 अंकों का मोबाइल नंबर\" value=\""+e(def)+"\"><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"pickDeviceContact()\">👤 फोन Contacts से चुनें</button><label>WhatsApp Message</label><textarea id=\"familyShareMessage\" rows=\"3\">नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।</textarea><button class=\"btn green full\" style=\"margin-top:10px\" onclick=\"sendFamilyVoterSlips()\">📲 WhatsApp पर भेजें</button><div class=\"muted\" style=\"margin-top:8px\">Saved voter mobile होने पर नंबर अपने-आप भर जाएगा।</div>";
+ familyShareDlg.showModal();
+}
+function pickFamilyShareMember(){
+ const i=Number(document.getElementById("familyShareMember")?.value||-1), a=fam(), v=a[i], inp=document.getElementById("familySharePhone");
+ if(i>=0&&v&&inp){const m=voterMobileMap.get(String(v.id))?.mobile_number||"";if(m)inp.value=m;}
+}
+async function pickDeviceContact(){
+ if(!navigator.contacts?.select){alert("इस browser में Contacts Picker उपलब्ध नहीं है। Saved voter mobile या नंबर manually डालें।");return}
+ try{const contacts=await navigator.contacts.select(["tel","name"],{multiple:false});const tel=contacts?.[0]?.tel?.[0]?.replace(/\D/g,"").slice(-10);if(tel)document.getElementById("familySharePhone").value=tel;else alert("इस contact में mobile number नहीं मिला।")}catch(x){if(x.name!=="AbortError")alert("Contacts access उपलब्ध नहीं है।")}
+}
+async function sendFamilyVoterSlips(){
+ const a=fam();if(!a.length)return;
+ let phone=(document.getElementById("familySharePhone")?.value||"").replace(/\D/g,"");
+ if(phone.length!==10){alert("कृपया 10 अंकों का mobile number दर्ज करें।");return}
+ const msg=document.getElementById("familyShareMessage")?.value?.trim()||"नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।";
+ try{
+  const file=await makePdfFile(a,"House_"+house.value+"_Voter_Slips.pdf");
+  const text=msg+"\n\nमकान नंबर: "+house.value+"\nपंचायत: "+(candidate.gram_panchayat||"");
+  const waUrl="https://wa.me/91"+phone+"?text="+encodeURIComponent(text);
+  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title:"Family Voter Slips",text,files:[file]});familyShareDlg.close();return}catch(x){if(x.name==="AbortError")return}}
+  const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();window.open(waUrl,"_blank");familyShareDlg.close();
+  alert("WhatsApp message खुल गया है और PDF download हो गई है। यदि PDF auto-attach न हो, तो WhatsApp chat में PDF attach करें।");
+ }catch(x){alert("Family voter slip तैयार नहीं हो सकी: "+x.message)}
+}sb.auth.onAuthStateChange(()=>{});
 load();
 </script></body></html>
