@@ -77,6 +77,20 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 .demoBottomNav button{background:none;border:0;color:#657a6e;font-size:10px;padding:4px 1px}.demoBottomNav button b{display:block;font-size:21px;margin-bottom:2px}.demoBottomNav button.active{color:#087451;font-weight:900}
 #workspaceAfterHome{padding:0 12px 12px}.tabs{position:static;margin:12px 0}.fieldtools{display:none!important}.quicknav{display:none!important}
 @media(max-width:649px){main#app{padding-left:0;padding-right:0;margin-top:0}.demoGrid2{grid-template-columns:1fr 1fr}}
+.exactSearchCard{background:#fff;border:1px solid #dce9e1;border-radius:17px;padding:14px;margin-bottom:12px;box-shadow:0 4px 14px #214d3510}
+.exactSearchTitle{font-weight:900;color:#064c39;margin-bottom:11px;font-size:16px}
+.exactSearchGrid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.exactHint{padding:6px 0 8px;color:#667b70;font-size:11px}
+.exactSearchCard label{display:block;font-size:12px;font-weight:800;margin:10px 0 5px}
+.exactSearchCard input,.exactSearchCard select,.exactSearchCard textarea{width:100%;border:1px solid #d5e3db;background:#fff;border-radius:10px;padding:11px;font:inherit;font-size:13px;color:#18392d}
+.exactSearchCard .full{width:100%}
+.exactVoterCard{border-left:4px solid #087451!important}
+.exactVoterCard .vname{font-size:17px}
+.exactVoterCard .actions{grid-template-columns:1fr 1fr}
+.exactFamilyStatus{background:#fffdf5;border:1px solid #e9d7a5}
+.exactCurrent{padding:10px;background:#fff6df;border-radius:11px;font-size:12px;line-height:1.6}
+.exactFamilyBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+@media(max-width:649px){.exactSearchGrid2{grid-template-columns:1fr 1fr}.exactFamilyBtns{grid-template-columns:1fr 1fr}}
 </style></head>
 <body>
 <header><div class="brand">Panchayat Digital</div><button id="logout" class="btn ghost hidden">Logout</button></header>
@@ -219,7 +233,24 @@ function dashboard(){
   <div id="opsReports" class="card hidden" style="margin:12px 0"></div>
   <div class="tabs"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
   <section id="tabSlip" class="tabpane"><div class="card"><h3>📄 Voter Slip Download</h3><p class="muted">Ward चुनकर 9 slips per A4 page PDF बनाएं।</p><select id="slipWard" onchange="updateSlipCount()">${options("ward","वार्ड चुनें")}</select><div id="slipCount" class="muted" style="margin-top:8px">Ward चुनें</div><div id="pdfProgressBox" class="hidden" style="margin-top:10px"><div style="height:10px;background:#e7eee9;border-radius:999px;overflow:hidden"><div id="pdfProgressBar" style="height:100%;width:0;background:#087451"></div></div><div id="pdfProgressText" class="muted" style="margin-top:5px">0%</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" onclick="downloadWardPdf()">📄 Generate / Download PDF</button><button class="btn ghost" onclick="shareWardPdf()">↗ Share Ward PDF</button></div></div></section>
-  <section id="tabInfo" class="tabpane active"><div class="card stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;padding:10px;margin-bottom:12px"><div class="stat"><strong id="total">0</strong><span>Voters</span></div><div class="stat"><strong id="male">0</strong><span>Male</span></div><div class="stat"><strong id="female">0</strong><span>Female</span></div><div class="stat"><strong id="wards">0</strong><span>Wards</span></div><div class="stat"><strong id="colonies">0</strong><span>Colonies</span></div><div class="stat"><strong id="houses">0</strong><span>Houses</span></div></div><div class="card"><div class="sectionTitle"><span>🔍</span>मतदाता खोजें / Search Voter</div><div class="filters"><input id="q" placeholder="नाम / Name / Voter ID / रिश्तेदार"><select id="ward">${options("ward","सभी वार्ड")}</select><select id="colony" disabled><option value="">पहले वार्ड चुनें</option></select><select id="house" disabled><option value="">पहले कॉलोनी चुनें</option></select><select id="booth" style="display:none"><option value="">सभी मतदान केंद्र</option></select><button class="btn ghost" onclick="clearFilters()">Reset Filters</button></div></div><div id="familyBox" class="card family"></div><div id="result" style="margin-top:12px"></div></section>
+  <section id="tabInfo" class="tabpane active">
+   <div class="exactSearchCard">
+    <div class="exactSearchTitle">🔎 मतदाता खोजें</div>
+    <label>मतदाता खोजें — हिंदी / English</label>
+    <input id="q" placeholder="राम / Ram / Voter ID / रिश्तेदार">
+    <div class="exactHint">हिंदी या English spelling दोनों से खोजें</div>
+    <div class="exactSearchGrid2">
+     <div><label>Ward</label><select id="ward">${options("ward","सभी वार्ड")}</select></div>
+     <div><label>Colony</label><select id="colony" disabled><option value="">सभी कॉलोनी</option></select></div>
+    </div>
+    <label>मकान नंबर</label>
+    <select id="house" disabled><option value="">सभी मकान</option></select>
+    <select id="booth" style="display:none"><option value="">सभी मतदान केंद्र</option></select>
+    <button class="btn soft full" style="margin-top:8px" onclick="clearFilters()">Reset Filters</button>
+   </div>
+   <div id="familyBox" class="hidden"></div>
+   <div id="result"></div>
+  </section>
   <section id="tabStats" class="tabpane"><div class="card"><div class="sectionTitle"><span>📊</span>Panchayat Statistics</div><div id="pStats"></div></div><div class="card" style="margin-top:12px"><div class="sectionTitle"><span>🔤</span>A–Z Voter List</div><div class="aztools"><input id="azQ" placeholder="English / Hindi name search" oninput="renderAZ()"><select id="azWard" onchange="renderAZ()"><option value="">पूरी पंचायत — Combined</option>${[...new Set(voters.map(v=>String(v.ward||"")))].filter(Boolean).sort().map(w=>`<option value="${e(w)}">Ward ${e(w)}</option>`).join("")}</select><button class="btn ghost" onclick="printAZ()">🖨 PDF</button><button class="btn ghost" onclick="downloadAZCsv()">⬇ CSV</button></div><div id="azResult"></div></div></section>
   <dialog id="detailDlg"><h3>मतदाता विवरण</h3><div id="detailBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="detailDlg.close()">Close</button></div></dialog>
  </div>
@@ -272,19 +303,18 @@ Ward: ${v.ward||""}
 House: ${v.house_no||""}
 For voter-list reference only.`;if(navigator.share){try{await navigator.share({title:"Voter Information",text:t});return}catch(x){if(x.name==="AbortError")return}}try{await navigator.clipboard.writeText(t);alert("Voter information copied.")}catch(x){alert(t)}}
 function familyPanel(){
- const b=familyBox,w=ward.value,co=colony.value,h=house.value;
+ const b=document.getElementById("familyBox");if(!b)return;
+ const w=ward.value,co=colony.value,h=house.value;
  const a=(w&&co&&h)?voters.filter(v=>String(v.ward)===String(w)&&String(v.colony)===String(co)&&String(v.house_no)===String(h)):[];
- if(!a.length){b.style.display="none";return}
- b.style.display="block";
- const statuses=a.map(v=>contactMap.get(String(v.id))?.contact_status||"pending");
- const label={pending:"घर पर भेंट लंबित",contacted:"दूरभाष / अन्य माध्यम से संपर्क किया",met:"घर पर संपर्क / भेंट की",follow_up:"मतदाता नहीं मिला / Follow-up"};
- const adds=additionRows.filter(x=>String(x.ward)===String(w)&&String(x.colony)===String(co)&&String(x.house_no)===String(h)&&x.status!=="closed");
- b.innerHTML=`<div class="sectionTitle"><span>🏠</span>House / Family Details</div>
- <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><b>मकान ${e(h)} — ${a.length} मतदाता</b><div class="muted">${e(co)} • Ward ${e(w)}</div></div><div class="pill housepill">Supp-2: ${adds.length}</div></div>
- <div style="margin-top:10px">${a.map(v=>{const st=contactMap.get(String(v.id))?.contact_status||"pending";return `<div style="padding:9px 0;border-top:1px solid #eee"><b>${e(v.name)}</b> · ${e(v.epic)}<br><small>${e(v.relative_name)} • Age ${e(v.age)} • ${e(v.gender)}</small><div class="muted" style="margin-top:3px">Status: ${e(label[st]||st)}</div></div>`}).join("")}</div>
- <div class="fieldcard" style="margin-top:10px"><b>Family-wise Status Update</b><div class="muted">इस मकान के सभी मतदाताओं पर एक साथ neutral contact/visit status लगाएँ।</div><div class="contactBtns"><button class="btn ghost" onclick="setFamilyStatus('contacted')">☎ संपर्क किया</button><button class="btn ghost" onclick="setFamilyStatus('met')">🏠 घर पर भेंट की</button><button class="btn ghost" onclick="setFamilyStatus('follow_up')">↻ मतदाता नहीं मिला</button><button class="btn ghost" onclick="setFamilyStatus('pending')">○ भेंट लंबित</button></div></div>
- <div class="houseTools"><button class="btn primary" onclick="openAdditionForm()">➕ New Voter (Supp-2)</button><button class="btn ghost" onclick="showHouseAdditions()">📋 Supp-2 Follow-up</button><button class="btn ghost" onclick="printHouse()">📄 Family Voter Slips</button><button class="btn ghost" onclick="shareHouse()">↗ Share Family Slips</button></div>`;
+ b.classList.toggle("hidden",!a.length);if(!a.length){b.innerHTML="";return}
+ const labels={pending:"घर पर भेंट लंबित",contacted:"दूरभाष / अन्य माध्यम से संपर्क किया",met:"घर पर संपर्क / भेंट की",follow_up:"मतदाता नहीं मिला / Follow-up"};
+ const rows=a.map(v=>({v,st:contactMap.get(String(v.id))}));
+ const existing=rows.find(x=>x.st&&x.st.contact_status!=="pending")?.st||rows.find(x=>x.st)?.st||null;
+ const current=existing?labels[existing.contact_status]||existing.contact_status:"कोई status नहीं";
+ const currentDate=existing?.last_contact_at?new Date(existing.last_contact_at).toLocaleDateString("en-IN"):"अभी तक update नहीं";
+ b.innerHTML=`<div class="exactSearchCard"><div class="exactSearchTitle">🏠 House ${e(h)} — Family Details</div><div>${a.map(v=>`<div class="member"><div class="row"><b>${e(v.name)}</b><span class="id">${e(v.epic)}</span></div><div class="muted">संबंधी: ${e(v.relative_name)} • आयु: ${e(v.age)} • Ward ${e(v.ward)}</div></div>`).join("")}</div><div class="exactFamilyBtns"><button class="btn soft" onclick="printHouse()">📄 Generate Family Voter Slips</button><button class="btn gold" onclick="shareHouse()">↗ Share Family Voter Slips</button></div></div><div class="exactSearchCard exactFamilyStatus"><div class="exactSearchTitle">📋 Family-wise Status Update</div><div class="exactCurrent"><b>Current Status:</b> ${e(current)}<br><span class="muted">${e(currentDate)}</span></div><label>Family Status</label><select id="exactFamilyStatus"><option value="">Status चुनें</option><option value="contacted">दूरभाष / अन्य माध्यम से संपर्क किया</option><option value="met">घर पर संपर्क / भेंट की</option><option value="pending">घर पर भेंट लंबित</option><option value="follow_up">मतदाता नहीं मिला</option></select><button class="btn green full" style="margin-top:10px" onclick="saveExactFamilyStatus()">✓ Family Status Save करें</button></div><div class="exactSearchCard"><div class="exactSearchTitle">➕ परिवार के अन्य विकल्प</div><button class="btn green full" onclick="openAdditionForm()">🆕 New Voter (Supp-2) Report देखें</button></div>`;
 }
+async function saveExactFamilyStatus(){const s=document.getElementById("exactFamilyStatus")?.value;if(!s){alert("Status चुनें।");return}await setFamilyStatus(s)}
 async function setFamilyStatus(status){
  const a=fam();if(!a.length)return;
  const now=new Date().toISOString();
@@ -296,11 +326,22 @@ async function setFamilyStatus(status){
 }
 function renderRows(){
  const a=filtered(),isMale=x=>/पुरुष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
- total.textContent=a.length;male.textContent=a.filter(isMale).length;female.textContent=a.filter(isFemale).length;wards.textContent=new Set(a.map(x=>x.ward)).size;colonies.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony))).size;houses.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony)+"|"+String(x.house_no))).size;
+ const totalEl=document.getElementById("total"),maleEl=document.getElementById("male"),femaleEl=document.getElementById("female"),wardsEl=document.getElementById("wards"),coloniesEl=document.getElementById("colonies"),housesEl=document.getElementById("houses");
+ if(totalEl)totalEl.textContent=a.length;if(maleEl)maleEl.textContent=a.filter(isMale).length;if(femaleEl)femaleEl.textContent=a.filter(isFemale).length;if(wardsEl)wardsEl.textContent=new Set(a.map(x=>x.ward)).size;if(coloniesEl)coloniesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony))).size;if(housesEl)housesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony)+"|"+String(x.house_no))).size;
  const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages);const chunk=a.slice((page-1)*PER,page*PER);
- result.innerHTML=`<div class="muted" style="margin-bottom:8px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">${e(v.colony)}</span><span class="pill housepill">🏠 ${e(v.house_no)} · ${houseCount(v)} voters</span><span class="pill">Age ${e(v.age)}</span><span class="pill">${e(v.gender)}</span></div><div class="contactBtns"><button class="btn ghost cs" data-i="${i}" data-s="contacted">✓ संपर्क हुआ</button><button class="btn ghost cs" data-i="${i}" data-s="met">🤝 मुलाकात</button><button class="btn ghost cs" data-i="${i}" data-s="follow_up">↻ Follow-up</button><button class="btn ghost cs" data-i="${i}" data-s="pending">○ बाकी</button></div><div class="actions"><button class="btn ghost det" data-i="${i}">Details</button><button class="btn ghost pdfb" data-i="${i}">📄 PDF</button><button class="btn ghost shareb" data-i="${i}">↗ Share</button></div></article>`).join("")}</div><div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`;
- result.querySelectorAll(".cs").forEach(x=>{const v=chunk[+x.dataset.i],st=contactMap.get(String(v.id))?.contact_status||"pending";if(st===x.dataset.s)x.classList.add("active");x.onclick=()=>setContactStatus(v,x.dataset.s)});result.querySelectorAll(".det").forEach(x=>x.onclick=()=>showDetail(chunk[+x.dataset.i]));result.querySelectorAll(".pdfb").forEach(x=>x.onclick=()=>voterSlip(JSON.stringify(chunk[+x.dataset.i])));result.querySelectorAll(".shareb").forEach(x=>x.onclick=()=>shareInfo(chunk[+x.dataset.i]));
- pPrev.onclick=()=>{if(page>1){page--;renderRows()}};pNext.onclick=()=>{if(page<pages){page++;renderRows()}};familyPanel();
+ result.innerHTML=`<div class="muted" style="margin:0 0 8px 2px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard exactVoterCard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">🏠 ${e(v.house_no)}</span><span class="pill">आयु ${e(v.age)}</span><span class="pill">${e(v.colony)}</span></div><div class="actions"><button class="btn soft det" data-i="${i}">Details</button><button class="btn soft pdfb" data-i="${i}">📄 PDF Slip</button><button class="btn soft shareb" data-i="${i}">↗ Share</button><button class="btn soft famb" data-i="${i}">🏠 Family</button></div></article>`).join("")||'<div class="empty">कोई मतदाता नहीं मिला</div>'}</div>${a.length?`<div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`:""}`;
+ result.querySelectorAll(".det").forEach(x=>x.onclick=()=>showDetail(chunk[+x.dataset.i]));
+ result.querySelectorAll(".pdfb").forEach(x=>x.onclick=()=>voterSlip(JSON.stringify(chunk[+x.dataset.i])));
+ result.querySelectorAll(".shareb").forEach(x=>x.onclick=()=>shareInfo(chunk[+x.dataset.i]));
+ result.querySelectorAll(".famb").forEach(x=>x.onclick=()=>openFamilyFromVoter(chunk[+x.dataset.i]));
+ const pp=document.getElementById("pPrev"),pn=document.getElementById("pNext");if(pp)pp.onclick=()=>{if(page>1){page--;renderRows()}};if(pn)pn.onclick=()=>{if(page<pages){page++;renderRows()}};
+ familyPanel();
+}
+function openFamilyFromVoter(v){
+ ward.value=String(v.ward??"");cascade("ward");
+ colony.value=String(v.colony??"");cascade("colony");
+ house.value=String(v.house_no??"");page=1;renderRows();
+ setTimeout(()=>document.getElementById("familyBox")?.scrollIntoView({behavior:"smooth",block:"start"}),80);
 }
 function updateFieldSummary(){const vals=[...contactMap.values()];const done=vals.filter(x=>x.contact_status==="contacted"||x.contact_status==="met").length,follow=vals.filter(x=>x.contact_status==="follow_up").length;const c=document.getElementById("contactSummary"),a=document.getElementById("additionSummary");if(c)c.textContent="Contacted/Met: "+done+" • Follow-up: "+follow;if(a)a.textContent="Supp-2 / Physical Follow-up: "+additionRows.filter(x=>x.status==="addition_required"||x.status==="physical_follow_up").length;}
 async function setContactStatus(v,status){if(!currentUser||!currentAccess)return;const row={user_id:currentUser.id,panchayat_id:currentAccess.panchayat_id,voter_id:v.id,contact_status:status,last_contact_at:status==="pending"?null:new Date().toISOString(),updated_at:new Date().toISOString()};const {data,error}=await sb.from("voter_contact_status").upsert(row,{onConflict:"user_id,voter_id"}).select().single();if(error){alert(error.message);return}contactMap.set(String(v.id),data);updateFieldSummary();renderRows();}
