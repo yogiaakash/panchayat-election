@@ -524,6 +524,7 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 <header><div class="brand">Panchayat Digital</div><button id="logout" class="btn ghost hidden">Logout</button></header>
 <main id="app"></main>
 <script>
+window.PANCHAYAT_FULL_ACCESS_PRICE=4999;
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
@@ -888,7 +889,13 @@ function dashboard(){
  <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
 }
-function showUpgradePrompt(){alert("Full Access के लिए One-Time Payment करें। Payment integration अगला step है।");}
+async function showUpgradePrompt(){
+ const {data:pay}=await sb.from("lifetime_payment_records").select("*").eq("user_id",currentUser.id).eq("panchayat_id",currentAccess.panchayat_id).eq("status","paid").limit(1).maybeSingle();
+ if(pay){alert("आपके account में Lifetime Full Access पहले से active है।");return}
+ const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||4999;
+ if(!confirm("🔓 Lifetime Full Access\\n\\nएक बार का भुगतान: ₹"+amount.toLocaleString("en-IN")+"\\n\\nRazorpay Checkout connect होने के बाद payment करके 100% voter data unlock होगा.\\n\\nक्या आप आगे बढ़ना चाहते हैं?"))return;
+ alert("Payment database तैयार है। Razorpay merchant credentials जोड़कर secure Checkout connect करना अगला step है.");
+}
 function showWorkspace(){
  document.getElementById("app")?.classList.add("moduleOpen");
  const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.setProperty("display","none","important");
@@ -1284,6 +1291,12 @@ async function makeWardGridPdf(list,filename,onProgress){
 }
 async function sharePdfFile(file,title,text){if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title,text,files:[file]});return}catch(x){if(x.name==="AbortError")return}}const u=URL.createObjectURL(file),a=document.createElement("a");a.href=u;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);alert("PDF तैयार है। WhatsApp में attachment के रूप में share करें।")}
 async function shareInfo(v){try{const file=await makePdfFile([v],`Voter_Slip_${v.epic||v.serial_no}.pdf`);await sharePdfFile(file,"Voter Information Slip","मतदाता सूची संदर्भ हेतु सूचना पर्ची")}catch(x){alert("PDF share तैयार नहीं हो सका: "+x.message)}}
+function pdfAccessList(list){
+ const isLifetime=["lifetime","paid"].includes(String(currentAccess?.access_level||"").toLowerCase());
+ if(isLifetime)return list;
+ if(list.length>18){alert("🟡 Free Access में PDF अधिकतम 2 pages है।\\nकेवल पहले 18 voter slips (2 pages) डाउनलोड किए जाएंगे। Full PDF के लिए Lifetime Full Access unlock करें.");return list.slice(0,18)}
+ return list;
+}
 function setPdfProgress(done,total){const box=document.getElementById("pdfProgressBox"),bar=document.getElementById("pdfProgressBar"),txt=document.getElementById("pdfProgressText");if(!box||!bar||!txt)return;box.classList.remove("hidden");const pct=total?Math.round(done*100/total):0;bar.style.width=pct+"%";txt.textContent=`PDF तैयार हो रहा है: ${done}/${total} voters • ${pct}%`}
 function resetPdfProgress(){const box=document.getElementById("pdfProgressBox");if(box)setTimeout(()=>box.classList.add("hidden"),1800)}
 function selectedWardVoters(){
@@ -1292,7 +1305,7 @@ function selectedWardVoters(){
  return voters.filter(v=>String(v.ward)===String(w)).sort((a,b)=>(Number(a.serial_no)||0)-(Number(b.serial_no)||0));
 }
 async function downloadWardPdf(){
- const a=selectedWardVoters(); if(!a.length)return;
+ let a=selectedWardVoters(); if(!a.length)return; a=pdfAccessList(a);
  try{
   const w=document.getElementById("slipWard")?.value||document.getElementById("ward")?.value||"";
   setPdfProgress(0,a.length);const file=await makeWardGridPdf(a,`Ward_${w}_Voter_Slips.pdf`,setPdfProgress);
@@ -1310,9 +1323,9 @@ async function shareWardPdf(){
  }catch(x){alert("Ward PDF share तैयार नहीं हो सका: "+x.message)}
 }
 function fam(){const w=ward.value,co=colony.value,h=house.value;return w&&co&&h?voters.filter(v=>String(v.ward)===String(w)&&String(v.colony)===String(co)&&String(effectiveHouse(v))===String(h)):[]}
-async function printHouse(){const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}
+async function printHouse(){let a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}a=pdfAccessList(a);try{const file=await makePdfFile(a,`House_${house.value}_Voter_Slips.pdf`);const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}catch(x){alert("House PDF तैयार नहीं हो सका: "+x.message)}}
 async function shareHouse(){
- const a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}
+ let a=fam();if(!a.length){alert("पहले Ward, Colony और House चुनें।");return}a=pdfAccessList(a);
  openFamilySharePopup(a);
 }
 async function saveFamilyShareMessage(){
