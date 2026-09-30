@@ -195,6 +195,32 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 /* Statistics */
 
 #tabStats #pStats .statsList{display:grid;gap:8px;margin-top:12px}
+#tabStats #statDetail .detailedStatsList{display:grid;gap:8px;margin-top:12px}
+#tabStats #statDetail .statLine{
+ display:grid;
+ grid-template-columns:minmax(52px,auto) 14px minmax(0,1fr);
+ align-items:center;
+ gap:5px;
+ text-align:left;
+ padding:11px 12px;
+ border:1px solid #e2ece6;
+ border-radius:13px;
+ background:#f8fbf9;
+}
+#tabStats #statDetail .statLine b,
+#tabStats #statDetail .statLine span,
+#tabStats #statDetail .statLine strong{
+ font-size:16px;
+ line-height:1.25;
+ font-weight:850;
+}
+#tabStats #statDetail .statLine b{color:#087451}
+#tabStats #statDetail .statLine span{color:#8a9a91;text-align:center}
+#tabStats #statDetail .statLine strong{color:#253d33}
+#tabStats #statDetail .statSelection{margin-top:10px;padding:10px 12px;font-size:12px}
+#tabStats #statDetail .statSelection b{font-size:13px;color:#173b2f}
+#tabStats #statDetail .statSelection span{color:#64786d}
+
 #tabStats #pStats .statLine{
  display:grid;
  grid-template-columns:minmax(52px,auto) 14px minmax(0,1fr);
@@ -765,7 +791,22 @@ function syncStatFiltersExact(){
  const w=document.getElementById("statWard")?.value||"",sel=document.getElementById("statColony");if(!sel)return;const old=sel.value;const cs=smart(voters.filter(v=>!w||String(v.ward)===w).map(v=>v.colony));sel.innerHTML=`<option value="">सभी कॉलोनी</option>${cs.map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}`;if(cs.map(String).includes(old))sel.value=old;renderDetailedStats();
 }
 function renderDetailedStats(){
- const box=document.getElementById("statDetail");if(!box)return;const w=document.getElementById("statWard")?.value||"",co=document.getElementById("statColony")?.value||"";const a=voters.filter(v=>(!w||String(v.ward)===w)&&(!co||String(v.colony)===co));const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");const ages=a.map(x=>Number(x.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((x,y)=>x+y,0)/ages.length).toFixed(1):"-";const hs=new Set(a.map(v=>String(v.ward)+"|"+String(v.colony)+"|"+String(v.house_no))).size,cs=new Set(a.map(v=>String(v.colony))).size;box.innerHTML=`<div class="grid3"><div class="stat"><b>${a.length}</b><small>Voters</small></div><div class="stat"><b>${a.filter(isMale).length}</b><small>Male</small></div><div class="stat"><b>${a.filter(isFemale).length}</b><small>Female</small></div><div class="stat"><b>${hs}</b><small>Houses</small></div><div class="stat"><b>${cs}</b><small>Colonies</small></div><div class="stat"><b>${avg}</b><small>Avg Age</small></div></div>${co?`<div class="notice" style="margin-top:9px"><b>${e(co)}</b>${w?` • Ward ${e(w)}`:""}</div>`:w?`<div class="notice" style="margin-top:9px"><b>Ward ${e(w)}</b></div>`:""}`;
+ const box=document.getElementById("statDetail");if(!box)return;
+ const w=document.getElementById("statWard")?.value||"",co=document.getElementById("statColony")?.value||"";
+ const a=voters.filter(v=>(!w||String(v.ward)===w)&&(!co||String(v.colony)===co));
+ const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
+ const ages=a.map(x=>Number(x.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((x,y)=>x+y,0)/ages.length).toFixed(1):"-";
+ const hs=new Set(a.map(v=>String(v.ward)+"|"+String(v.colony)+"|"+String(v.house_no))).size,cs=new Set(a.map(v=>String(v.colony))).size;
+ const stat=(n,label)=>`<div class="stat statLine"><b>${e(n)}</b><span>-</span><strong>${label}</strong></div>`;
+ box.innerHTML=`<div class="statsList detailedStatsList">
+   ${stat(a.length,"कुल मतदाता")}
+   ${stat(a.filter(isMale).length,"पुरुष")}
+   ${stat(a.filter(isFemale).length,"महिला")}
+   ${stat(hs,"कुल मकान")}
+   ${stat(cs,"कुल कॉलोनियाँ")}
+   ${stat(avg,"औसत आयु")}
+  </div>
+  ${co?`<div class="notice statSelection"><b>${e(co)}</b>${w?` <span>• वार्ड ${e(w)}</span>`:""}</div>`:w?`<div class="notice statSelection"><b>वार्ड ${e(w)}</b></div>`:""}`;
 }
 function renderWardOverview(){
  const box=document.getElementById("wardOverview");if(!box)return;const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");const wards=smart(voters.map(v=>v.ward));box.innerHTML=wards.length?wards.map(w=>{const a=voters.filter(v=>String(v.ward)===String(w));const ages=a.map(v=>Number(v.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((x,y)=>x+y,0)/ages.length).toFixed(1):"-",hs=new Set(a.map(v=>String(v.colony)+"|"+String(v.house_no))).size;return `<div class="member row"><div><b>Ward ${e(w)}</b><div class="muted">${hs} Houses • Avg Age ${avg}</div></div><div style="text-align:right"><b>${a.length} Voters</b><div class="muted">Male ${a.filter(isMale).length} • Female ${a.filter(isFemale).length}</div></div></div>`}).join(""):'<div class="empty">कोई Ward data नहीं</div>';
