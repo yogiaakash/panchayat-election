@@ -193,6 +193,31 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 #opsReports .badge{font-size:10px;font-weight:800}
 
 /* Statistics */
+
+#tabStats #pStats .statsList{display:grid;gap:8px;margin-top:12px}
+#tabStats #pStats .statLine{
+ display:grid;
+ grid-template-columns:minmax(52px,auto) 14px minmax(0,1fr);
+ align-items:center;
+ gap:5px;
+ text-align:left;
+ padding:11px 12px;
+}
+#tabStats #pStats .statLine b,
+#tabStats #pStats .statLine span,
+#tabStats #pStats .statLine strong{
+ font-size:16px;
+ line-height:1.25;
+ font-weight:850;
+}
+#tabStats #pStats .statLine b{color:#087451}
+#tabStats #pStats .statLine span{color:#8a9a91;text-align:center}
+#tabStats #pStats .statLine strong{color:#253d33}
+@media(max-width:360px){
+ #tabStats #pStats .statLine b,
+ #tabStats #pStats .statLine span,
+ #tabStats #pStats .statLine strong{font-size:14.5px}
+}
 #tabStats #pStats>.card{margin-bottom:12px}
 #tabStats #pStats .title{font-size:19px}
 #tabStats #pStats .stat{
@@ -703,7 +728,37 @@ function renderPanchayatStats(){
  const ages=voters.map(x=>Number(x.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1):"-";
  const g18=ages.filter(a=>a>=18&&a<=25).length,g26=ages.filter(a=>a>=26&&a<=40).length,g41=ages.filter(a=>a>=41&&a<=60).length,g60=ages.filter(a=>a>60).length;
  const wards=smart(voters.map(x=>x.ward));
- box.innerHTML=`<div class="card" style="margin:0"><div class="title">📊 Panchayat Statistics</div><div class="muted">मतदाता data के अनुसार Panchayat, Ward, Colony और House-wise आँकड़े।</div><div class="grid3"><div class="stat"><b>${voters.length}</b><small>Total Voters</small></div><div class="stat"><b>${male}</b><small>Male</small></div><div class="stat"><b>${female}</b><small>Female</small></div><div class="stat"><b>${houses}</b><small>Unique Houses</small></div><div class="stat"><b>${colonies}</b><small>Colonies</small></div><div class="stat"><b>${avg}</b><small>Average Age</small></div></div></div><div class="card"><div class="title">🎂 Age Group</div><div class="grid2"><div class="stat"><b>${g18}</b><small>18–25</small></div><div class="stat"><b>${g26}</b><small>26–40</small></div><div class="stat"><b>${g41}</b><small>41–60</small></div><div class="stat"><b>${g60}</b><small>60+</small></div></div></div><div class="card"><div class="title">🔎 Detailed Statistics</div><div class="grid2"><div><label>Ward</label><select id="statWard" onchange="syncStatFiltersExact()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option value="${e(w)}">${e(w)}</option>`).join("")}</select></div><div><label>Colony</label><select id="statColony" onchange="renderDetailedStats()"><option value="">सभी कॉलोनी</option></select></div></div><div id="statDetail" style="margin-top:10px"></div></div><div class="card"><div class="title">🗳️ Ward-wise Overview</div><div id="wardOverview"></div></div>`;
+ const stat=(n,label)=>`<div class="stat statLine"><b>${e(n)}</b><span>-</span><strong>${label}</strong></div>`;
+ box.innerHTML=`<div class="card" style="margin:0">
+   <div class="title">📊 पंचायत सांख्यिकी</div>
+   <div class="muted">मतदाता सूची के आधार पर पंचायत के मुख्य आँकड़े</div>
+   <div class="statsList">
+    ${stat(voters.length,"कुल मतदाता")}
+    ${stat(male,"पुरुष")}
+    ${stat(female,"महिला")}
+    ${stat(houses,"कुल मकान")}
+    ${stat(colonies,"कुल कॉलोनियाँ")}
+    ${stat(avg,"औसत आयु")}
+   </div>
+  </div>
+  <div class="card">
+   <div class="title">🎂 आयु वर्ग</div>
+   <div class="statsList">
+    ${stat(g18,"18 वर्ष–25 वर्ष")}
+    ${stat(g26,"26 वर्ष–40 वर्ष")}
+    ${stat(g41,"41 वर्ष–60 वर्ष")}
+    ${stat(g60,"60 वर्ष से अधिक")}
+   </div>
+  </div>
+  <div class="card">
+   <div class="title">🔎 विस्तृत सांख्यिकी</div>
+   <div class="grid2">
+    <div><label>वार्ड</label><select id="statWard" onchange="syncStatFiltersExact()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option value="${e(w)}">${e(w)}</option>`).join("")}</select></div>
+    <div><label>कॉलोनी</label><select id="statColony" onchange="renderDetailedStats()"><option value="">सभी कॉलोनियाँ</option></select></div>
+   </div>
+   <div id="statDetail"></div>
+  </div>
+  <div class="card"><div class="title">वार्ड अनुसार सारांश</div><div id="wardOverview"></div></div>`;
  syncStatFiltersExact();renderWardOverview();
 }
 function syncStatFiltersExact(){
