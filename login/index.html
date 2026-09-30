@@ -121,7 +121,8 @@ const NAME_WORD_OVERRIDES={
  "सिंह":"Singh","कंवर":"Kanwar","कँवर":"Kanwar","चन्द":"Chand","चंद्र":"Chandra","चन्द्र":"Chandra",
  "कुमार":"Kumar","कुमारी":"Kumari","देवी":"Devi","लाल":"Lal","राम":"Ram","श्याम":"Shyam","मोहन":"Mohan",
  "हनुमान":"Hanuman","कैलाश":"Kailash","सुभाष":"Subhash","भारद्वाज":"Bhardwaj","गुर्जर":"Gurjar","शर्मा":"Sharma",
- "शेखावत":"Shekhawat","बुनकर":"Bunkar","मल":"Mal","बाबूलाल":"Babulal","बाबु":"Babu","बाबू":"Babu"
+ "शेखावत":"Shekhawat","बुनकर":"Bunkar","मल":"Mal","बाबूलाल":"Babulal","बाबुलाल":"Babulal","बाबु":"Babu","बाबू":"Babu",
+ "बृजबाला":"Brijbala","बबिता":"Babita","बबली":"Babli","भागीरथ":"Bhagirath","भागोती":"Bhagoti","भैरू":"Bhairu"
 };
 function translitWord(word){
  if(!word)return "";
@@ -141,15 +142,16 @@ function translitWord(word){
   if(ch==="ः"){out+="h";continue}
   if(/[A-Za-z0-9]/.test(ch)){out+=ch;continue}
  }
+ const last=word[word.length-1]||"";
+ const hasExplicitFinalVowel=HI_MATRAS[last]!==undefined||HI_VOWELS[last]!==undefined;
  out=out.toLowerCase()
    .replace(/aa/g,"a")
    .replace(/ee/g,"i")
    .replace(/oo/g,"u")
-   .replace(/([bcdfghjklmnpqrstvwxyz])a([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz])/g,"$1$2$3")
    .replace(/jaba/g,"jba")
    .replace(/nvara$/,"nwar")
-   .replace(/sinha$/,"singh")
-   .replace(/a$/,"");
+   .replace(/sinha$/,"singh");
+ if(!hasExplicitFinalVowel)out=out.replace(/a$/,"");
  return out.charAt(0).toUpperCase()+out.slice(1);
 }
 function latinize(v){
