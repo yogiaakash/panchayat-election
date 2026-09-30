@@ -55,86 +55,317 @@ header{background:linear-gradient(135deg,#075b43,#0b8b60);border-bottom:4px soli
 body{background:#dce8e0}
 main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;background:#f3f7f4;box-shadow:0 0 30px #1e4e3219;overflow:visible}
 .demoHead{background:linear-gradient(125deg,#064b37,#09966a);color:#fff;padding:18px 16px 22px;border-bottom:4px solid #d5a638}
-.demoHeadRow{
- display:grid;
- grid-template-columns:60px minmax(0,1fr);
- gap:10px;
- align-items:center;
- padding-right:54px;
- min-height:66px
+.demoHeadRow{display:flex;align-items:center;gap:10px}
+.demoAvatar{width:68px;height:68px;border-radius:16px;background:#e9f7f0;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;border:2px solid #ffffff55}
+.demoAvatar img{width:100%;height:100%;object-fit:cover}
+.demoCandidateName{font-size:22px;font-weight:900;line-height:1.1}
+.demoPost{display:block;font-size:14px;font-weight:800;color:#ffe28a;margin-top:5px}
+.demoGp{display:block;margin-top:4px;font-size:13px;font-weight:800;line-height:1.25}
+.demoSub{display:block;font-size:10px;font-weight:500;line-height:1.35}
+.demoMain{padding:12px}
+.demoGrid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.demoFeature{border:1px solid #e7d9b2;background:#fff;border-radius:15px;padding:14px 7px;font-weight:800;font-size:12px;text-align:center;cursor:pointer;color:#18392d}
+.demoFeature span{display:block;font-size:26px;background:#e9f7f0;border-radius:12px;width:43px;line-height:43px;margin:0 auto 7px}
+.demoInfoCard{background:#fff;border:1px solid #dce9e1;border-radius:17px;padding:14px;margin-top:12px;box-shadow:0 4px 14px #214d3510}
+.demoInfoLead{font-size:11.5px;line-height:1.45;color:#6b7f74;margin:-3px 0 11px}
+.demoInfoList{display:grid;gap:8px}
+.demoInfoRow{border:1px solid #e2ece6;border-radius:13px;background:#f8fbf9;padding:10px 11px}
+.demoInfoRow>div{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.demoInfoRow b,.demoInfoRow span{font-size:15px;line-height:1.25;font-weight:850}
+.demoInfoRow b{color:#087451}
+.demoInfoRow span{color:#243e33}
+.demoInfoRow small{display:block;margin-top:4px;font-size:10.5px;line-height:1.4;color:#718279}
+.demoGenderBreak{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:#4f655a}
+.demoGenderBreak span,.demoGenderBreak b{font-size:11px;line-height:1.2}
+.demoGenderBreak b{color:#087451;font-weight:900}
+
+
+.demoTitle{font-weight:900;color:#064c39;margin-bottom:11px;font-size:16px}
+.demoGrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.demoStat{border-radius:12px;background:#f5faf7;padding:11px 4px;text-align:center}
+.demoStat b{display:block;color:#087451;font-size:20px}.demoStat small{font-size:10px;color:#667b70}
+.demoNotice{border-radius:12px;padding:10px;background:#f0f8f3;font-size:11px;color:#486658;margin-top:12px}
+.demoLogout{margin-left:auto;border:1px solid #ffffff88;background:#ffffff16;color:#fff;border-radius:9px;padding:7px 10px;font-weight:800;font-size:11px}
+.demoBottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:470px;width:100%;display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid #dce9e1;padding:7px 0 8px;z-index:20}
+.demoBottomNav button{background:none;border:0;color:#657a6e;font-size:10px;padding:4px 1px}.demoBottomNav button b{display:block;font-size:21px;margin-bottom:2px}.demoBottomNav button.active{color:#087451;font-weight:900}
+#workspaceAfterHome{padding:0 12px 12px}.tabs{position:static;margin:12px 0}.fieldtools{display:none!important}.quicknav{display:none!important}
+@media(max-width:649px){main#app{padding-left:0;padding-right:0;margin-top:0}.demoGrid2{grid-template-columns:1fr 1fr}}
+.exactSearchCard{background:#fff;border:1px solid #dce9e1;border-radius:17px;padding:14px;margin-bottom:12px;box-shadow:0 4px 14px #214d3510}
+.exactSearchTitle{font-weight:900;color:#064c39;margin-bottom:11px;font-size:16px}
+.exactSearchGrid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.exactHint{padding:6px 0 8px;color:#667b70;font-size:11px}
+.exactSearchCard label{display:block;font-size:12px;font-weight:800;margin:10px 0 5px}
+.exactSearchCard input,.exactSearchCard select,.exactSearchCard textarea{width:100%;border:1px solid #d5e3db;background:#fff;border-radius:10px;padding:11px;font:inherit;font-size:13px;color:#18392d}
+.exactSearchCard .full{width:100%}
+.exactVoterCard{border-left:4px solid #087451!important}
+.exactVoterCard .vname{font-size:17px}
+.exactVoterCard .actions{grid-template-columns:1fr 1fr}
+.exactFamilyStatus{background:#fffdf5;border:1px solid #e9d7a5}
+.exactCurrent{padding:10px;background:#fff6df;border-radius:11px;font-size:12px;line-height:1.6}
+.exactFamilyBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+@media(max-width:649px){.exactSearchGrid2{grid-template-columns:1fr 1fr}.exactFamilyBtns{grid-template-columns:1fr 1fr}}
+/* Candidate header stability fix */
+
+/* Professional voter-search hierarchy */
+.houseDlg{width:min(430px,94vw);border:0;border-radius:18px;padding:16px;color:#173b2f}.houseDlg::backdrop{background:#10281f88}.houseDlg h3{margin:0 0 12px;color:#063f31}.houseDlg select{width:100%;min-height:44px;border:1px solid #cddfd5;border-radius:12px;padding:10px;background:#fff}.houseFamilyPreview .member{padding:9px 10px;margin-top:6px;border:1px solid #e2ece6;border-radius:11px;background:#fff}
+
+/* Unified professional module typography */
+#workspaceAfterHome{
+ font-family:Inter,system-ui,-apple-system,"Segoe UI","Nirmala UI",Arial,sans-serif;
+ color:#173b2f;
 }
-.demoAvatar{
- width:60px;
- height:60px;
- border-radius:50%;
- border:2.5px solid #d5a638;
+#workspaceAfterHome .card{
+ border:1px solid #d8e6de;
+ border-radius:18px;
  background:#fff;
- font-size:22px;
+ box-shadow:0 8px 24px #163c2a10;
+ padding:16px;
+}
+#workspaceAfterHome .title,
+#workspaceAfterHome .sectionTitle{
+ font-size:19px;
+ line-height:1.2;
  font-weight:900;
- color:#087451;
- box-shadow:0 2px 8px #003d2b22;
-}
-.demoAvatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
-.demoCandidateName{
- display:block;
- font-size:20px;
- font-weight:950;
- line-height:1.12;
  letter-spacing:-.2px;
- white-space:normal;
- overflow-wrap:anywhere;
- margin:0;
- color:#fff;
+ color:#063f31;
+ margin-bottom:6px;
 }
-.demoPost{
- display:inline-block;
+#workspaceAfterHome .sectionTitle{display:flex;align-items:center;gap:7px}
+#workspaceAfterHome .muted{
+ font-size:11.5px;
+ line-height:1.45;
+ color:#6d7f76;
+}
+#workspaceAfterHome label{
+ display:block;
  font-size:11px;
- line-height:1.15;
+ line-height:1.2;
+ font-weight:800;
+ color:#40574c;
+ margin:11px 0 5px;
+}
+#workspaceAfterHome input,
+#workspaceAfterHome select,
+#workspaceAfterHome textarea{
+ min-height:44px;
+ border-radius:12px;
+ border:1px solid #cddfd5;
+ background:#fbfdfc;
+ font-size:14px;
+ color:#18392d;
+ padding:10px 11px;
+}
+#workspaceAfterHome input:focus,
+#workspaceAfterHome select:focus,
+#workspaceAfterHome textarea:focus{
+ outline:none;
+ border-color:#0b8b60;
+ box-shadow:0 0 0 3px #0b8b6017;
+}
+#workspaceAfterHome .btn{
+ min-height:40px;
+ border-radius:11px;
+ font-size:11.5px;
+ font-weight:800;
+ padding:9px 10px;
+}
+#workspaceAfterHome .notice{
+ border-radius:12px;
+ font-size:11.5px;
+ line-height:1.45;
+}
+
+/* Ward PDF */
+#tabSlip .title{font-size:20px}
+#tabSlip #slipCount{margin-top:10px;padding:10px 12px}
+#tabSlip .progressWrap{border-radius:14px;padding:14px}
+#tabSlip .progressText{font-size:12px;font-weight:800}
+#tabSlip .slipPreview{border-radius:14px}
+#tabSlip .miniSlip{font-size:9px;line-height:1.35}
+
+/* Visit + Supp-2 reports */
+#opsReports>.card,
+#opsReports .card{margin-bottom:12px}
+#opsReports .title{font-size:19px}
+#opsReports .grid2,
+#opsReports .grid3{gap:9px}
+#opsReports .stat{
+ border:1px solid #e2ece6!important;
+ border-radius:13px;
+ background:#f8fbf9;
+ padding:11px 6px;
+}
+#opsReports .stat b{font-size:18px;color:#087451}
+#opsReports .stat small{font-size:10px;color:#667b70}
+#opsReports .member{
+ border:1px solid #e2ece6;
+ border-radius:13px;
+ padding:11px 12px;
+ margin-bottom:8px;
+}
+#opsReports .member b{font-size:14px;line-height:1.3;color:#18392d}
+#opsReports .badge{font-size:10px;font-weight:800}
+
+/* Statistics */
+
+#tabStats #pStats .statsList{display:grid;gap:8px;margin-top:12px}
+#tabStats #statDetail .detailedStatsList{display:grid;gap:8px;margin-top:12px}
+#tabStats #statDetail .statLine{
+ display:grid;
+ grid-template-columns:minmax(52px,auto) 14px minmax(0,1fr);
+ align-items:center;
+ gap:5px;
+ text-align:left;
+ padding:11px 12px;
+ border:1px solid #e2ece6;
+ border-radius:13px;
+ background:#f8fbf9;
+}
+#tabStats #statDetail .statLine b,
+#tabStats #statDetail .statLine span,
+#tabStats #statDetail .statLine strong{
+ font-size:16px;
+ line-height:1.25;
  font-weight:850;
- margin-top:4px;
- padding:3px 8px;
- border-radius:999px;
- color:#fff8df;
- background:#ffffff1c;
- border:1px solid #ffe28a66;
 }
-.demoGp{
- display:block;
- font-size:13px;
- line-height:1.18;
+#tabStats #statDetail .statLine b{color:#087451}
+#tabStats #statDetail .statLine span{color:#8a9a91;text-align:center}
+#tabStats #statDetail .statLine strong{color:#253d33}
+#tabStats #statDetail .statSelection{margin-top:10px;padding:10px 12px;font-size:12px}
+#tabStats #statDetail .statSelection b{font-size:13px;color:#173b2f}
+#tabStats #statDetail .statSelection span{color:#64786d}
+
+#tabStats #pStats .statLine{
+ display:grid;
+ grid-template-columns:minmax(52px,auto) 14px minmax(0,1fr);
+ align-items:center;
+ gap:5px;
+ text-align:left;
+ padding:11px 12px;
+}
+#tabStats #pStats .statLine b,
+#tabStats #pStats .statLine span,
+#tabStats #pStats .statLine strong{
+ font-size:16px;
+ line-height:1.25;
  font-weight:850;
- margin-top:5px;
- color:#fff;
 }
-.demoSub{
- display:block;
- font-size:10px;
- line-height:1.28;
- font-weight:600;
- opacity:.96;
- color:#e8f5ef;
- margin-top:2px;
-}
-.demoLogout{
- position:absolute;
- top:9px;
- right:8px;
- margin:0;
- padding:5px 7px;
- border-radius:8px;
- font-size:9px;
- line-height:1;
- background:#ffffff18;
-}
+#tabStats #pStats .statLine b{color:#087451}
+#tabStats #pStats .statLine span{color:#8a9a91;text-align:center}
+#tabStats #pStats .statLine strong{color:#253d33}
 @media(max-width:360px){
- .demoHead{padding:10px 9px 11px}
- .demoHeadRow{grid-template-columns:52px minmax(0,1fr);gap:8px;padding-right:48px;min-height:58px}
- .demoAvatar{width:52px;height:52px}
- .demoCandidateName{font-size:17px}
- .demoPost{font-size:10px;margin-top:3px;padding:3px 7px}
- .demoGp{font-size:12px;margin-top:4px}
- .demoSub{font-size:9px;line-height:1.25;margin-top:1px}
- .demoLogout{right:6px;top:7px;padding:4px 6px;font-size:8.5px}
+ #tabStats #pStats .statLine b,
+ #tabStats #pStats .statLine span,
+ #tabStats #pStats .statLine strong{font-size:14.5px}
+}
+#tabStats #pStats>.card{margin-bottom:12px}
+#tabStats #pStats .title{font-size:19px}
+#tabStats #pStats .stat{
+ border:1px solid #e2ece6;
+ border-radius:13px;
+ background:#f8fbf9;
+ padding:12px 6px;
+}
+#tabStats #pStats .stat b{font-size:20px;color:#087451}
+#tabStats #pStats .stat small{font-size:10px;color:#667b70}
+
+/* A-Z */
+#tabStats #azLetters{
+ gap:6px!important;
+ margin-top:12px!important;
+}
+#tabStats .azLetterBtn{
+ min-width:31px;
+ min-height:31px;
+ border-radius:9px;
+ font-size:10px;
+ font-weight:900;
+}
+#tabStats #azResult .member{
+ border:1px solid #e2ece6;
+ border-left:4px solid #0b8b60;
+ border-radius:14px;
+ padding:12px;
+ margin-bottom:9px;
+ background:#fff;
+}
+#tabStats #azResult .member b{
+ font-size:16px;
+ line-height:1.25;
+ color:#173b2f;
+}
+#tabStats #azResult .member .muted{
+ font-size:11.5px;
+ line-height:1.45;
+}
+#tabStats #azResult .badge{
+ font-size:10px;
+ font-weight:800;
+ border-radius:999px;
+ padding:5px 7px;
+}
+#tabStats #azCount{
+ font-size:10px;
+ font-weight:800;
+ padding:5px 8px;
+ border-radius:999px;
+}
+
+@media(max-width:360px){
+ #workspaceAfterHome .title,
+ #workspaceAfterHome .sectionTitle{font-size:17px}
+ #workspaceAfterHome input,
+ #workspaceAfterHome select,
+ #workspaceAfterHome textarea{font-size:13px}
+ #workspaceAfterHome .btn{font-size:10.5px}
+ #tabStats #azResult .member b{font-size:15px}
+}
+#tabInfo{font-family:Inter,system-ui,-apple-system,"Segoe UI","Nirmala UI",Arial,sans-serif}
+#tabInfo .exactSearchCard{padding:16px;border-radius:18px;box-shadow:0 8px 24px #163c2a12;border:1px solid #d8e6de}
+#tabInfo .exactSearchTitle{font-size:20px;line-height:1.2;font-weight:900;letter-spacing:-.2px;color:#063f31;margin-bottom:4px}
+#tabInfo .exactSearchCard>label:first-of-type{font-size:12px;color:#52675d;font-weight:700;margin-top:12px}
+#tabInfo .exactHint{font-size:11px;line-height:1.4;color:#74867d;padding:6px 0 4px}
+#tabInfo label{font-size:11px!important;line-height:1.2;font-weight:800!important;color:#40574c;margin:11px 0 5px!important;text-transform:none}
+#tabInfo input,#tabInfo select{font-size:14px!important;min-height:44px;border-radius:12px!important;border:1px solid #cddfd5!important;background:#fbfdfc!important}
+#tabInfo input:focus,#tabInfo select:focus{outline:none;border-color:#0b8b60!important;box-shadow:0 0 0 3px #0b8b6017}
+#tabInfo .exactVoterCard{padding:14px 13px!important;border-radius:16px!important;margin-bottom:10px!important;background:#fff;box-shadow:0 6px 18px #153d2910}
+#tabInfo .exactVoterCard .vname{font-size:18px!important;line-height:1.22;font-weight:900;color:#153d2f;letter-spacing:-.15px}
+#tabInfo .exactVoterCard .muted{font-size:11.5px;line-height:1.45;color:#697a72}
+#tabInfo .exactVoterCard .id{font-size:10px;font-weight:800;letter-spacing:.2px;background:#edf7f1;color:#0a7855;border-radius:999px;padding:4px 7px;white-space:nowrap}
+#tabInfo .exactVoterCard .badge{font-size:10px!important;font-weight:800!important;padding:5px 7px!important;border-radius:999px!important}
+#tabInfo .exactVoterCard .actions{gap:7px;margin-top:10px}
+#tabInfo .exactVoterCard .actions .btn{min-height:38px;padding:8px 8px;font-size:11px;font-weight:800;border-radius:10px}
+#tabInfo .member{padding:11px 12px;border-radius:12px}
+#tabInfo #familyBox .exactSearchTitle{font-size:17px}
+#tabInfo .exactCurrent{font-size:11.5px;line-height:1.55}
+@media(max-width:360px){
+ #tabInfo .exactSearchTitle{font-size:18px}
+ #tabInfo .exactVoterCard .vname{font-size:16.5px!important}
+ #tabInfo input,#tabInfo select{font-size:13px!important}
+ #tabInfo .exactVoterCard .actions .btn{font-size:10px}
+}
+.moduleOpen #demoHome{height:0;min-height:0;overflow:visible}
+.moduleOpen #workspaceAfterHome{padding-top:112px}
+@media(max-width:360px){.moduleOpen #workspaceAfterHome{padding-top:96px}}
+.moduleOpen .demoHead{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:470px;z-index:60;box-shadow:0 6px 18px #0b3d2c33}
+.demoHead{position:relative;padding:14px 14px 16px;border-bottom:4px solid #d5a638}
+.demoHeadRow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding-right:58px;min-height:76px}
+.demoAvatar{width:64px;height:64px;border-radius:50%;border:3px solid #d5a638;background:#fff;font-size:24px;font-weight:900;color:#087451;box-shadow:0 3px 10px #003d2b28}
+.demoAvatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.demoCandidateName{display:block;font-size:21px;font-weight:950;line-height:1.15;letter-spacing:-.25px;white-space:normal;overflow-wrap:anywhere;margin:0;color:#fff}
+.demoPost{display:inline-block;font-size:12px;line-height:1.2;font-weight:850;margin-top:6px;padding:4px 9px;border-radius:999px;color:#fff8df;background:#ffffff1c;border:1px solid #ffe28a66}
+.demoGp{display:block;font-size:14px;line-height:1.25;font-weight:850;margin-top:7px;color:#fff}
+.demoSub{display:block;font-size:10.5px;line-height:1.45;font-weight:600;opacity:.96;color:#e8f5ef}
+.demoLogout{position:absolute;top:12px;right:10px;margin:0;padding:6px 8px;border-radius:8px;font-size:10px;line-height:1;background:#ffffff18}
+@media(max-width:360px){
+ .demoHead{padding:12px 10px 14px}
+ .demoHeadRow{grid-template-columns:56px minmax(0,1fr);gap:9px;padding-right:50px;min-height:68px}
+ .demoAvatar{width:56px;height:56px}
+ .demoCandidateName{font-size:18px;letter-spacing:-.15px}
+ .demoPost{font-size:10.5px;margin-top:5px;padding:3px 8px}
+ .demoGp{font-size:12.5px;margin-top:6px}
+ .demoSub{font-size:9.5px;line-height:1.4}
+ .demoLogout{right:7px;top:9px;padding:5px 6px;font-size:9px}
 }
 </style>
 <style id="ward-pdf-demo-style">
@@ -700,9 +931,9 @@ function openHouseOverride(v){
  houseBody.innerHTML=`<div class="notice"><b>${e(v.name)}</b><br>Ward ${e(v.ward)} • ${e(v.colony||"-")}<br><span class="muted">Original House: ${e(original||"-")} • Local House: ${e(current||"-")}</span></div>
  <label>नया Local House चुनें</label>
  <select id="houseOverrideSelect" onchange="previewHouseFamily(${Number(v.id)})"><option value="">House चुनें</option>${houses.map(h=>`<option value="${e(h)}" ${String(h)===current?"selected":""}>${e(h)}</option>`).join("")}</select>
-  <div id="houseFamilyPreview" class="houseFamilyPreview"></div>
+ <div id="houseFamilyPreview" class="houseFamilyPreview"></div>
  <div class="grid2" style="margin-top:10px">
-  <button class="btn green" onclick="saveHouseOverride(${Number(v.id)})">✓ मकान नंबर Save</button>
+  <button class="btn green" onclick="saveHouseOverride(${Number(v.id)})">✓ Local House Save</button>
   <button class="btn soft" onclick="resetHouseOverride(${Number(v.id)})">↺ Original House Restore</button>
  </div>
  <div class="muted" style="margin-top:9px">यह केवल app की local family grouping बदलता है। Official voter list का मकान नंबर नहीं बदलेगा।</div>`;
