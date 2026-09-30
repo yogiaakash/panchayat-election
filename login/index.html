@@ -285,7 +285,7 @@ function dashboard(){
  </section>
  <div id="workspaceAfterHome" style="display:none">
   <div id="opsReports" class="card hidden" style="margin:12px 0"></div>
-  <div class="tabs"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
+  <div class="tabs" style="display:none"><button id="tbInfo" class="tabbtn active" onclick="showTab('info')">1. मतदाता जानकारी</button><button id="tbSlip" class="tabbtn" onclick="showTab('slip')">2. मतदाता पर्ची</button><button id="tbStats" class="tabbtn" onclick="showTab('stats')">3. सांख्यिकी + A–Z</button></div>
   <section id="tabSlip" class="tabpane">
  <div class="card">
   <div class="title">📄 Ward-wise Voter Slip PDF Generator</div>
@@ -373,6 +373,24 @@ function dashboard(){
 }
 function showWorkspace(){
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="block";
+ const tabs=w?.querySelector(".tabs");if(tabs)tabs.style.display="none";
+}
+function setModuleVisibility(mode){
+ const info=document.getElementById("tabInfo"),slip=document.getElementById("tabSlip"),stats=document.getElementById("tabStats"),ops=document.getElementById("opsReports");
+ [info,slip,stats].forEach(x=>{if(x){x.classList.remove("active");x.style.display="none"}});
+ if(ops){ops.classList.add("hidden");ops.innerHTML=""}
+ const statsCard=document.getElementById("pStats")?.closest(".card");
+ const azMain=document.getElementById("azLetters")?.closest(".card");
+ const azPdf=document.getElementById("azProgress")?.closest(".card");
+ const azList=document.getElementById("azResult")?.closest(".card");
+ [statsCard,azMain,azPdf,azList].forEach(x=>{if(x)x.style.display=""});
+ if(mode==="info"&&info){info.classList.add("active");info.style.display="block"}
+ if(mode==="slip"&&slip){slip.classList.add("active");slip.style.display="block"}
+ if((mode==="stats"||mode==="az")&&stats){
+   stats.classList.add("active");stats.style.display="block";
+   if(mode==="stats"){[azMain,azPdf,azList].forEach(x=>{if(x)x.style.display="none"});if(statsCard)statsCard.style.display=""}
+   if(mode==="az"){if(statsCard)statsCard.style.display="none";[azMain,azPdf,azList].forEach(x=>{if(x)x.style.display=""})}
+ }
 }
 function scrollToHome(){
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="none";
@@ -380,21 +398,22 @@ function scrollToHome(){
  document.getElementById("demoHome")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function openWorkspace(k){
- showWorkspace();showTab(k);
+ showWorkspace();setModuleVisibility(k);
+ if(k==="stats")renderPanchayatStats();
  document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function openVisitWorkspace(){
- showWorkspace();showTab("info");renderOpsReport("visit");
+ showWorkspace();setModuleVisibility("ops");renderOpsReport("visit");
 }
 function openAdditionWorkspace(){
- showWorkspace();showTab("info");renderOpsReport("supp2");
+ showWorkspace();setModuleVisibility("ops");renderOpsReport("supp2");
 }
 function openAZWorkspace(){
- showWorkspace();showTab("stats");
- setTimeout(()=>document.getElementById("azLetters")?.closest(".card")?.scrollIntoView({behavior:"smooth",block:"start"}),100);
+ showWorkspace();setModuleVisibility("az");initAZLetters();renderAZ();
+ document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
-function focusVisit(){showTab("info");renderOpsReport("visit")}
-function focusAddition(){showTab("info");renderOpsReport("supp2")}
+function focusVisit(){openVisitWorkspace()}
+function focusAddition(){openAdditionWorkspace()}
 function renderOpsReport(mode){
  const box=document.getElementById("opsReports");if(!box)return;box.classList.remove("hidden");const wards=smart(voters.map(v=>v.ward));
  if(mode==="visit"){
