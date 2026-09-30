@@ -94,6 +94,167 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 /* Candidate header stability fix */
 
 /* Professional voter-search hierarchy */
+
+/* Unified professional module typography */
+#workspaceAfterHome{
+ font-family:Inter,system-ui,-apple-system,"Segoe UI","Nirmala UI",Arial,sans-serif;
+ color:#173b2f;
+}
+#workspaceAfterHome .card{
+ border:1px solid #d8e6de;
+ border-radius:18px;
+ background:#fff;
+ box-shadow:0 8px 24px #163c2a10;
+ padding:16px;
+}
+#workspaceAfterHome .title,
+#workspaceAfterHome .sectionTitle{
+ font-size:19px;
+ line-height:1.2;
+ font-weight:900;
+ letter-spacing:-.2px;
+ color:#063f31;
+ margin-bottom:6px;
+}
+#workspaceAfterHome .sectionTitle{display:flex;align-items:center;gap:7px}
+#workspaceAfterHome .muted{
+ font-size:11.5px;
+ line-height:1.45;
+ color:#6d7f76;
+}
+#workspaceAfterHome label{
+ display:block;
+ font-size:11px;
+ line-height:1.2;
+ font-weight:800;
+ color:#40574c;
+ margin:11px 0 5px;
+}
+#workspaceAfterHome input,
+#workspaceAfterHome select,
+#workspaceAfterHome textarea{
+ min-height:44px;
+ border-radius:12px;
+ border:1px solid #cddfd5;
+ background:#fbfdfc;
+ font-size:14px;
+ color:#18392d;
+ padding:10px 11px;
+}
+#workspaceAfterHome input:focus,
+#workspaceAfterHome select:focus,
+#workspaceAfterHome textarea:focus{
+ outline:none;
+ border-color:#0b8b60;
+ box-shadow:0 0 0 3px #0b8b6017;
+}
+#workspaceAfterHome .btn{
+ min-height:40px;
+ border-radius:11px;
+ font-size:11.5px;
+ font-weight:800;
+ padding:9px 10px;
+}
+#workspaceAfterHome .notice{
+ border-radius:12px;
+ font-size:11.5px;
+ line-height:1.45;
+}
+
+/* Ward PDF */
+#tabSlip .title{font-size:20px}
+#tabSlip #slipCount{margin-top:10px;padding:10px 12px}
+#tabSlip .progressWrap{border-radius:14px;padding:14px}
+#tabSlip .progressText{font-size:12px;font-weight:800}
+#tabSlip .slipPreview{border-radius:14px}
+#tabSlip .miniSlip{font-size:9px;line-height:1.35}
+
+/* Visit + Supp-2 reports */
+#opsReports>.card,
+#opsReports .card{margin-bottom:12px}
+#opsReports .title{font-size:19px}
+#opsReports .grid2,
+#opsReports .grid3{gap:9px}
+#opsReports .stat{
+ border:1px solid #e2ece6!important;
+ border-radius:13px;
+ background:#f8fbf9;
+ padding:11px 6px;
+}
+#opsReports .stat b{font-size:18px;color:#087451}
+#opsReports .stat small{font-size:10px;color:#667b70}
+#opsReports .member{
+ border:1px solid #e2ece6;
+ border-radius:13px;
+ padding:11px 12px;
+ margin-bottom:8px;
+}
+#opsReports .member b{font-size:14px;line-height:1.3;color:#18392d}
+#opsReports .badge{font-size:10px;font-weight:800}
+
+/* Statistics */
+#tabStats #pStats>.card{margin-bottom:12px}
+#tabStats #pStats .title{font-size:19px}
+#tabStats #pStats .stat{
+ border:1px solid #e2ece6;
+ border-radius:13px;
+ background:#f8fbf9;
+ padding:12px 6px;
+}
+#tabStats #pStats .stat b{font-size:20px;color:#087451}
+#tabStats #pStats .stat small{font-size:10px;color:#667b70}
+
+/* A-Z */
+#tabStats #azLetters{
+ gap:6px!important;
+ margin-top:12px!important;
+}
+#tabStats .azLetterBtn{
+ min-width:31px;
+ min-height:31px;
+ border-radius:9px;
+ font-size:10px;
+ font-weight:900;
+}
+#tabStats #azResult .member{
+ border:1px solid #e2ece6;
+ border-left:4px solid #0b8b60;
+ border-radius:14px;
+ padding:12px;
+ margin-bottom:9px;
+ background:#fff;
+}
+#tabStats #azResult .member b{
+ font-size:16px;
+ line-height:1.25;
+ color:#173b2f;
+}
+#tabStats #azResult .member .muted{
+ font-size:11.5px;
+ line-height:1.45;
+}
+#tabStats #azResult .badge{
+ font-size:10px;
+ font-weight:800;
+ border-radius:999px;
+ padding:5px 7px;
+}
+#tabStats #azCount{
+ font-size:10px;
+ font-weight:800;
+ padding:5px 8px;
+ border-radius:999px;
+}
+
+@media(max-width:360px){
+ #workspaceAfterHome .title,
+ #workspaceAfterHome .sectionTitle{font-size:17px}
+ #workspaceAfterHome input,
+ #workspaceAfterHome select,
+ #workspaceAfterHome textarea{font-size:13px}
+ #workspaceAfterHome .btn{font-size:10.5px}
+ #tabStats #azResult .member b{font-size:15px}
+}
 #tabInfo{font-family:Inter,system-ui,-apple-system,"Segoe UI","Nirmala UI",Arial,sans-serif}
 #tabInfo .exactSearchCard{padding:16px;border-radius:18px;box-shadow:0 8px 24px #163c2a12;border:1px solid #d8e6de}
 #tabInfo .exactSearchTitle{font-size:20px;line-height:1.2;font-weight:900;letter-spacing:-.2px;color:#063f31;margin-bottom:4px}
