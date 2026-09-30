@@ -372,8 +372,10 @@ function dashboard(){
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
 }
 function showWorkspace(){
+ const home=document.getElementById("demoHome");if(home)home.style.display="none";
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="block";
  const tabs=w?.querySelector(".tabs");if(tabs)tabs.style.display="none";
+ window.scrollTo({top:0,behavior:"smooth"});
 }
 function setModuleVisibility(mode){
  const info=document.getElementById("tabInfo"),slip=document.getElementById("tabSlip"),stats=document.getElementById("tabStats"),ops=document.getElementById("opsReports");
@@ -395,12 +397,12 @@ function setModuleVisibility(mode){
 function scrollToHome(){
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="none";
  const ops=document.getElementById("opsReports");if(ops){ops.classList.add("hidden");ops.innerHTML=""}
- document.getElementById("demoHome")?.scrollIntoView({behavior:"smooth",block:"start"});
+ const home=document.getElementById("demoHome");if(home)home.style.display="block";
+ window.scrollTo({top:0,behavior:"smooth"});
 }
 function openWorkspace(k){
  showWorkspace();setModuleVisibility(k);
  if(k==="stats")renderPanchayatStats();
- document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function openVisitWorkspace(){
  showWorkspace();setModuleVisibility("ops");renderOpsReport("visit");
@@ -410,7 +412,6 @@ function openAdditionWorkspace(){
 }
 function openAZWorkspace(){
  showWorkspace();setModuleVisibility("az");initAZLetters();renderAZ();
- document.getElementById("workspaceAfterHome")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function focusVisit(){openVisitWorkspace()}
 function focusAddition(){openAdditionWorkspace()}
