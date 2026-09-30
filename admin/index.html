@@ -19,7 +19,7 @@ app.innerHTML=`<div id="adminShell"><div class="adminnav"><button id="anCreate" 
 <div><label>Name</label><input id=name></div><div><label>Hindi Name</label><input id=hindi></div><div><label>Post</label><input id=post value="Sarpanch"></div>
 <div><label>District</label><select id="district" onchange="loadSamitis()"></select></div><div><label>Panchayat Samiti</label><select id="ps" onchange="loadGPs()"></select></div><div><label>Gram Panchayat</label><select id="gp"></select></div>
 <div><label>Mobile</label><input id=mobile></div><div><label>Candidate Email</label><input id=email type=email></div><div><label>Temporary Password</label><input id=password type=password></div>
-<div><label>URL Slug</label><input id=slug placeholder="rampura-rajesh"></div><div><label>Expiry</label><input id=expiry type=date></div><div><label>Candidate Photo</label><input id=photo type=file accept="image/*"></div><div><label>Election Symbol</label><input id=symbol type=file accept="image/*"></div><div><label>Banner</label><input id=banner type=file accept="image/*"></div></div>
+<div><label>URL Slug</label><input id=slug placeholder="rampura-rajesh"></div><div><label>Expiry</label><input id=expiry type=date></div><div><label>Candidate Photo <span style="color:#b42318">*</span></label><input id=photo type=file accept="image/*" required><div class="muted">यही photo candidate app header/profile में दिखाई जाएगी।</div></div><div><label>Election Symbol</label><input id=symbol type=file accept="image/*"></div><div><label>Banner</label><input id=banner type=file accept="image/*"></div></div>
 <button style="margin-top:14px" onclick="createCandidate()">Create Candidate + Login</button><p id=status></p></div>
 </section>
 <section id="apVoters" class="adminpane"><div class=card><h2>Voter Excel Import</h2><label>Candidate</label><select id=cid>${(c||[]).map(x=>`<option value="${x.id}">${esc(x.hindi_name||x.name)} — ${esc(x.gram_panchayat)}</option>`).join("")}</select>
@@ -47,8 +47,8 @@ async function createCandidate(){
   mobile:el("mobile").value.trim(),email:el("email").value.trim(),password:el("password").value,
   slug:el("slug").value.trim(),subscription_expiry:el("expiry").value||null
  };
- if(!body.name||!body.gram_panchayat||!body.email||!body.password||!body.slug){
-  st.textContent="Name, Gram Panchayat, Email, Password और URL Slug required हैं.";st.className="bad";return;
+ if(!body.name||!body.gram_panchayat||!body.email||!body.password||!body.slug||!el("photo").files[0]){
+  st.textContent="Name, Gram Panchayat, Email, Password, URL Slug और Candidate Photo required हैं.";st.className="bad";return;
  }
  const {data,error}=await sb.functions.invoke("admin-create-candidate",{body});
  if(error||data?.error){
