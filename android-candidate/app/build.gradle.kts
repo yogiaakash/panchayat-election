@@ -3,10 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 android {
-    namespace = "in.panchayatdigital.candidateapp"
+    namespace = "com.panchayatdigital.candidateapp"
     compileSdk = 35
     defaultConfig {
-        applicationId = "in.panchayatdigital.candidateapp"
+        applicationId = "com.panchayatdigital.candidateapp"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
