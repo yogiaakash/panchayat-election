@@ -513,6 +513,8 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 /* Keep Home feature grid hidden while any module is open; header remains fixed. */
 .moduleOpen #demoHome .demoMain{display:none!important}
 .moduleOpen #demoHome{height:auto!important;min-height:0!important;overflow:visible!important}
+
+.mobileEditBox{margin-top:12px;padding:12px;border:1px solid #dce9e1;border-radius:13px;background:#f8fbf9}.mobileEditBox label{display:block;font-size:11px;font-weight:800;color:#40574c;margin:0 0 5px}.mobileEditBox input{width:100%;box-sizing:border-box;min-height:44px;border:1px solid #cddfd5;border-radius:12px;padding:10px 11px;font-size:14px;background:#fff}
 </style>
 </head>
 <body>
@@ -522,7 +524,7 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
-let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(); const PER=40;
+let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(); const PER=40;
 
 
 const HI_VOWELS={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ऋ":"ri","ए":"e","ऐ":"ai","ओ":"o","औ":"au"};
@@ -634,15 +636,18 @@ async function load(){
    if(!batch||batch.length<1000)break;
  }
  voters=allVoters;
- const [{data:cs},{data:ar},{data:ho,error:hoe}]=await Promise.all([
+ const [{data:cs},{data:ar},{data:ho,error:hoe},{data:vm,error:vme}]=await Promise.all([
    sb.from("voter_contact_status").select("*").eq("panchayat_id",access.panchayat_id),
    sb.from("voter_addition_requests").select("*").eq("panchayat_id",access.panchayat_id).order("created_at",{ascending:false}),
-   sb.from("voter_house_overrides").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id)
+   sb.from("voter_house_overrides").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id),
+   sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id)
  ]);
  if(hoe){console.error("House override load error",hoe)}
  contactMap=new Map((cs||[]).map(x=>[String(x.voter_id),x]));
  additionRows=ar||[];
  houseOverrideMap=new Map((ho||[]).map(x=>[String(x.voter_id),x]));
+ voterMobileMap=new Map((vm||[]).map(x=>[String(x.voter_id),x]));
+ if(vme) console.error("Voter mobile load error",vme);
  logout.classList.remove("hidden");dashboard();
 }
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0900-\u097f]+/g,"");
@@ -1011,7 +1016,31 @@ function cascade(from){
 }
 function clearFilters(){document.getElementById("q").value="";document.getElementById("ward").value="";document.getElementById("colony").innerHTML="<option value=\"\">पहले वार्ड चुनें</option>";document.getElementById("house").innerHTML="<option value=\"\">पहले कॉलोनी चुनें</option>";document.getElementById("colony").disabled=true;document.getElementById("house").disabled=true;document.getElementById("booth").value="";page=1;renderRows();}
 function houseCount(v){return voters.filter(x=>String(x.ward)===String(v.ward)&&String(x.colony)===String(v.colony)&&String(effectiveHouse(x))===String(effectiveHouse(v))).length}
-function showDetail(v){detailBody.innerHTML=[["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["Local मकान",effectiveHouse(v)],["Original मकान",originalHouse(v)],["कॉलोनी",v.colony],["वार्ड",v.ward],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]].map(x=>`<div class="drow"><span>${e(x[0])}</span><b>${e(x[1]??"-")}</b></div>`).join("");detailDlg.showModal()}
+function showDetail(v){
+ const mob=voterMobileMap.get(String(v.id))?.mobile_number||"";
+ detailBody.innerHTML=[
+ ["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],
+ ["Local मकान",effectiveHouse(v)],["Original मकान",originalHouse(v)],["कॉलोनी",v.colony],["वार्ड",v.ward],
+ ["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender],["मोबाइल नंबर",mob||"अभी दर्ज नहीं"]
+ ].map(x=>`<div class="drow"><span>${e(x[0])}</span><b>${e(x[1]??"-")}</b></div>`).join("")+
+ `<div class="mobileEditBox"><label>मतदाता का मोबाइल नंबर</label><input id="voterMobileInput" type="tel" inputmode="numeric" maxlength="15" placeholder="10 अंकों का मोबाइल नंबर" value="${e(mob)}"><button class="btn green full" style="margin-top:8px" onclick="saveVoterMobile(${Number(v.id)})">📱 मोबाइल नंबर Save करें</button>${mob?`<button class="btn soft full" style="margin-top:6px" onclick="removeVoterMobile(${Number(v.id)})">हटाएँ</button>`:""}</div>`;
+ detailDlg.showModal()
+}
+async function saveVoterMobile(voterId){
+ const input=document.getElementById("voterMobileInput"); if(!input)return;
+ const raw=input.value.trim().replace(/[\s-]/g,"");
+ if(!/^\d{10}$/.test(raw)){alert("कृपया 10 अंकों का मोबाइल नंबर दर्ज करें।");return}
+ const {data,error}=await sb.from("voter_mobile_numbers").upsert({
+   user_id:currentUser.id,panchayat_id:currentAccess.panchayat_id,voter_id:voterId,mobile_number:raw,updated_at:new Date().toISOString()
+ },{onConflict:"user_id,panchayat_id,voter_id"}).select().single();
+ if(error){alert("मोबाइल नंबर save नहीं हुआ: "+error.message);return}
+ voterMobileMap.set(String(voterId),data);detailDlg.close();renderRows();alert("मतदाता का मोबाइल नंबर save हो गया।")
+}
+async function removeVoterMobile(voterId){
+ const {error}=await sb.from("voter_mobile_numbers").delete().eq("user_id",currentUser.id).eq("panchayat_id",currentAccess.panchayat_id).eq("voter_id",voterId);
+ if(error){alert("मोबाइल नंबर हटाया नहीं जा सका: "+error.message);return}
+ voterMobileMap.delete(String(voterId));detailDlg.close();renderRows();alert("मोबाइल नंबर हटा दिया गया।")
+}
 function familyPanel(){
  const b=document.getElementById("familyBox");if(!b)return;
  const w=ward.value,co=colony.value,h=house.value;
@@ -1039,7 +1068,7 @@ function renderRows(){
  const totalEl=document.getElementById("total"),maleEl=document.getElementById("male"),femaleEl=document.getElementById("female"),wardsEl=document.getElementById("wards"),coloniesEl=document.getElementById("colonies"),housesEl=document.getElementById("houses");
  if(totalEl)totalEl.textContent=a.length;if(maleEl)maleEl.textContent=a.filter(isMale).length;if(femaleEl)femaleEl.textContent=a.filter(isFemale).length;if(wardsEl)wardsEl.textContent=new Set(a.map(x=>x.ward)).size;if(coloniesEl)coloniesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony))).size;if(housesEl)housesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony)+"|"+String(effectiveHouse(x)))).size;
  const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages);const chunk=a.slice((page-1)*PER,page*PER);
- result.innerHTML=`<div class="muted" style="margin:0 0 8px 2px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard exactVoterCard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">🏠 ${e(effectiveHouse(v))}</span><span class="pill">आयु ${e(v.age)}</span><span class="pill">${e(v.colony)}</span></div><div class="actions"><button class="btn soft det" data-i="${i}">Details</button><button class="btn soft pdfb" data-i="${i}">📄 PDF Slip</button><button class="btn soft shareb" data-i="${i}">↗ Share</button><button class="btn soft famb" data-i="${i}">🏠 Family</button><button class="btn soft housechg" data-i="${i}">✏ Change House Number</button></div></article>`).join("")||'<div class="empty">कोई मतदाता नहीं मिला</div>'}</div>${a.length?`<div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`:""}`;
+ result.innerHTML=`<div class="muted" style="margin:0 0 8px 2px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard exactVoterCard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">🏠 ${e(effectiveHouse(v))}</span><span class="pill">आयु ${e(v.age)}</span><span class="pill">${e(v.colony)}</span>${voterMobileMap.get(String(v.id))?.mobile_number?`<span class="pill">📱 ${e(voterMobileMap.get(String(v.id)).mobile_number)}</span>`:""}</div><div class="actions"><button class="btn soft det" data-i="${i}">Details</button><button class="btn soft pdfb" data-i="${i}">📄 PDF Slip</button><button class="btn soft shareb" data-i="${i}">↗ Share</button><button class="btn soft famb" data-i="${i}">🏠 Family</button><button class="btn soft housechg" data-i="${i}">✏ Change House Number</button></div></article>`).join("")||'<div class="empty">कोई मतदाता नहीं मिला</div>'}</div>${a.length?`<div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`:""}`;
  result.querySelectorAll(".det").forEach(x=>x.onclick=()=>showDetail(chunk[+x.dataset.i]));
  result.querySelectorAll(".pdfb").forEach(x=>x.onclick=()=>voterSlip(JSON.stringify(chunk[+x.dataset.i])));
  result.querySelectorAll(".shareb").forEach(x=>x.onclick=()=>shareInfo(chunk[+x.dataset.i]));
