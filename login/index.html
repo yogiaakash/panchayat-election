@@ -729,7 +729,7 @@ async function signIn(){
   if(error){msg.textContent=error.message;return}
   if(!data?.session){msg.textContent="Login session नहीं मिला।";return}
   msg.textContent="Login successful… Panchayat access check हो रहा है।";
-  await load();
+  await load(data.user);
  }catch(err){
   console.error("SIGNIN ERROR",err);
   msg.textContent="Login error: "+(err?.message||String(err));
@@ -737,14 +737,15 @@ async function signIn(){
 }
 
 logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];loginView()};
-async function load(){
+async function load(userOverride=null){
  const hash=window.location.hash||"";
  if(/(?:^#|&)type=recovery(?:&|$)/.test(hash)){
    const {data:{session}}=await sb.auth.getSession();
    if(session){showRecoveryPasswordForm();return}
  }
- const {data:{user}}=await sb.auth.getUser();
- if(!user){loginView();return}
+ const {data:{user:sessionUser}}=await sb.auth.getUser();
+ const user=userOverride||sessionUser;
+ if(!user){loginView("Login session खो गया। कृपया फिर से Login करें।");return}
  currentUser=user;
  try{
    const {data:{session}}=await sb.auth.getSession();
