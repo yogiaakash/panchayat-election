@@ -528,7 +528,7 @@ window.PANCHAYAT_FULL_ACCESS_PRICE=4999;
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
-let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,masterVoterCount=0,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(),familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।",signupPanchayats=[]; const PER=40;
+let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,masterVoterCount=0,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(),familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।",signupPanchayats=[]; let selectedSignupPanchayatId=null; const PER=40;
 
 
 const HI_VOWELS={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ऋ":"ri","ए":"e","ऐ":"ai","ओ":"o","औ":"au"};
@@ -588,20 +588,20 @@ function loginView(msg=""){
 async function loadSignupPanchayats(){
  const msg=document.getElementById("signupMsg");
  try{
-  const {data,error}=await sb.rpc("get_signup_panchayats");
-  if(error) throw error;
-  const dataRows=Array.isArray(data)?data:[];
-  signupPanchayats=dataRows;
-  const ds=[...new Set(dataRows.map(x=>x.district).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
+  const {data,error}=await sb.rpc("get_signup_districts");
+  if(error)throw error;
+  const rows=Array.isArray(data)?data:[];
+  const ds=rows.map(x=>x.district).filter(Boolean);
   const el=document.getElementById("suDistrict");
-  if(!el) throw new Error("District dropdown not found");
+  if(!el)throw new Error("District dropdown not found");
   el.innerHTML='<option value="">जिला चुनें</option>'+ds.map(x=>'<option value="'+e(x)+'">'+e(x)+'</option>').join("");
-  if(!ds.length) throw new Error("Panchayat directory में District नहीं मिला");
-  if(msg) msg.textContent="";
+  if(!ds.length)throw new Error("District list empty");
+  if(msg)msg.textContent="";
  }catch(error){
-  if(msg) msg.textContent="Panchayat list load नहीं हुई: "+(error?.message||error);
+  if(msg)msg.textContent="District list load नहीं हुई: "+(error?.message||error);
  }
 }
+
 function signupView(){
  document.querySelector("header").style.display="flex";logout.classList.add("hidden");
  app.innerHTML=`<div class="card login signupCard"><h2>📝 Candidate Account बनाएं</h2><p class="muted">अपनी जानकारी भरें और अपनी Panchayat चुनें। Signup के बाद Free Access में 10% voter data मिलेगा।</p>
@@ -610,7 +610,7 @@ function signupView(){
  <label>Election Post *</label><select id="suPost"><option value="">Post चुनें</option><option>Sarpanch</option><option>Ward Panch</option><option>Panchayat Samiti Member</option><option>Zila Parishad Member</option></select>
  <label>District *</label><select id="suDistrict" onchange="signupFilterPS()"><option>Loading…</option></select>
  <label>Panchayat Samiti *</label><select id="suPS" onchange="signupFilterGP()" disabled><option>पहले जिला चुनें</option></select>
- <label>Gram Panchayat *</label><select id="suGP" disabled><option>पहले Panchayat Samiti चुनें</option></select>
+ <label>Gram Panchayat *</label><select id="suGP" onchange="signupSelectGP()" disabled><option>पहले Panchayat Samiti चुनें</option></select>
  <label>Mobile *</label><input id="suMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर">
  <label>WhatsApp Number</label><input id="suWhatsApp" type="tel" inputmode="numeric" maxlength="10">
  <label>Email / Login ID *</label><input id="suEmail" type="email" autocomplete="username">
@@ -622,17 +622,36 @@ function signupView(){
  <p id="signupMsg" class="error"></p></div>`;
  loadSignupPanchayats();
 }
-function signupFilterPS(){
- const d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS");
- const rows=signupPanchayats.filter(x=>x.district===d),vals=[...new Set(rows.map(x=>x.panchayat_samiti).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
- ps.disabled=!d;ps.innerHTML='<option value="">Panchayat Samiti चुनें</option>'+vals.map(x=>'<option>'+e(x)+'</option>').join("");
- const gp=document.getElementById("suGP");gp.disabled=true;gp.innerHTML='<option value="">पहले Panchayat Samiti चुनें</option>';
+async function signupFilterPS(){
+ const d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS"),gp=document.getElementById("suGP");
+ selectedSignupPanchayatId=null;
+ ps.disabled=true;gp.disabled=true;
+ ps.innerHTML='<option>Loading…</option>';gp.innerHTML='<option value="">पहले Panchayat Samiti चुनें</option>';
+ if(!d){ps.innerHTML='<option value="">पहले जिला चुनें</option>';return}
+ try{
+  const {data,error}=await sb.rpc("get_signup_panchayat_samitis",{p_district:d});
+  if(error)throw error;
+  const vals=(data||[]).map(x=>x.panchayat_samiti).filter(Boolean);
+  ps.innerHTML='<option value="">Panchayat Samiti चुनें</option>'+vals.map(x=>'<option value="'+e(x)+'">'+e(x)+'</option>').join("");
+  ps.disabled=false;
+ }catch(err){ps.innerHTML='<option value="">Load नहीं हुआ</option>';document.getElementById("signupMsg").textContent="Panchayat Samiti load नहीं हुई: "+(err.message||err)}
 }
-function signupFilterGP(){
+async function signupFilterGP(){
  const d=document.getElementById("suDistrict").value,psv=document.getElementById("suPS").value,gp=document.getElementById("suGP");
- const vals=[...new Set(signupPanchayats.filter(x=>x.district===d&&x.panchayat_samiti===psv).map(x=>x.gram_panchayat).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
- gp.disabled=!psv;gp.innerHTML='<option value="">Gram Panchayat चुनें</option>'+vals.map(x=>'<option>'+e(x)+'</option>').join("");
+ selectedSignupPanchayatId=null;gp.disabled=true;gp.innerHTML='<option>Loading…</option>';
+ if(!d||!psv){gp.innerHTML='<option value="">पहले Panchayat Samiti चुनें</option>';return}
+ try{
+  const {data,error}=await sb.rpc("get_signup_gram_panchayats",{p_district:d,p_panchayat_samiti:psv});
+  if(error)throw error;
+  const vals=data||[];
+  gp.innerHTML='<option value="">Gram Panchayat चुनें</option>'+vals.map(x=>'<option value="'+e(x.id)+'">'+e(x.gram_panchayat)+'</option>').join("");
+  gp.disabled=false;
+ }catch(err){gp.innerHTML='<option value="">Load नहीं हुआ</option>';document.getElementById("signupMsg").textContent="Gram Panchayat load नहीं हुई: "+(err.message||err)}
 }
+function signupSelectGP(){
+ selectedSignupPanchayatId=document.getElementById("suGP").value||null;
+}
+
 function previewSignupPhoto(){
  const f=document.getElementById("suPhoto")?.files?.[0],box=document.getElementById("suPhotoPreview");if(!f||!box)return;
  const r=new FileReader();r.onload=()=>{box.innerHTML='<img src="'+e(r.result)+'" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #d5a638;margin-top:8px">'};r.readAsDataURL(f);
@@ -642,13 +661,13 @@ async function createCandidateAccount(){
  const name=document.getElementById("suName").value.trim(),nameHi=document.getElementById("suNameHi").value.trim(),post=document.getElementById("suPost").value,
  d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS").value,gp=document.getElementById("suGP").value,mobile=document.getElementById("suMobile").value.replace(/\D/g,""),wa=document.getElementById("suWhatsApp").value.replace(/\D/g,""),
  email=document.getElementById("suEmail").value.trim(),pw=document.getElementById("suPassword").value,pw2=document.getElementById("suPassword2").value;
- const p=signupPanchayats.find(x=>x.district===d&&x.panchayat_samiti===ps&&x.gram_panchayat===gp);
- if(!name||!post||!p||mobile.length!==10||!email||pw.length<6||pw!==pw2){msg.textContent="कृपया सभी required details सही भरें। Password कम से कम 6 characters का होना चाहिए।";return}
+ const pId=selectedSignupPanchayatId;
+ if(!name||!post||!pId||mobile.length!==10||!email||pw.length<6||pw!==pw2){msg.textContent="कृपया सभी required details सही भरें। Password कम से कम 6 characters का होना चाहिए।";return}
  let photo="";
  const file=document.getElementById("suPhoto")?.files?.[0];
  if(file){photo=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.readAsDataURL(file)})}
  try{
-  const res=await fetch(SUPABASE_URL+"/functions/v1/candidate-self-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password:pw,candidate_name:name,candidate_name_hindi:nameHi,election_post:post,mobile,whatsapp:wa,panchayat_id:p.id,photo_url:photo})});
+  const res=await fetch(SUPABASE_URL+"/functions/v1/candidate-self-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password:pw,candidate_name:name,candidate_name_hindi:nameHi,election_post:post,mobile,whatsapp:wa,panchayat_id:pId,photo_url:photo})});
   const out=await res.json().catch(()=>({}));
   if(!res.ok||!out.success)throw new Error(out.error||"Account create नहीं हो सका");
   const {error:loginError}=await sb.auth.signInWithPassword({email,password:pw});
