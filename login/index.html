@@ -581,7 +581,7 @@ function loginView(msg=""){
  app.innerHTML=`<div class="card login"><h2>Candidate Login</h2><p class="muted">अपने Email और Password से लॉगिन करें।</p>
  <label>Email / Login ID</label><input id="email" type="email" autocomplete="username">
  <label>Password</label><input id="password" type="password" autocomplete="current-password">
- <button class="btn primary" style="width:100%;margin-top:16px" onclick="signIn()">Login</button>
+ <button class="btn primary" style="width:100%;margin-top:16px" onclick="signIn()">Login</button><button class="btn ghost full" style="margin-top:8px" onclick="forgotPassword()">🔑 Password भूल गए?</button>
  <button class="btn soft full" style="margin-top:9px" onclick="signupView()">➕ नया Candidate Account बनाएं</button>
  <p id="msg" class="error">${e(msg)}</p></div>`;
 }
@@ -663,6 +663,14 @@ async function createCandidateAccount(){
  }else{
    msg.textContent="Account बन गया। Email verification पूरा करके फिर Login करें। आपका selected Panchayat सुरक्षित है।";
  }
+}
+async function forgotPassword(){
+ const email=document.getElementById("email")?.value.trim();
+ const msg=document.getElementById("msg");
+ if(!email){msg.textContent="पहले अपना Email / Login ID डालें।";return}
+ msg.textContent="Password reset email भेजा जा रहा है…";
+ const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+ msg.textContent=error?error.message:"Password reset link आपके email पर भेज दिया गया है।";
 }
 async function signIn(){
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
