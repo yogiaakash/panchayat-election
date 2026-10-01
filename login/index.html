@@ -654,15 +654,15 @@ async function createCandidateAccount(){
  let photo="";
  const file=document.getElementById("suPhoto")?.files?.[0];
  if(file){photo=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.readAsDataURL(file)})}
- const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{candidate_name:name,candidate_name_hindi:nameHi,election_post:post,mobile,whatsapp:wa,district:d,panchayat_samiti:ps,gram_panchayat:gp,panchayat_id:p.id}}});
- if(error){msg.textContent=error.message;return}
- if(data.user) localStorage.setItem("pendingCandidatePhoto:"+data.user.id,photo);
- if(data.session){
-   if(photo) await sb.from("candidate_profiles").update({photo_url:photo}).eq("user_id",data.user.id);
-   msg.textContent="Account बन गया। Free Access activate हो रहा है…";await load();
- }else{
-   msg.textContent="Account बन गया। Email verification पूरा करके फिर Login करें। आपका selected Panchayat सुरक्षित है।";
- }
+ try{
+  const res=await fetch(SUPABASE_URL+"/functions/v1/candidate-self-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password:pw,candidate_name:name,candidate_name_hindi:nameHi,election_post:post,mobile,whatsapp:wa,panchayat_id:p.id,photo_url:photo})});
+  const out=await res.json().catch(()=>({}));
+  if(!res.ok||!out.success)throw new Error(out.error||"Account create नहीं हो सका");
+  const {error:loginError}=await sb.auth.signInWithPassword({email,password:pw});
+  if(loginError)throw loginError;
+  msg.textContent="Account बन गया। Free Access activate हो रहा है…";
+  await load();
+ }catch(err){msg.textContent=err.message||"Account create नहीं हो सका।"}
 }
 async function forgotPassword(){
  const email=document.getElementById("email")?.value.trim();
