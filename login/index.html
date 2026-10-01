@@ -748,13 +748,13 @@ async function load(userOverride=null){
  if(!user){loginView("Login session खो गया। कृपया फिर से Login करें।");return}
  currentUser=user;
  try{
-   const {data:{session}}=await sb.auth.getSession();
-   if(session){
-     const ar=await fetch(SUPABASE_URL+"/functions/v1/ensure-candidate-access",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"}});
-     const ao=await ar.json().catch(()=>({}));
-     if(!ar.ok||!ao.success){loginView(ao.error||"Panchayat access activate नहीं हो सका।");await sb.auth.signOut();return}
-   }
- }catch(accessErr){loginView(accessErr.message||"Panchayat access activate नहीं हो सका।");await sb.auth.signOut();return}
+   const {data:accessRows,error:accessRpcError}=await sb.rpc("ensure_candidate_access_rpc");
+   if(accessRpcError)throw accessRpcError;
+   if(!Array.isArray(accessRows)||!accessRows.length)throw new Error("Panchayat access activate नहीं हुआ।");
+ }catch(accessErr){
+   loginView("Panchayat access error: "+(accessErr?.message||accessErr));
+   return;
+ }
  try{
    const pendingKey="pendingCandidatePhoto:"+user.id, pendingPhoto=localStorage.getItem(pendingKey);
    if(pendingPhoto){
@@ -776,17 +776,16 @@ async function load(userOverride=null){
  }
  if(!access){
    try{
-     const {data:{session}}=await sb.auth.getSession();
-     const ar=await fetch(SUPABASE_URL+"/functions/v1/ensure-candidate-access",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"}});
-     const ao=await ar.json().catch(()=>({}));
-     if(ar.ok&&ao.access){
-       access=ao.access;
+     const {data:accessRows,error:accessRpcError}=await sb.rpc("ensure_candidate_access_rpc");
+     if(accessRpcError)throw accessRpcError;
+     const row=Array.isArray(accessRows)?accessRows[0]:null;
+     if(row){
+       access={panchayat_id:row.panchayat_id,access_level:row.access_level,status:row.status,expires_at:row.expires_at};
      }else{
-       loginView("Panchayat access create error: "+(ao.error||"Access record नहीं बना।"));
-       return;
+       throw new Error("Access record नहीं मिला।");
      }
    }catch(ex){
-     loginView("Panchayat access error: "+(ex.message||ex));
+     loginView("Panchayat access create error: "+(ex?.message||ex));
      return;
    }
  }
