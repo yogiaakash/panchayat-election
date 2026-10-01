@@ -743,155 +743,124 @@ async function load(userOverride=null){
    const {data:{session}}=await sb.auth.getSession();
    if(session){showRecoveryPasswordForm();return}
  }
- let user=userOverride||null;
- if(!user){
-   try{
-     const {data:{session}}=await sb.auth.getSession();
-     user=session?.user||null;
-   }catch(sessionErr){
-     loginView("Login session नहीं मिल सका: "+(sessionErr?.message||sessionErr));
-     return;
-   }
- }
+ const user=userOverride;
  if(!user){loginView("Login session खो गया। कृपया फिर से Login करें।");return}
  currentUser=user;
- // Access is created during candidate signup. Do not call a network function here.
- try{
-   const pendingKey="pendingCandidatePhoto:"+user.id, pendingPhoto=localStorage.getItem(pendingKey);
-   if(pendingPhoto){
-     await sb.from("candidate_profiles").update({photo_url:pendingPhoto}).eq("user_id",user.id);
-     localStorage.removeItem(pendingKey);
-   }
- }catch(_){}
- 
- // Login must not be blocked by voter/access-table availability.
- // Signup stores the selected Panchayat in Auth user_metadata, so use that as the
- // initial workspace identity and refresh database access when available.
+
+ // Do not block login on any database/network request.
  const meta=user.user_metadata||{};
- let access={
-   panchayat_id:meta.panchayat_id||null,
+ const pid=meta.panchayat_id||null;
+ if(!pid){
+   loginView("इस account में selected Panchayat सुरक्षित नहीं है। कृपया नया Candidate Account बनाएं।");
+   return;
+ }
+
+ currentAccess={
+   panchayat_id:pid,
    candidate_id:null,
    access_level:"free",
    status:"active",
    expires_at:null
  };
- let p={
-   id:meta.panchayat_id||null,
-   district:meta.district||"",
-   panchayat_samiti:meta.panchayat_samiti||"",
-   gram_panchayat:meta.gram_panchayat||""
- };
 
- try{
-   const {data:dbAccess,error:ae}=await sb.from("panchayat_access")
-     .select("panchayat_id,candidate_id,access_level,status,expires_at")
-     .eq("user_id",user.id).eq("status","active")
-     .or("expires_at.is.null,expires_at.gt."+new Date().toISOString())
-     .limit(1).maybeSingle();
-   if(!ae&&dbAccess) access=dbAccess;
- }catch(accessErr){
-   console.warn("Panchayat access refresh skipped:",accessErr);
- }
-
- if(!access.panchayat_id){
-   loginView("इस account में selected Panchayat सुरक्षित नहीं है। कृपया नया Candidate Account बनाएं।");
-   return;
- }
-
- currentAccess=access;
-
- try{
-   const {data:dbP,error:pe}=await sb.from("panchayats").select("*").eq("id",access.panchayat_id).maybeSingle();
-   if(!pe&&dbP) p=dbP;
- }catch(pErr){
-   console.warn("Panchayat profile refresh skipped:",pErr);
- }
-
- // Candidate branding is optional. Auth metadata is the fallback, so login does not
- // depend on candidate/profile tables being reachable at this moment.
- let c=null;
- try{
-   if(access.candidate_id){
-     const {data:linked}=await sb.from("candidates").select("*").eq("id",access.candidate_id).maybeSingle();
-     c=linked||null;
-   }
-   if(!c){
-     const {data:owned}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).eq("active",true).limit(1).maybeSingle();
-     c=owned||null;
-   }
-   const {data:profile}=await sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle();
-   if(profile&&!c)c=profile;
- }catch(profileErr){
-   console.warn("Candidate profile refresh skipped:",profileErr);
- }
- if(!c){
-   c={
-     id:null,
-     name:meta.candidate_name||"Panchayat Workspace",
-     hindi_name:meta.candidate_name_hindi||meta.candidate_name||"पंचायत कार्यक्षेत्र",
-     post:meta.election_post||"",
-     active:true,
-     gram_panchayat:p.gram_panchayat||meta.gram_panchayat||"",
-     panchayat_samiti:p.panchayat_samiti||meta.panchayat_samiti||"",
-     district:p.district||meta.district||"",
-     photo_url:meta.photo_url||"",
-     symbol_url:"",
-     banner_url:"",
-     mobile:meta.mobile||"",
-     whatsapp:meta.whatsapp||"",
-     email:user.email||""
-   };
- }
  candidate={
-   ...c,
-   gram_panchayat:p.gram_panchayat||c.gram_panchayat||meta.gram_panchayat||"",
-   panchayat_samiti:p.panchayat_samiti||c.panchayat_samiti||meta.panchayat_samiti||"",
-   district:p.district||c.district||meta.district||"",
-   photo_url:c.photo_url||meta.photo_url||"",
-   symbol_url:c.symbol_url||"",
-   banner_url:c.banner_url||""
+   id:null,
+   name:meta.candidate_name||"Panchayat Workspace",
+   hindi_name:meta.candidate_name_hindi||meta.candidate_name||"पंचायत कार्यक्षेत्र",
+   post:meta.election_post||"",
+   active:true,
+   gram_panchayat:meta.gram_panchayat||"",
+   panchayat_samiti:meta.panchayat_samiti||"",
+   district:meta.district||"",
+   photo_url:meta.photo_url||"",
+   symbol_url:"",
+   banner_url:"",
+   mobile:meta.mobile||"",
+   whatsapp:meta.whatsapp||"",
+   email:user.email||""
  };
- try{
-   const {data:branding,error:be}=await sb.functions.invoke("candidate-branding-urls");
-   if(!be&&branding)candidate={...candidate,...branding};
- }catch(_){}
 
- const isLifetime=["lifetime","paid"].includes(String(access.access_level||"").toLowerCase());
- let allVoters=[]; masterVoterCount=0;
- if(isLifetime){
-   for(let from=0;;from+=1000){
-     const {data:batch,error:ve}=await sb.from("voters").select("*").eq("panchayat_id",access.panchayat_id).order("id",{ascending:true}).range(from,from+999);
-     if(ve){loginView("Voter data load error: "+ve.message);return}
-     allVoters.push(...(batch||[])); if(!batch||batch.length<1000)break;
-   }
-   masterVoterCount=allVoters.length;
- }else{
-   const {count,error:ce}=await sb.from("voters").select("id",{count:"exact",head:true}).eq("panchayat_id",access.panchayat_id);
-   if(ce){console.warn("Voter count load skipped:",ce.message);masterVoterCount=0}
-   masterVoterCount=count||0;
-   const freeLimit=Math.max(1,Math.ceil(masterVoterCount*0.10));
-   const {data:batch,error:ve}=await sb.from("voters").select("*").eq("panchayat_id",access.panchayat_id).order("id",{ascending:true}).range(0,freeLimit-1);
-   if(ve){console.warn("Voter data load skipped:",ve.message);allVoters=[]}
-   else allVoters=batch||[];
- }
- voters=allVoters;
- const [{data:cs},{data:ar},{data:ho,error:hoe},{data:vm,error:vme},{data:ss,error:sse}]=await Promise.all([
-   sb.from("voter_contact_status").select("*").eq("panchayat_id",access.panchayat_id),
-   sb.from("voter_addition_requests").select("*").eq("panchayat_id",access.panchayat_id).order("created_at",{ascending:false}),
-   sb.from("voter_house_overrides").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id),
-   sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id),
-   sb.from("candidate_share_settings").select("*").eq("panchayat_id",access.panchayat_id).eq("user_id",user.id).maybeSingle()
- ]);
- if(hoe){console.error("House override load error",hoe)}
- contactMap=new Map((cs||[]).map(x=>[String(x.voter_id),x]));
- additionRows=ar||[];
- houseOverrideMap=new Map((ho||[]).map(x=>[String(x.voter_id),x]));
- voterMobileMap=new Map((vm||[]).map(x=>[String(x.voter_id),x]));
- if(ss?.family_share_message) familyShareMessage=ss.family_share_message;
- if(sse) console.error("Share message load error",sse);
- if(vme) console.error("Voter mobile load error",vme);
- logout.classList.remove("hidden");dashboard();
+ // Open dashboard immediately. Voter/profile data is loaded in background.
+ voters=[];
+ masterVoterCount=0;
+ contactMap=new Map();
+ additionRows=[];
+ houseOverrideMap=new Map();
+ voterMobileMap=new Map();
+ dashboard();
+
+ (async()=>{
+   try{
+     const {data:dbAccess}=await sb.from("panchayat_access")
+       .select("panchayat_id,candidate_id,access_level,status,expires_at")
+       .eq("user_id",user.id).eq("status","active")
+       .or("expires_at.is.null,expires_at.gt."+new Date().toISOString())
+       .limit(1).maybeSingle();
+     if(dbAccess){
+       currentAccess=dbAccess;
+     }
+   }catch(e){console.warn("Access refresh skipped:",e)}
+
+   try{
+     const {data:p}=await sb.from("panchayats").select("*").eq("id",currentAccess.panchayat_id).maybeSingle();
+     if(p){
+       candidate.gram_panchayat=p.gram_panchayat||candidate.gram_panchayat;
+       candidate.panchayat_samiti=p.panchayat_samiti||candidate.panchayat_samiti;
+       candidate.district=p.district||candidate.district;
+     }
+   }catch(e){console.warn("Panchayat refresh skipped:",e)}
+
+   try{
+     const {data:profile}=await sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle();
+     if(profile){
+       candidate={...candidate,...profile,
+         gram_panchayat:profile.gram_panchayat||candidate.gram_panchayat,
+         panchayat_samiti:profile.panchayat_samiti||candidate.panchayat_samiti,
+         district:profile.district||candidate.district,
+         photo_url:profile.photo_url||candidate.photo_url};
+     }
+   }catch(e){console.warn("Candidate profile refresh skipped:",e)}
+
+   try{
+     const paid=["lifetime","paid"].includes(String(currentAccess.access_level||"").toLowerCase());
+     if(paid){
+       for(let from=0;;from+=1000){
+         const {data:batch,error}=await sb.from("voters").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("id",{ascending:true}).range(from,from+999);
+         if(error)break;
+         voters.push(...(batch||[]));
+         if(!batch||batch.length<1000)break;
+       }
+       masterVoterCount=voters.length;
+     }else{
+       const {count}=await sb.from("voters").select("id",{count:"exact",head:true}).eq("panchayat_id",currentAccess.panchayat_id);
+       masterVoterCount=count||0;
+       const freeLimit=Math.max(1,Math.ceil(masterVoterCount*.10));
+       if(freeLimit>0){
+         const {data:batch}=await sb.from("voters").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("id",{ascending:true}).range(0,freeLimit-1);
+         voters=batch||[];
+       }
+     }
+   }catch(e){console.warn("Voter data refresh skipped:",e)}
+
+   try{
+     const [{data:cs},{data:ar},{data:ho},{data:vm},{data:ss}]=await Promise.all([
+       sb.from("voter_contact_status").select("*").eq("panchayat_id",currentAccess.panchayat_id),
+       sb.from("voter_addition_requests").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("created_at",{ascending:false}),
+       sb.from("voter_house_overrides").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
+       sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
+       sb.from("candidate_share_settings").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id).maybeSingle()
+     ]);
+     contactMap=new Map((cs||[]).map(x=>[String(x.voter_id),x]));
+     additionRows=ar||[];
+     houseOverrideMap=new Map((ho||[]).map(x=>[String(x.voter_id),x]));
+     voterMobileMap=new Map((vm||[]).map(x=>[String(x.voter_id),x]));
+     if(ss?.family_share_message)familyShareMessage=ss.family_share_message;
+   }catch(e){console.warn("Extra data refresh skipped:",e)}
+
+   dashboard();
+ })();
 }
+
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0900-\u097f]+/g,"");
 const sk=s=>norm(s).replace(/chh/g,"ch").replace(/sh/g,"s").replace(/ph/g,"f").replace(/bh/g,"b").replace(/dh/g,"d").replace(/th/g,"t").replace(/kh/g,"k").replace(/gh/g,"g").replace(/jh/g,"j").replace(/w/g,"v").replace(/[aeiouy]/g,"");
 function smart(a){return [...new Set(a.filter(x=>x!==null&&x!==undefined&&String(x)!==""))].sort((a,b)=>{const an=Number(a),bn=Number(b);return !isNaN(an)&&!isNaN(bn)?an-bn:String(a).localeCompare(String(b),"hi")})}
