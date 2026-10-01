@@ -872,7 +872,7 @@ function dashboard(){
  document.querySelector("header").style.display="none";
  const c=candidate;
  const total=voters.length;
- const totalMaster=(typeof masterVoterCount==="number"&&masterVoterCount)?masterVoterCount:allVoters.length;
+ const totalMaster=(typeof masterVoterCount==="number"&&masterVoterCount)?masterVoterCount:voters.length;
  const limited=!["lifetime","paid"].includes(String(currentAccess?.access_level||"").toLowerCase());
  const wards=new Set(voters.map(v=>String(v.ward||"")).filter(Boolean)).size;
  const maleCount=voters.filter(v=>/पुरुष|पुरूष|male|^m$/i.test(v.gender||"")).length;
