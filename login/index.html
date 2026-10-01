@@ -756,46 +756,97 @@ async function load(userOverride=null){
    }
  }catch(_){}
  
- // New model: access belongs to Panchayat, not only to a candidate.
- let {data:access,error:ae}=await sb.from("panchayat_access")
-   .select("panchayat_id,candidate_id,access_level,status,expires_at")
-   .eq("user_id",user.id).eq("status","active")
-   .or("expires_at.is.null,expires_at.gt."+new Date().toISOString())
-   .limit(1).maybeSingle();
+ // Login must not be blocked by voter/access-table availability.
+ // Signup stores the selected Panchayat in Auth user_metadata, so use that as the
+ // initial workspace identity and refresh database access when available.
+ const meta=user.user_metadata||{};
+ let access={
+   panchayat_id:meta.panchayat_id||null,
+   candidate_id:null,
+   access_level:"free",
+   status:"active",
+   expires_at:null
+ };
+ let p={
+   id:meta.panchayat_id||null,
+   district:meta.district||"",
+   panchayat_samiti:meta.panchayat_samiti||"",
+   gram_panchayat:meta.gram_panchayat||""
+ };
 
- if(ae){
-   loginView("Panchayat access check error: "+ae.message);
-   return;
+ try{
+   const {data:dbAccess,error:ae}=await sb.from("panchayat_access")
+     .select("panchayat_id,candidate_id,access_level,status,expires_at")
+     .eq("user_id",user.id).eq("status","active")
+     .or("expires_at.is.null,expires_at.gt."+new Date().toISOString())
+     .limit(1).maybeSingle();
+   if(!ae&&dbAccess) access=dbAccess;
+ }catch(accessErr){
+   console.warn("Panchayat access refresh skipped:",accessErr);
  }
- if(!access){
-   loginView("इस login को किसी पंचायत का active access नहीं मिला है। नया account signup से बनाएं या Admin से access activate कराएं।");
+
+ if(!access.panchayat_id){
+   loginView("इस account में selected Panchayat सुरक्षित नहीं है। कृपया नया Candidate Account बनाएं।");
    return;
  }
 
  currentAccess=access;
- const {data:p,error:pe}=await sb.from("panchayats").select("*").eq("id",access.panchayat_id).maybeSingle();
- if(pe||!p){loginView("Panchayat profile load नहीं हो सका।");await sb.auth.signOut();return}
 
- // Candidate branding is optional. A Panchayat-access user can work without a candidate row.
- let c=null;
- if(access.candidate_id){
-   const {data:linked}=await sb.from("candidates").select("*").eq("id",access.candidate_id).maybeSingle();
-   c=linked||null;
+ try{
+   const {data:dbP,error:pe}=await sb.from("panchayats").select("*").eq("id",access.panchayat_id).maybeSingle();
+   if(!pe&&dbP) p=dbP;
+ }catch(pErr){
+   console.warn("Panchayat profile refresh skipped:",pErr);
  }
- if(!c){
-   const {data:owned}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).eq("active",true).limit(1).maybeSingle();
-   c=owned||null;
+
+ // Candidate branding is optional. Auth metadata is the fallback, so login does not
+ // depend on candidate/profile tables being reachable at this moment.
+ let c=null;
+ try{
+   if(access.candidate_id){
+     const {data:linked}=await sb.from("candidates").select("*").eq("id",access.candidate_id).maybeSingle();
+     c=linked||null;
+   }
+   if(!c){
+     const {data:owned}=await sb.from("candidates").select("*").eq("owner_user_id",user.id).eq("active",true).limit(1).maybeSingle();
+     c=owned||null;
+   }
    const {data:profile}=await sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle();
    if(profile&&!c)c=profile;
+ }catch(profileErr){
+   console.warn("Candidate profile refresh skipped:",profileErr);
  }
- candidate=c?{...c,gram_panchayat:p.gram_panchayat,panchayat_samiti:p.panchayat_samiti,district:p.district,photo_url:c.photo_url||"",symbol_url:c.symbol_url||"",banner_url:c.banner_url||""}:{
-   id:null,name:"Panchayat Workspace",hindi_name:"पंचायत कार्यक्षेत्र",post:"",active:true,
-   gram_panchayat:p.gram_panchayat,panchayat_samiti:p.panchayat_samiti,district:p.district,
-   photo_url:"",symbol_url:"",banner_url:""
+ if(!c){
+   c={
+     id:null,
+     name:meta.candidate_name||"Panchayat Workspace",
+     hindi_name:meta.candidate_name_hindi||meta.candidate_name||"पंचायत कार्यक्षेत्र",
+     post:meta.election_post||"",
+     active:true,
+     gram_panchayat:p.gram_panchayat||meta.gram_panchayat||"",
+     panchayat_samiti:p.panchayat_samiti||meta.panchayat_samiti||"",
+     district:p.district||meta.district||"",
+     photo_url:meta.photo_url||"",
+     symbol_url:"",
+     banner_url:"",
+     mobile:meta.mobile||"",
+     whatsapp:meta.whatsapp||"",
+     email:user.email||""
+   };
+ }
+ candidate={
+   ...c,
+   gram_panchayat:p.gram_panchayat||c.gram_panchayat||meta.gram_panchayat||"",
+   panchayat_samiti:p.panchayat_samiti||c.panchayat_samiti||meta.panchayat_samiti||"",
+   district:p.district||c.district||meta.district||"",
+   photo_url:c.photo_url||meta.photo_url||"",
+   symbol_url:c.symbol_url||"",
+   banner_url:c.banner_url||""
  };
- if(c){
-   try{const {data:branding,error:be}=await sb.functions.invoke("candidate-branding-urls");if(!be&&branding)candidate={...candidate,...branding}}catch(_){}
- }
+ try{
+   const {data:branding,error:be}=await sb.functions.invoke("candidate-branding-urls");
+   if(!be&&branding)candidate={...candidate,...branding};
+ }catch(_){}
 
  const isLifetime=["lifetime","paid"].includes(String(access.access_level||"").toLowerCase());
  let allVoters=[]; masterVoterCount=0;
