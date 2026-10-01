@@ -743,8 +743,16 @@ async function load(userOverride=null){
    const {data:{session}}=await sb.auth.getSession();
    if(session){showRecoveryPasswordForm();return}
  }
- const {data:{user:sessionUser}}=await sb.auth.getUser();
- const user=userOverride||sessionUser;
+ let user=userOverride||null;
+ if(!user){
+   try{
+     const {data:{session}}=await sb.auth.getSession();
+     user=session?.user||null;
+   }catch(sessionErr){
+     loginView("Login session नहीं मिल सका: "+(sessionErr?.message||sessionErr));
+     return;
+   }
+ }
  if(!user){loginView("Login session खो गया। कृपया फिर से Login करें।");return}
  currentUser=user;
  // Access is created during candidate signup. Do not call a network function here.
