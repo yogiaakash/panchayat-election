@@ -672,6 +672,26 @@ async function forgotPassword(){
  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
  msg.textContent=error?error.message:"Password reset link आपके email पर भेज दिया गया है।";
 }
+function showRecoveryPasswordForm(){
+ document.querySelector("header").style.display="flex";
+ logout.classList.add("hidden");
+ app.innerHTML=`<div class="card login"><h2>🔐 नया Password बनाएं</h2><p class="muted">आपका password reset link valid है। नया password डालें।</p>
+ <label>New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="कम से कम 6 characters">
+ <label>Confirm New Password</label><input id="newPassword2" type="password" autocomplete="new-password">
+ <button class="btn primary full" style="margin-top:16px" onclick="updateRecoveryPassword()">Password Update करें</button>
+ <p id="resetMsg" class="error"></p></div>`;
+}
+async function updateRecoveryPassword(){
+ const p=document.getElementById("newPassword").value,p2=document.getElementById("newPassword2").value,msg=document.getElementById("resetMsg");
+ if(p.length<6){msg.textContent="Password कम से कम 6 characters का होना चाहिए।";return}
+ if(p!==p2){msg.textContent="दोनों passwords समान नहीं हैं।";return}
+ msg.textContent="Password update हो रहा है…";
+ const {error}=await sb.auth.updateUser({password:p});
+ if(error){msg.textContent=error.message;return}
+ history.replaceState({},document.title,window.location.pathname);
+ msg.textContent="Password successfully update हो गया। Login किया जा रहा है…";
+ setTimeout(()=>load(),500);
+}
 async function signIn(){
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
  document.getElementById("msg").textContent="Signing in…";
@@ -681,6 +701,11 @@ async function signIn(){
 }
 logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];loginView()};
 async function load(){
+ const hash=window.location.hash||"";
+ if(/(?:^#|&)type=recovery(?:&|$)/.test(hash)){
+   const {data:{session}}=await sb.auth.getSession();
+   if(session){showRecoveryPasswordForm();return}
+ }
  const {data:{user}}=await sb.auth.getUser();
  if(!user){loginView();return}
  currentUser=user;
@@ -1414,6 +1439,9 @@ async function sendFamilyVoterSlips(){
   const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();window.open(waUrl,"_blank");familyShareDlg.close();
   alert("WhatsApp message खुल गया है और PDF download हो गई है। यदि PDF auto-attach न हो, तो WhatsApp chat में PDF attach करें।");
  }catch(x){alert("Family voter slip तैयार नहीं हो सकी: "+x.message)}
-}sb.auth.onAuthStateChange(()=>{});
+}sb.auth.onAuthStateChange((event,session)=>{
+ if(event==="PASSWORD_RECOVERY"&&session){showRecoveryPasswordForm();return}
+ if(event==="SIGNED_OUT"){currentUser=null;currentAccess=null}
+});
 load();
 </script></body></html>
