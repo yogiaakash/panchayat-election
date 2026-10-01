@@ -1047,7 +1047,9 @@ function showWorkspace(){
  const home=document.getElementById("demoHome");if(home)home.style.display="block";
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="block";
  const tabs=w?.querySelector(".tabs");if(tabs)tabs.style.display="none";
- window.scrollTo({top:0,behavior:"smooth"});
+ // Always start a module at its own heading, not at the previous Home-page scroll position.
+ window.scrollTo(0,0);
+ requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo(0,0)));
 }
 function setModuleVisibility(mode){
  const info=document.getElementById("tabInfo"),slip=document.getElementById("tabSlip"),stats=document.getElementById("tabStats"),ops=document.getElementById("opsReports");
