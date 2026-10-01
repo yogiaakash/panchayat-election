@@ -859,12 +859,12 @@ async function load(userOverride=null){
    masterVoterCount=allVoters.length;
  }else{
    const {count,error:ce}=await sb.from("voters").select("id",{count:"exact",head:true}).eq("panchayat_id",access.panchayat_id);
-   if(ce){loginView("Voter count load error: "+ce.message);return}
+   if(ce){console.warn("Voter count load skipped:",ce.message);masterVoterCount=0}
    masterVoterCount=count||0;
    const freeLimit=Math.max(1,Math.ceil(masterVoterCount*0.10));
    const {data:batch,error:ve}=await sb.from("voters").select("*").eq("panchayat_id",access.panchayat_id).order("id",{ascending:true}).range(0,freeLimit-1);
-   if(ve){loginView("Voter data load error: "+ve.message);return}
-   allVoters=batch||[];
+   if(ve){console.warn("Voter data load skipped:",ve.message);allVoters=[]}
+   else allVoters=batch||[];
  }
  voters=allVoters;
  const [{data:cs},{data:ar},{data:ho,error:hoe},{data:vm,error:vme},{data:ss,error:sse}]=await Promise.all([
