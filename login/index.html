@@ -747,14 +747,7 @@ async function load(userOverride=null){
  const user=userOverride||sessionUser;
  if(!user){loginView("Login session खो गया। कृपया फिर से Login करें।");return}
  currentUser=user;
- try{
-   const {data:accessRows,error:accessRpcError}=await sb.rpc("ensure_candidate_access_rpc");
-   if(accessRpcError)throw accessRpcError;
-   if(!Array.isArray(accessRows)||!accessRows.length)throw new Error("Panchayat access activate नहीं हुआ।");
- }catch(accessErr){
-   loginView("Panchayat access error: "+(accessErr?.message||accessErr));
-   return;
- }
+ // Access is created during candidate signup. Do not call a network function here.
  try{
    const pendingKey="pendingCandidatePhoto:"+user.id, pendingPhoto=localStorage.getItem(pendingKey);
    if(pendingPhoto){
@@ -775,19 +768,8 @@ async function load(userOverride=null){
    return;
  }
  if(!access){
-   try{
-     const {data:accessRows,error:accessRpcError}=await sb.rpc("ensure_candidate_access_rpc");
-     if(accessRpcError)throw accessRpcError;
-     const row=Array.isArray(accessRows)?accessRows[0]:null;
-     if(row){
-       access={panchayat_id:row.panchayat_id,access_level:row.access_level,status:row.status,expires_at:row.expires_at};
-     }else{
-       throw new Error("Access record नहीं मिला।");
-     }
-   }catch(ex){
-     loginView("Panchayat access create error: "+(ex?.message||ex));
-     return;
-   }
+   loginView("इस login को किसी पंचायत का active access नहीं मिला है। नया account signup से बनाएं या Admin से access activate कराएं।");
+   return;
  }
 
  currentAccess=access;
