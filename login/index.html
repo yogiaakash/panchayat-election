@@ -586,9 +586,12 @@ function loginView(msg=""){
  <p id="msg" class="error">${e(msg)}</p></div>`;
 }
 async function loadSignupPanchayats(){
- const {data,error}=await sb.from("panchayats").select("id,district,panchayat_samiti,gram_panchayat").order("district").order("panchayat_samiti").order("gram_panchayat");
- if(error){document.getElementById("signupMsg").textContent="Panchayat list load नहीं हुई: "+error.message;return}
- signupPanchayats=data||[];
+ try{
+  const res=await fetch(SUPABASE_URL+"/functions/v1/public-panchayat-directory");
+  const out=await res.json();
+  if(!res.ok)throw new Error(out.error||"Directory load failed");
+  signupPanchayats=out.panchayats||[];
+ }catch(error){document.getElementById("signupMsg").textContent="Panchayat list load नहीं हुई: "+error.message;return}
  const ds=[...new Set(signupPanchayats.map(x=>x.district).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
  const el=document.getElementById("suDistrict");if(el)el.innerHTML='<option value="">जिला चुनें</option>'+ds.map(x=>'<option>'+e(x)+'</option>').join("");
 }
