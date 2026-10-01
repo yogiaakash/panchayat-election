@@ -586,14 +586,28 @@ function loginView(msg=""){
  <p id="msg" class="error">${e(msg)}</p></div>`;
 }
 async function loadSignupPanchayats(){
+ const msg=document.getElementById("signupMsg");
  try{
-  const res=await fetch(SUPABASE_URL+"/functions/v1/public-panchayat-directory");
-  const out=await res.json();
-  if(!res.ok)throw new Error(out.error||"Directory load failed");
-  signupPanchayats=out.panchayats||[];
- }catch(error){document.getElementById("signupMsg").textContent="Panchayat list load नहीं हुई: "+error.message;return}
- const ds=[...new Set(signupPanchayats.map(x=>x.district).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
- const el=document.getElementById("suDistrict");if(el)el.innerHTML='<option value="">जिला चुनें</option>'+ds.map(x=>'<option>'+e(x)+'</option>').join("");
+  let data=null;
+  try{
+   const res=await fetch(SUPABASE_URL+"/functions/v1/public-panchayat-directory",{method:"GET"});
+   const out=await res.json().catch(()=>({}));
+   if(res.ok&&Array.isArray(out.panchayats)) data=out.panchayats;
+  }catch(_){}
+  if(!data){
+   const {data:rpc,error}=await sb.rpc("get_signup_panchayats");
+   if(error)throw error;
+   data=rpc||[];
+  }
+  signupPanchayats=data;
+  const ds=[...new Set(data.map(x=>x.district).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"hi"));
+  const el=document.getElementById("suDistrict");
+  if(!el)throw new Error("District dropdown not found");
+  el.innerHTML='<option value="">जिला चुनें</option>'+ds.map(x=>'<option value="'+e(x)+'">'+e(x)+'</option>').join("");
+  if(!ds.length)throw new Error("Panchayat directory में District नहीं मिला");
+ }catch(error){
+  if(msg)msg.textContent="Panchayat list load नहीं हुई: "+(error?.message||error);
+ }
 }
 function signupView(){
  document.querySelector("header").style.display="flex";logout.classList.add("hidden");
