@@ -721,12 +721,21 @@ async function updateRecoveryPassword(){
  setTimeout(()=>load(),500);
 }
 async function signIn(){
- const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
- document.getElementById("msg").textContent="Signing in…";
- const {error}=await sb.auth.signInWithPassword({email,password});
- if(error){document.getElementById("msg").textContent=error.message;return}
- await load();
+ const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,msg=document.getElementById("msg");
+ msg.textContent="Signing in…";
+ if(!email||!password){msg.textContent="Email और Password दोनों भरें।";return}
+ try{
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){msg.textContent=error.message;return}
+  if(!data?.session){msg.textContent="Login session नहीं मिला।";return}
+  msg.textContent="Login successful… Panchayat access check हो रहा है।";
+  await load();
+ }catch(err){
+  console.error("SIGNIN ERROR",err);
+  msg.textContent="Login error: "+(err?.message||String(err));
+ }
 }
+
 logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];loginView()};
 async function load(){
  const hash=window.location.hash||"";
