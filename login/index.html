@@ -694,10 +694,18 @@ async function updateRecoveryPassword(){
 }
 async function signIn(){
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
- document.getElementById("msg").textContent="Signing in…";
- const {error}=await sb.auth.signInWithPassword({email,password});
- if(error){document.getElementById("msg").textContent=error.message;return}
- await load();
+ const msg=document.getElementById("msg");msg.textContent="Signing in…";
+ if(!email||!password){msg.textContent="Email और Password दोनों भरें।";return}
+ try{
+  const result=await Promise.race([
+   sb.auth.signInWithPassword({email,password}),
+   new Promise((_,reject)=>setTimeout(()=>reject(new Error("Login request timeout. Supabase/Auth response नहीं आया।")),15000))
+  ]);
+  const {error}=result;
+  if(error){msg.textContent=error.message;return}
+  msg.textContent="Login successful. Panchayat access check हो रहा है…";
+  await load();
+ }catch(err){msg.textContent=err?.message||"Login failed";console.error(err)}
 }
 logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];loginView()};
 async function load(){
