@@ -988,7 +988,22 @@ async function load(userOverride=null){
      return;
    }
 
-   // Render as soon as voter data is ready.
+   // Load persistent voter mobile numbers BEFORE rendering the dashboard.
+   // This guarantees logout/login and another browser restore the same data.
+   try{
+     const {data:mobileRows,error:mobileError}=await sb.from("voter_mobile_numbers")
+       .select("id,user_id,panchayat_id,voter_id,mobile_number,created_at,updated_at")
+       .eq("user_id",user.id)
+       .eq("panchayat_id",currentAccess.panchayat_id);
+     if(mobileError) throw mobileError;
+     voterMobileMap=new Map((mobileRows||[]).map(x=>[String(x.voter_id),x]));
+     console.log("Persistent voter mobiles loaded:",voterMobileMap.size);
+   }catch(mobileError){
+     console.error("Persistent voter mobile load failed:",mobileError);
+     voterMobileMap=new Map();
+   }
+
+   // Render only after persistent mobile numbers have been loaded.
    dashboard();
 
    // Optional metadata can load after the dashboard is visible.
@@ -1033,8 +1048,10 @@ async function load(userOverride=null){
      contactMap=new Map((cs?.data||[]).map(x=>[String(x.voter_id),x]));
      additionRows=ar?.data||[];
      houseOverrideMap=new Map((ho?.data||[]).map(x=>[String(x.voter_id),x]));
-     voterMobileMap=new Map((vm?.data||[]).map(x=>[String(x.voter_id),x]));
-     dashboard();
+     if(!vm?.error && Array.isArray(vm?.data)){
+       voterMobileMap=new Map(vm.data.map(x=>[String(x.voter_id),x]));
+     }
+     renderRows();
    }).catch(e=>console.warn("Optional data refresh skipped:",e));
  })();
 }
