@@ -824,21 +824,12 @@ async function load(userOverride=null){
    try{
      const {data:{session}}=await sb.auth.getSession();
      if(!session?.access_token) throw new Error("No authenticated session");
-     const resp=await fetch("/login/api/candidate-voter-data",{
-       method:"POST",
-       headers:{
-         "Authorization":"Bearer "+session.access_token,
-         "Content-Type":"application/json"
-       },
-       body:"{}"
-     });
-     const out=await resp.json().catch(()=>({}));
-     if(!resp.ok) throw new Error(out?.error||("Voter API HTTP "+resp.status));
-     if(out?.error) throw new Error(out.error);
-     voters=Array.isArray(out?.voters)?out.voters:[];
-     masterVoterCount=Number(out?.master_count||0);
-     currentAccess={...currentAccess,panchayat_id:out?.panchayat_id||currentAccess.panchayat_id,access_level:out?.access_level||currentAccess.access_level};
-     console.log("Candidate voter data:",out?.returned_count,"/",masterVoterCount,out?.access_level);
+     const {data:rpcRows,error:rpcError}=await sb.rpc("get_candidate_voters");
+     if(rpcError) throw rpcError;
+     voters=Array.isArray(rpcRows)?rpcRows:[];
+     masterVoterCount=voters.length;
+     console.log("Candidate voter data:",voters.length,"full access");
+     if(!voters.length) throw new Error("Database returned 0 voters for this authenticated account");
    }catch(e){console.error("Voter data refresh failed:",e)}
    try{
      const [{data:cs},{data:ar},{data:ho},{data:vm},{data:ss}]=await Promise.all([
