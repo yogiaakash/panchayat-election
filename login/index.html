@@ -1366,7 +1366,31 @@ let generatedWardPdfFile=null;
 function updateSlipCount(){const el=document.getElementById("slipWard"),info=document.getElementById("slipCount");if(!el||!info)return;const w=el.value;if(!w){info.textContent="पहले Ward चुनें";return}const n=voters.filter(v=>String(v.ward)===String(w)).length;info.innerHTML=`<b>Ward ${e(w)}</b> • ${n} voters • सभी की slips एक PDF में`;}
 function renderExactSlipPreview(list,w){const grid=document.getElementById("slipGrid");if(!grid)return;const demo=list.length?list:voters.slice(0,1);grid.innerHTML=Array.from({length:9},(_,i)=>{const p=demo[i%demo.length]||{};return `<div class="miniSlip"><div class="mh">ग्राम पंचायत ${e(candidate.gram_panchayat||"")}</div><div class="orange">मतदाता पर्ची</div><b>Ward:</b> ${e(w)}<br><b>क्रम:</b> ${e(p.serial_no??(i+1))} &nbsp; <b>EPIC:</b> ${e(p.epic||"-")}<br><b>नाम:</b> ${e(p.name||"-")}<br><b>पिता/पति:</b> ${e(p.relative_name||"-")}<br><b>मकान:</b> ${e(p.house_no||"-")}<br><b>क्षेत्र:</b> ${e(p.colony||"-")}<br><b>आयु:</b> ${e(p.age||"-")}</div>`}).join("");}
 function toggleSlipPreview(){const x=document.getElementById("slipPreview");if(x)x.style.display=x.style.display==="block"?"none":"block";}
-async function generateExactWardPdf(){const w=document.getElementById("slipWard")?.value;if(!w){alert("पहले Ward चुनें।");return}const list=voters.filter(v=>String(v.ward)===String(w));if(!list.length){alert("इस Ward में voter data नहीं मिला।");return}const box=document.getElementById("pdfProgress"),ready=document.getElementById("pdfReady"),preview=document.getElementById("slipPreview"),btn=document.getElementById("generateWardBtn");box.style.display="block";ready.classList.add("hidden");preview.style.display="none";btn.disabled=true;generatedWardPdfFile=null;let pct=8;const setp=(p,detail)=>{pct=Math.max(pct,p);document.getElementById("pdfFill").style.width=pct+"%";document.getElementById("pdfPercent").textContent=pct+"%";document.getElementById("pdfProgressText").textContent=pct+"% Generated";document.getElementById("pdfProgressDetail").textContent=detail};try{setp(15,`0 / ${list.length} voter slips तैयार`);await new Promise(r=>setTimeout(r,80));setp(35,`${Math.ceil(list.length*.35)} / ${list.length} voter slips तैयार`);generatedWardPdfFile=await makePdfFile(list,`Ward_${w}_Voter_Slips.pdf`);setp(90,`${list.length} / ${list.length} voter slips तैयार`);renderExactSlipPreview(list,w);setp(100,`${list.length} / ${list.length} voter slips तैयार`);document.getElementById("pdfReadyText").textContent=`Ward ${w} voter slip PDF तैयार है`;ready.classList.remove("hidden");const u=URL.createObjectURL(generatedWardPdfFile),a=document.createElement("a");a.href=u;a.download=generatedWardPdfFile.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);}catch(err){alert("PDF तैयार नहीं हो सकी: "+err.message)}finally{btn.disabled=false}}
+async function generateExactWardPdf(){
+ const w=document.getElementById("slipWard")?.value;
+ if(!w){alert("पहले Ward चुनें।");return}
+ const list=voters.filter(v=>String(v.ward)===String(w));
+ if(!list.length){alert("इस Ward में voter data नहीं मिला।");return}
+ const box=document.getElementById("pdfProgress"),ready=document.getElementById("pdfReady"),preview=document.getElementById("slipPreview"),btn=document.getElementById("generateWardBtn");
+ box.style.display="block";ready.classList.add("hidden");preview.style.display="none";btn.disabled=true;generatedWardPdfFile=null;
+ const pctEl=document.getElementById("pdfPercent"),fill=document.getElementById("pdfFill"),textEl=document.getElementById("pdfProgressText"),detail=document.getElementById("pdfProgressDetail");
+ const setp=(done,total)=>{const pct=total?Math.min(100,Math.round(done*100/total)):0;fill.style.width=pct+"%";pctEl.textContent=pct+"%";textEl.textContent=pct+"% Generated";detail.textContent=done+" / "+total+" voter slips तैयार"};
+ try{
+  setp(0,list.length);
+  // Generate 9 slips per A4 page. This avoids creating hundreds of separate
+  // full-page canvases and reports real progress after every page.
+  generatedWardPdfFile=await makeWardGridPdf(list,`Ward_${w}_Voter_Slips.pdf`,(done,total)=>setp(done,total));
+  setp(list.length,list.length);
+  renderExactSlipPreview(list,w);
+  document.getElementById("pdfReadyText").textContent=`Ward ${w} के ${list.length} voter slips का PDF तैयार है`;
+  ready.classList.remove("hidden");
+  const u=URL.createObjectURL(generatedWardPdfFile),a=document.createElement("a");a.href=u;a.download=generatedWardPdfFile.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);
+ }catch(err){
+  console.error("Ward PDF generation failed:",err);
+  alert("PDF तैयार नहीं हो सकी: "+(err?.message||err));
+  document.getElementById("pdfProgressDetail").textContent="PDF generation में समस्या आई";
+ }finally{btn.disabled=false}
+}
 async function shareGeneratedWardPdf(){if(!generatedWardPdfFile){alert("पहले PDF Generate करें।");return}await sharePdfFile(generatedWardPdfFile,"Ward Voter Information Slips","मतदाता सूची संदर्भ हेतु Ward voter slips");}
 function renderPanchayatStats(){
  const box=document.getElementById("pStats");if(!box)return;
