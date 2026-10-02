@@ -19,10 +19,62 @@ export default async function handler(req,res){
     if(!r.ok) return res.status(r.status).json({error:"Supabase voter RPC failed ("+r.status+")",details:text});
     let voters=[];
     try{voters=JSON.parse(text)}catch{}
-    const count=Array.isArray(voters)?voters.length:0;
+    voters=Array.isArray(voters)?voters:[];
+    const count=voters.length;
+    const panchayatId=voters[0]?.panchayat_id||null;
+
+    // Full voter details are unlocked only after a verified lifetime payment
+    // for THIS logged-in user and THIS Panchayat. Never send unmasked fields
+    // to a free browser session.
+    let fullAccess=false;
+    if(panchayatId && authUser?.id){
+      const payUrl=base+"/rest/v1/lifetime_payment_records?select=id&user_id=eq."+encodeURIComponent(authUser.id)+"&panchayat_id=eq."+encodeURIComponent(panchayatId)+"&status=eq.paid&limit=1";
+      const pr=await fetch(payUrl,{method:"GET",headers:{"Authorization":auth,"apikey":key,"Accept":"application/json"}});
+      if(pr.ok){
+        try{const pd=await pr.json();fullAccess=Array.isArray(pd)&&pd.length>0}catch{}
+      }
+    }
+
+    const maskName=(value)=>{
+      const s=String(value??"").trim();
+      if(!s)return s;
+      if(s.length<=2)return s[0]+"**";
+      if(s.length===3)return s[0]+"**";
+      return s.slice(0,2)+"**"+s.slice(-1);
+    };
+    const maskEpic=(value)=>{
+      const s=String(value??"").trim();
+      if(!s)return s;
+      const slash=s.lastIndexOf("/");
+      if(slash>=0 && s.length-slash>3){
+        const tail=s.slice(slash+1);
+        return s.slice(0,slash+1)+tail.slice(0,1)+"*****"+tail.slice(-2);
+      }
+      return s.length>5?s.slice(0,3)+"*****"+s.slice(-2):"*****";
+    };
+    const maskMobile=(value)=>{
+      const s=String(value??"").trim();
+      if(!s)return s;
+      return s.length>4?s.slice(0,2)+"******"+s.slice(-2):"********";
+    };
+
+    if(!fullAccess){
+      voters=voters.map(v=>({
+        ...v,
+        name:maskName(v.name),
+        relative_name:maskName(v.relative_name),
+        epic:maskEpic(v.epic),
+        mobile_number:v.mobile_number?maskMobile(v.mobile_number):v.mobile_number
+      }));
+    }
+
     return res.status(200).json({
       success:true,
-      voters:Array.isArray(voters)?voters:[],
+      full_access:fullAccess,
+      access_level:fullAccess?"full":"masked",
+      panchayat_id:panchayatId,
+      master_count:count,
+      voters,
       returned_count:count
     });
   }catch(e){
