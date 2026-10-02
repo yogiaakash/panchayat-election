@@ -1157,6 +1157,8 @@ function dashboard(){
  const visited=statuses.filter(x=>x.contact_status==="met").length;
  const pending=voters.length-visited-contacted;
  const additions=additionRows.filter(x=>x.status!=="closed").length;
+ const maskedDashboard=currentAccess.access_level!=="full";
+ const maskStat=n=>maskedDashboard?"****":String(n);
  app.innerHTML=`
  <section id="demoHome">
   <div class="demoHead">
@@ -1188,12 +1190,12 @@ function dashboard(){
     <div class="demoTitle">📊 पंचायत की जानकारी</div>
     <div class="demoInfoLead">इस पंचायत के मतदाता, वार्ड और संपर्क प्रगति का संक्षिप्त सार</div>
     <div class="demoInfoList">
-     <div class="demoInfoRow"><div><b>${total}</b><span>- कुल मतदाता</span></div><small>पंचायत की वर्तमान मतदाता सूची में उपलब्ध कुल मतदाता</small><div class="demoGenderBreak"><span><b>${maleCount}</b> पुरुष</span><span>•</span><span><b>${femaleCount}</b> महिला</span></div></div>
-     <div class="demoInfoRow"><div><b>${wards}</b><span>- कुल वार्ड</span></div><small>इस पंचायत में उपलब्ध अलग-अलग वार्डों की संख्या</small></div>
-     <div class="demoInfoRow"><div><b>${contacted}</b><span>- संपर्क किए गए</span></div><small>जिन मतदाताओं से फोन या अन्य माध्यम से संपर्क दर्ज किया गया</small></div>
-     <div class="demoInfoRow"><div><b>${visited}</b><span>- घर पर भेंट</span></div><small>जिन मतदाताओं या परिवारों से घर पर मिलना दर्ज किया गया</small></div>
-     <div class="demoInfoRow"><div><b>${Math.max(0,pending)}</b><span>- संपर्क बाकी</span></div><small>जिन मतदाताओं का संपर्क या भेंट अभी दर्ज नहीं हुआ</small></div>
-     <div class="demoInfoRow"><div><b>${additions}</b><span>- नाम जोड़ने की प्रविष्टियाँ</span></div><small>Supp-2 / नाम जोड़ने हेतु दर्ज सक्रिय entries</small></div>
+     <div class="demoInfoRow"><div><b>${maskStat(total)}</b><span>- कुल मतदाता</span></div><small>पंचायत की वर्तमान मतदाता सूची में उपलब्ध कुल मतदाता</small><div class="demoGenderBreak"><span><b>${maskStat(maleCount)}</b> पुरुष</span><span>•</span><span><b>${maskStat(femaleCount)}</b> महिला</span></div></div>
+     <div class="demoInfoRow"><div><b>${maskStat(wards)}</b><span>- कुल वार्ड</span></div><small>इस पंचायत में उपलब्ध अलग-अलग वार्डों की संख्या</small></div>
+     <div class="demoInfoRow"><div><b>${maskStat(contacted)}</b><span>- संपर्क किए गए</span></div><small>जिन मतदाताओं से फोन या अन्य माध्यम से संपर्क दर्ज किया गया</small></div>
+     <div class="demoInfoRow"><div><b>${maskStat(visited)}</b><span>- घर पर भेंट</span></div><small>जिन मतदाताओं या परिवारों से घर पर मिलना दर्ज किया गया</small></div>
+     <div class="demoInfoRow"><div><b>${maskStat(Math.max(0,pending))}</b><span>- संपर्क बाकी</span></div><small>जिन मतदाताओं का संपर्क या भेंट अभी दर्ज नहीं हुआ</small></div>
+     <div class="demoInfoRow"><div><b>${maskStat(additions)}</b><span>- नाम जोड़ने की प्रविष्टियाँ</span></div><small>Supp-2 / नाम जोड़ने हेतु दर्ज सक्रिय entries</small></div>
     </div>
    </div>
   </div>
