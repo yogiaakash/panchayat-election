@@ -994,15 +994,17 @@ async function load(userOverride=null){
      sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle(),
      sb.from("voter_contact_status").select("*").eq("panchayat_id",currentAccess.panchayat_id),
      sb.from("voter_addition_requests").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("created_at",{ascending:false}),
+     sb.from("candidate_share_settings").select("family_share_message").eq("user_id",user.id).eq("panchayat_id",currentAccess.panchayat_id).maybeSingle(),
      sb.from("voter_house_overrides").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
      sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id)
-   ]).then(async ([pr,prof,cs,ar,ho,vm])=>{
+   ]).then(async ([pr,prof,cs,ar,ho,vm,share])=>{
      const p=pr?.data;
      if(p){
        candidate.gram_panchayat=p.gram_panchayat||candidate.gram_panchayat;
        candidate.panchayat_samiti=p.panchayat_samiti||candidate.panchayat_samiti;
        candidate.district=p.district||candidate.district;
      }
+     if(share?.data?.family_share_message) familyShareMessage=share.data.family_share_message;
      const profile=prof?.data;
      if(profile){
        candidate={...candidate,...profile};
