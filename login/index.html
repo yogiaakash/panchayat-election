@@ -1076,6 +1076,66 @@ function hindiPostName(post){
  if(/पद प्रत्याशी$/u.test(raw))return raw;
  return raw+" पद प्रत्याशी";
 }
+function candidatePhotoHtml(url,name){
+ const fallback=e((name||"प").slice(0,1));
+ return url?'<img src="'+e(url)+'" alt="Candidate Photo" onerror="this.outerHTML=\'<span>'+fallback+'</span>\'">':'<span>'+fallback+'</span>';
+}
+function openCandidateProfile(){
+ const c=candidate||{};
+ app.innerHTML=`
+ <section class="card" style="max-width:760px;margin:18px auto">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+   <button class="btn ghost" onclick="dashboard()">← वापस</button>
+   <div class="title" style="margin:0">👤 Candidate Profile</div>
+  </div>
+  <div style="text-align:center;padding:8px 0 18px">
+   <div id="profilePhotoPreview" style="width:120px;height:120px;border-radius:50%;margin:auto;overflow:hidden;background:#e7f0ec;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800;color:#176451">${candidatePhotoHtml(c.photo_url,c.hindi_name||c.name)}</div>
+   <label class="btn soft" style="display:inline-flex;margin-top:12px;cursor:pointer">
+    📷 Change Photo
+    <input id="profilePhoto" type="file" accept="image/*" style="display:none" onchange="previewCandidatePhoto(this)">
+   </label>
+  </div>
+  <div class="grid2">
+   <div><label>Candidate Name</label><input id="profileName" value="${e(c.name||"")}" readonly></div>
+   <div><label>Candidate Name (Hindi)</label><input id="profileNameHi" value="${e(c.hindi_name||"")}" readonly></div>
+   <div><label>Election Post</label><input value="${e(hindiPostName(c.post||""))}" readonly></div>
+   <div><label>Mobile Number</label><input id="profileMobile" value="${e(c.mobile||"")}" inputmode="numeric" maxlength="10"></div>
+   <div><label>WhatsApp Number</label><input id="profileWhatsApp" value="${e(c.whatsapp||"")}" inputmode="numeric" maxlength="10"></div>
+   <div><label>Email</label><input value="${e(c.email||"")}" readonly></div>
+   <div><label>District</label><input value="${e(c.district||"")}" readonly></div>
+   <div><label>Panchayat Samiti</label><input value="${e(c.panchayat_samiti||"")}" readonly></div>
+   <div><label>Gram Panchayat</label><input value="${e(c.gram_panchayat||"")}" readonly></div>
+  </div>
+  <div id="profileMsg" class="notice" style="margin-top:12px">आप अपना mobile/WhatsApp और profile photo update कर सकते हैं। Panchayat और election post account से जुड़े हैं।</div>
+  <button class="btn primary full" style="margin-top:10px" onclick="saveCandidateProfile()">💾 Save Profile Changes</button>
+ </section>`;
+}
+function previewCandidatePhoto(input){
+ const file=input?.files?.[0];if(!file)return;
+ compressSignupPhoto(file).then(data=>{
+   const box=document.getElementById("profilePhotoPreview");
+   if(box)box.innerHTML='<img src="'+e(data)+'" style="width:100%;height:100%;object-fit:cover" alt="New Photo">';
+   input.dataset.compressed=data;
+ }).catch(err=>{const m=document.getElementById("profileMsg");if(m)m.textContent=err.message||"Photo process नहीं हो सकी";});
+}
+async function saveCandidateProfile(){
+ const msg=document.getElementById("profileMsg");if(msg)msg.textContent="Profile save हो रही है…";
+ const mobile=(document.getElementById("profileMobile")?.value||"").replace(/\D/g,"");
+ const whatsapp=(document.getElementById("profileWhatsApp")?.value||"").replace(/\D/g,"");
+ if(mobile && mobile.length!==10){msg.textContent="Mobile Number 10 digits का होना चाहिए।";return}
+ if(whatsapp && whatsapp.length!==10){msg.textContent="WhatsApp Number 10 digits का होना चाहिए।";return}
+ const file=document.getElementById("profilePhoto");
+ let photo=file?.dataset?.compressed||"";
+ if(file?.files?.[0]&&!photo)photo=await compressSignupPhoto(file.files[0]);
+ const payload={user_id:currentUser.id,mobile,whatsapp,updated_at:new Date().toISOString()};
+ if(photo)payload.photo_url=photo;
+ const {data,error}=await sb.from("candidate_profiles").upsert(payload,{onConflict:"user_id"}).select().single();
+ if(error){console.error(error);msg.textContent="Profile save नहीं हुई: "+error.message;return}
+ candidate.mobile=mobile;candidate.whatsapp=whatsapp;
+ if(photo)candidate.photo_url=photo;
+ msg.textContent="✓ Profile successfully updated.";
+ setTimeout(()=>dashboard(),500);
+}
 function dashboard(){
  document.querySelector("header").style.display="none";
  const c=candidate;
@@ -1102,7 +1162,10 @@ function dashboard(){
      <span class="demoSub">पंचायत समिति: ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
      <span class="demoSub">जिला: ${e(c.hindi_district||c.district||"")}</span>
     </div>
-    <button class="demoLogout" onclick="logout.click()">Logout</button>
+    <div style="display:flex;gap:7px;align-items:center">
+     <button class="demoLogout" onclick="openCandidateProfile()">👤 Profile</button>
+     <button class="demoLogout" onclick="logout.click()">Logout</button>
+    </div>
    </div>
   </div>
   ${limited?`<div class="freeAccessBanner"><b>🟡 Free Access</b><br>${total} / ${totalMaster} voters दिखाई दे रहे हैं (10%).<br>PDF limit: अधिकतम 2 pages.<button class="btn primary full" onclick="showUpgradePrompt()">🔓 Full Access Unlock करें</button></div>`:""}
@@ -1710,7 +1773,8 @@ function showHouseAdditions(){const w=ward.value,co=colony.value,h=house.value,a
 function prevPage(){if(page>1){page--;renderRows()}}function nextPage(){if(page<Math.ceil(filtered().length/PER)){page++;renderRows()}}
 function rr(v){return [["Ward / वार्ड",v.ward],["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["मकान",effectiveHouse(v)],["कॉलोनी",v.colony],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]]}
 function slipHtml(v){return `<section class="vslip"><div class="gp">ग्राम पंचायत ${e(candidate.gram_panchayat||"")}</div><div class="cand">${e(candidate.hindi_name||candidate.name||"")}</div><div class="title">मतदाता पर्ची / Voter Slip</div><div class="ref">For voter-list reference only</div><div class="sliprows">${rr(v).map(x=>`<div class="sliprow"><b>${e(x[0])}</b><span>${e(x[1]??"-")}</span></div>`).join("")}</div></section>`}
-function slipDoc(content,title="Voter Slip"){return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><title>${e(title)}</title><style>@page{size:A4;margin:10mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111}body{font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.vslip{width:100%;min-height:277mm;border:1px solid #66736e;padding:7mm 8mm;page-break-after:always;break-after:page}.vslip:last-child{page-break-after:auto;break-after:auto}.gp{text-align:center;font-size:19px;font-weight:900;line-height:1.25;margin-top:1mm}.cand{text-align:center;font-size:17px;font-weight:900;line-height:1.25;margin-top:1mm}.title{text-align:center;font-size:21px;font-weight:900;margin-top:5mm;line-height:1.2}.ref{text-align:center;font-size:10px;color:#777;margin:1.5mm 0 10mm}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:15mm;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:12px;padding:3mm 1mm}.sliprow span{font-size:15px;padding:3mm 1mm;overflow-wrap:anywhere}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>${content}<!-- redeploy-trigger: 2026-09-25-house-pdf-fix -->
+function slipDoc(content,title="Voter Slip"){return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><title>${e(title)}</title><style>@page{size:A4;margin:10mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111}body{font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.vslip{width:100%;min-height:277mm;border:1px solid #66736e;padding:7mm 8mm;page-break-after:always;break-after:page}.vslip:last-child{page-break-after:auto;break-after:auto}.gp{text-align:center;font-size:19px;font-weight:900;line-height:1.25;margin-top:1mm}.cand{text-align:center;font-size:17px;font-weight:900;line-height:1.25;margin-top:1mm}.title{text-align:center;font-size:21px;font-weight:900;margin-top:5mm;line-height:1.2}.ref{text-align:center;font-size:10px;color:#777;margin:1.5mm 0 10mm}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:15mm;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:12px;padding:3mm 1mm}.sliprow span{font-size:15px;padding:3mm 1mm;overflow-wrap:anywhere}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}.profilePhotoPreview img{width:100%;height:100%;object-fit:cover}.demoLogout{white-space:nowrap}.profile-card input[readonly]{background:#f3f5f4;color:#53645e}
+</style></head><body>${content}<!-- redeploy-trigger: 2026-09-25-house-pdf-fix -->
 </body></html>`}
 function voterSlip(j){const v=typeof j==="string"?JSON.parse(j):j,w=open("","_blank");if(!w)return;w.document.write(slipDoc(slipHtml(v),"Voter Slip"));w.document.close();setTimeout(()=>w.print(),350)}
 function neutralSlipHtml(v){
