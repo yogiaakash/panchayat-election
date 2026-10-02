@@ -973,7 +973,7 @@ async function load(userOverride=null){
      sb.from("voter_addition_requests").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("created_at",{ascending:false}),
      sb.from("voter_house_overrides").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
      sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id)
-   ]).then(([pr,prof,cs,ar,ho,vm])=>{
+   ]).then(async ([pr,prof,cs,ar,ho,vm])=>{
      const p=pr?.data;
      if(p){
        candidate.gram_panchayat=p.gram_panchayat||candidate.gram_panchayat;
