@@ -1491,7 +1491,39 @@ function renderAZ(){
  const letters=document.querySelectorAll(".azLetterBtn");letters.forEach(b=>b.classList.toggle("active",(b.dataset.l||"")===azLetter));
  box.innerHTML=a.length?a.slice(0,500).map(v=>`<div class="member"><div class="row"><div><b>${e(v.name)}</b><div class="muted">${e(v.en)}</div></div><span class="badge">Ward ${e(v.ward)}</span></div><div class="muted">क्रम ${e(v.serial_no||"—")} • ${e(v.relative_name||"—")} • 🏠 ${e(effectiveHouse(v)||"—")} • ${e(v.gender||"")} ${e(v.age||"")} • ${e(v.epic||"—")}</div></div>`).join(""):'<div class="empty">कोई voter नहीं मिला</div>';
 }
-function azPrintHtml(list,title){return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><title>${e(title)}</title><style>body{font-family:"Nirmala UI",Arial;padding:14px;color:#111}h2{text-align:center;margin:0 0 4px}.sub{text-align:center;color:#555;font-size:11px;margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #aaa;padding:4px;text-align:left;vertical-align:top}th{background:#f1f5f2}@page{size:A4;margin:9mm}</style></head><body><h2>ग्राम पंचायत ${e(candidate.gram_panchayat||"")} — A–Z मतदाता सूची</h2><div class="sub">${e(title)} • ${list.length} voters</div><table><tr><th>क्रम</th><th>नाम</th><th>English</th><th>पिता/पति</th><th>EPIC</th><th>Ward</th><th>House</th><th>Age</th></tr>${list.map(v=>`<tr><td>${e(v.serial_no||"")}</td><td>${e(v.name||"")}</td><td>${e(v.en||azEnglishName(v))}</td><td>${e(v.relative_name||"")}</td><td>${e(v.epic||"")}</td><td>${e(v.ward||"")}</td><td>${e(effectiveHouse(v)||"")}</td><td>${e(v.age||"")}</td></tr>`).join("")}</table></body></html>`}
+function azPrintHtml(list,title){
+ const gp=String(candidate.gram_panchayat||"");
+ const cand=String(candidate.hindi_name||candidate.name||"");
+ const post=String(hindiPostName(candidate.post||""));
+ return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><title>${e(title)}</title>
+ <style>
+ body{font-family:"Nirmala UI",Mangal,Arial,sans-serif;padding:0;color:#111}
+ .printHeader{display:grid;grid-template-columns:1fr 1.4fr 1fr;align-items:center;border-bottom:1px solid #555;padding:0 0 5px;margin-bottom:5px}
+ .printHeader .left{font-size:11px;font-weight:800;text-align:left}
+ .printHeader .center{text-align:center}
+ .printHeader .center .gp{font-size:16px;font-weight:900;color:#176b3b}
+ .printHeader .center .cand{font-size:13px;font-weight:900}
+ .printHeader .center .post{font-size:10px;font-weight:800}
+ .printHeader .right{font-size:10px;text-align:right}
+ .sub{text-align:center;color:#555;font-size:10px;margin:3px 0 7px}
+ table{width:100%;border-collapse:collapse;font-size:10px}thead{display:table-header-group}tfoot{display:table-footer-group}th,td{border:1px solid #aaa;padding:4px;text-align:left;vertical-align:top}th{background:#f1f5f2}
+ @page{size:A4;margin:9mm}
+ </style></head><body>
+ <table>
+  <thead>
+   <tr><th colspan="8" style="border:0;background:#fff;padding:0">
+    <div class="printHeader">
+     <div class="left">पंचायत आम चुनाव, 2026</div>
+     <div class="center"><div class="gp">ग्राम पंचायत: ${e(gp)}</div><div class="cand">${e(cand)}</div><div class="post">${e(post)}</div></div>
+     <div class="right">${e(title)}</div>
+    </div>
+    <div class="sub">A–Z मतदाता सूची • कुल ${list.length} मतदाता</div>
+   </th></tr>
+   <tr><th>क्रम</th><th>नाम</th><th>English</th><th>पिता/पति</th><th>EPIC</th><th>Ward</th><th>House</th><th>Age</th></tr>
+  </thead>
+  <tbody>${list.map(v=>`<tr><td>${e(v.serial_no||"")}</td><td>${e(v.name||"")}</td><td>${e(v.en||azEnglishName(v))}</td><td>${e(v.relative_name||"")}</td><td>${e(v.epic||"")}</td><td>${e(v.ward||"")}</td><td>${e(effectiveHouse(v)||"")}</td><td>${e(v.age||"")}</td></tr>`).join("")}</tbody>
+ </table></body></html>`
+}
 function openAZPrint(list,title){const w=open("","_blank");if(!w){alert("Popup blocked. Browser में popup allow करें।");return}w.document.write(azPrintHtml(list,title));w.document.close();setTimeout(()=>w.print(),350)}
 function generateAZPdfExact(mode){
  const ward=document.getElementById("azWard")?.value||"";if(mode==="ward"&&!ward){alert("Ward-wise PDF के लिए पहले Ward चुनें।");return}
