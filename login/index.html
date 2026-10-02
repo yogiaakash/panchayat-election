@@ -793,17 +793,21 @@ async function load(userOverride=null){
    try{
      const all=[];
      const pageSize=500;
+     let expectedCount=0;
      for(let offset=0;;offset+=pageSize){
-       const {data:page,error:pageError}=await sb.rpc("get_candidate_voter_page",{p_offset:offset,p_limit:pageSize});
+       const {data:payload,error:pageError}=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize}});
        if(pageError) throw pageError;
-       const rows=Array.isArray(page)?page:[];
+       if(payload?.error) throw new Error(payload.error);
+       const rows=Array.isArray(payload?.voters)?payload.voters:[];
        all.push(...rows);
-       console.log("Candidate voter page:",offset,"+",rows.length);
-       if(rows.length<pageSize) break;
+       expectedCount=Number(payload?.master_count||expectedCount||0);
+       if(payload?.panchayat_id) currentAccess.panchayat_id=payload.panchayat_id;
+       console.log("Candidate voter page:",offset,"+",rows.length,"of",expectedCount);
+       if(rows.length<pageSize||(expectedCount>0&&all.length>=expectedCount)) break;
        if(offset>100000) throw new Error("Unexpected voter pagination limit");
      }
      voters=all;
-     masterVoterCount=all.length;
+     masterVoterCount=expectedCount||all.length;
      currentAccess={...currentAccess,access_level:"full"};
      console.log("Candidate voter data:",voters.length,"FULL ACCESS");
      if(!voters.length) throw new Error("Database returned 0 voters");
