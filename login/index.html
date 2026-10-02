@@ -981,7 +981,12 @@ async function load(userOverride=null){
        candidate.district=p.district||candidate.district;
      }
      const profile=prof?.data;
-     if(profile) candidate={...candidate,...profile};
+     if(profile){
+       candidate={...candidate,...profile};
+       candidate.name=profile.candidate_name||profile.name||candidate.name;
+       candidate.hindi_name=profile.candidate_name_hindi||profile.hindi_name||candidate.hindi_name||candidate.name;
+       candidate.post=profile.election_post||profile.post||candidate.post;
+     }
      candidate.hindi_gram_panchayat=await hindiPlaceName(candidate.gram_panchayat);
      candidate.hindi_panchayat_samiti=await hindiPlaceName(candidate.panchayat_samiti);
      candidate.hindi_district=await hindiPlaceName(candidate.district);
