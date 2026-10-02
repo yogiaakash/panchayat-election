@@ -822,12 +822,19 @@ async function load(userOverride=null){
    }catch(e){console.warn("Candidate profile refresh skipped:",e)}
 
    try{
-     const {data:batch,error}=await sb.rpc("get_candidate_voters");
-     if(error)throw error;
-     voters=Array.isArray(batch)?batch:[];
-     const {data:panchayatMeta}=await sb.from("panchayats").select("voter_count").eq("id",currentAccess.panchayat_id).maybeSingle();
-     masterVoterCount=Number(panchayatMeta?.voter_count||0);
-   }catch(e){console.warn("Voter data refresh skipped:",e)}
+     const {data:{session}}=await sb.auth.getSession();
+     if(!session?.access_token) throw new Error("No authenticated session");
+     const {data:out,error}=await sb.functions.invoke("candidate-voter-data",{
+       body:{},
+       headers:{Authorization:"Bearer "+session.access_token}
+     });
+     if(error) throw error;
+     if(out?.error) throw new Error(out.error);
+     voters=Array.isArray(out?.voters)?out.voters:[];
+     masterVoterCount=Number(out?.master_count||0);
+     currentAccess={...currentAccess,panchayat_id:out?.panchayat_id||currentAccess.panchayat_id,access_level:out?.access_level||currentAccess.access_level};
+     console.log("Candidate voter data:",out?.returned_count,"/",masterVoterCount,out?.access_level);
+   }catch(e){console.error("Voter data refresh failed:",e)}
    try{
      const [{data:cs},{data:ar},{data:ho},{data:vm},{data:ss}]=await Promise.all([
        sb.from("voter_contact_status").select("*").eq("panchayat_id",currentAccess.panchayat_id),
