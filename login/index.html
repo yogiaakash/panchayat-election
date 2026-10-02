@@ -982,6 +982,9 @@ async function load(userOverride=null){
      }
      const profile=prof?.data;
      if(profile) candidate={...candidate,...profile};
+     candidate.hindi_gram_panchayat=await hindiPlaceName(candidate.gram_panchayat);
+     candidate.hindi_panchayat_samiti=await hindiPlaceName(candidate.panchayat_samiti);
+     candidate.hindi_district=await hindiPlaceName(candidate.district);
      contactMap=new Map((cs?.data||[]).map(x=>[String(x.voter_id),x]));
      additionRows=ar?.data||[];
      houseOverrideMap=new Map((ho?.data||[]).map(x=>[String(x.voter_id),x]));
@@ -998,6 +1001,15 @@ function effectiveHouse(v){const x=houseOverrideMap.get(String(v?.id));return x?
 function originalHouse(v){return v?.house_no??""}
 function uniq(k,base=voters){return smart(base.map(x=>k==="house_no"?effectiveHouse(x):x[k]))}
 function options(k,label,base=voters){return `<option value="">${label}</option>`+uniq(k,base).map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}
+function hindiPostName(post){
+ const m={
+  "Sarpanch":"सरपंच",
+  "Ward Panch":"वार्ड पंच",
+  "Panchayat Samiti Member":"पंचायत समिति सदस्य",
+  "Zila Parishad Member":"जिला परिषद सदस्य"
+ };
+ return m[String(post||"").trim()]||String(post||"");
+}
 function dashboard(){
  document.querySelector("header").style.display="none";
  const c=candidate;
@@ -1019,10 +1031,10 @@ function dashboard(){
     <div class="demoAvatar">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" onerror="this.remove();this.parentNode.textContent='${e((c.hindi_name||c.name||"प").slice(0,1))}'">`:`${e((c.hindi_name||c.name||"प").slice(0,1))}`}</div>
     <div style="min-width:0;flex:1">
      <span class="demoCandidateName">${e(c.hindi_name||c.name||"")}</span>
-     <span class="demoPost">${c.post?e(c.post)+" पद प्रत्याशी":"अधिकृत पंचायत कार्यक्षेत्र"}</span>
-     <span class="demoGp">${e(c.gram_panchayat||"")}</span>
-     <span class="demoSub">पंचायत समिति: ${e(c.panchayat_samiti||"")}</span>
-     <span class="demoSub">जिला: ${e(c.district||"")}</span>
+     <span class="demoPost">${c.post?e(hindiPostName(c.post))+" पद प्रत्याशी":"अधिकृत पंचायत कार्यक्षेत्र"}</span>
+     <span class="demoGp">${e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
+     <span class="demoSub">पंचायत समिति: ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
+     <span class="demoSub">जिला: ${e(c.hindi_district||c.district||"")}</span>
     </div>
     <button class="demoLogout" onclick="logout.click()">Logout</button>
    </div>
