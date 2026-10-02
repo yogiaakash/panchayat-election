@@ -658,6 +658,13 @@ const hiPlaceCache=new Map();
 async function hindiPlaceName(name){
  const raw=String(name||"").trim();
  if(!raw)return "";
+ const exact={
+   "AREIN":"अरांई",
+   "ARAIN":"अरांई",
+   "RURAL":"ग्रामीण"
+ };
+ const exactKey=raw.toUpperCase();
+ if(exact[exactKey]){hiPlaceCache.set(raw,exact[exactKey]);return exact[exactKey];}
  if(hiPlaceCache.has(raw))return hiPlaceCache.get(raw);
  try{
    const saved=localStorage.getItem("pd_hi_place_"+raw);
