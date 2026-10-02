@@ -728,6 +728,7 @@ async function signIn(){
   const {data,error}=await sb.auth.signInWithPassword({email,password});
   if(error){msg.textContent=error.message;return}
   if(!data?.session){msg.textContent="Login session नहीं मिला।";return}
+  sb.functions.setAuth(data.session.access_token);
   msg.textContent="Login successful… Panchayat access check हो रहा है।";
   await load(data.user);
  }catch(err){
