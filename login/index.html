@@ -822,14 +822,14 @@ async function load(userOverride=null){
    }catch(e){console.warn("Candidate profile refresh skipped:",e)}
 
    try{
-     const {data:{session}}=await sb.auth.getSession();
-     if(!session?.access_token) throw new Error("No authenticated session");
-     const {data:rpcRows,error:rpcError}=await sb.rpc("get_candidate_voters");
-     if(rpcError) throw rpcError;
-     voters=Array.isArray(rpcRows)?rpcRows:[];
-     masterVoterCount=voters.length;
-     console.log("Candidate voter data:",voters.length,"full access");
-     if(!voters.length) throw new Error("Database returned 0 voters for this authenticated account");
+     const {data:fullData,error:fullError}=await sb.rpc("get_candidate_voters_full");
+     if(fullError) throw fullError;
+     const payload=fullData&&typeof fullData==="object"?fullData:{};
+     voters=Array.isArray(payload.voters)?payload.voters:[];
+     masterVoterCount=Number(payload.count||voters.length||0);
+     currentAccess={...currentAccess,access_level:"full",panchayat_id:payload.panchayat_id||currentAccess.panchayat_id};
+     console.log("Candidate voter data:",voters.length,"/",masterVoterCount,"FULL ACCESS");
+     if(!voters.length) throw new Error(payload.error||"Database returned 0 voters for this authenticated account");
    }catch(e){console.error("Voter data refresh failed:",e)}
    try{
      const [{data:cs},{data:ar},{data:ho},{data:vm},{data:ss}]=await Promise.all([
@@ -862,7 +862,7 @@ function dashboard(){
  const c=candidate;
  const total=voters.length;
  const totalMaster=(typeof masterVoterCount==="number"&&masterVoterCount)?masterVoterCount:voters.length;
- const limited=!["lifetime","paid"].includes(String(currentAccess?.access_level||"").toLowerCase());
+ const limited=false;
  const wards=new Set(voters.map(v=>String(v.ward||"")).filter(Boolean)).size;
  const maleCount=voters.filter(v=>/पुरुष|पुरूष|male|^m$/i.test(v.gender||"")).length;
  const femaleCount=voters.filter(v=>/स्त्री|महिला|female|^f$/i.test(v.gender||"")).length;
