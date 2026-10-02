@@ -780,14 +780,13 @@ async function load(userOverride=null){
    email:user.email||""
  };
 
- // Open dashboard immediately. Voter/profile data is loaded in background.
+ // Prepare dashboard state; render only after voter data has finished loading.
  voters=[];
  masterVoterCount=0;
  contactMap=new Map();
  additionRows=[];
  houseOverrideMap=new Map();
  voterMobileMap=new Map();
- dashboard();
 
  (async()=>{
    try{
@@ -822,14 +821,24 @@ async function load(userOverride=null){
    }catch(e){console.warn("Candidate profile refresh skipped:",e)}
 
    try{
-     const {data:fullData,error:fullError}=await sb.rpc("get_candidate_voters_full");
-     if(fullError) throw fullError;
-     const payload=fullData&&typeof fullData==="object"?fullData:{};
-     voters=Array.isArray(payload.voters)?payload.voters:[];
-     masterVoterCount=Number(payload.count||voters.length||0);
-     currentAccess={...currentAccess,access_level:"full",panchayat_id:payload.panchayat_id||currentAccess.panchayat_id};
-     console.log("Candidate voter data:",voters.length,"/",masterVoterCount,"FULL ACCESS");
-     if(!voters.length) throw new Error(payload.error||"Database returned 0 voters for this authenticated account");
+     // Load voters in small authenticated pages. Supabase/PostgREST limits collection responses,
+     // so never request the whole Panchayat in one browser RPC.
+     const all=[];
+     const pageSize=500;
+     for(let offset=0;;offset+=pageSize){
+       const {data:page,error:pageError}=await sb.rpc("get_candidate_voter_page",{p_offset:offset,p_limit:pageSize});
+       if(pageError) throw pageError;
+       const rows=Array.isArray(page)?page:[];
+       all.push(...rows);
+       console.log("Candidate voter page:",offset,"+",rows.length);
+       if(rows.length<pageSize) break;
+       if(offset>100000) throw new Error("Unexpected voter pagination limit");
+     }
+     voters=all;
+     masterVoterCount=all.length;
+     currentAccess={...currentAccess,access_level:"full"};
+     console.log("Candidate voter data:",voters.length,"FULL ACCESS");
+     if(!voters.length) throw new Error("Database returned 0 voters for this authenticated account");
    }catch(e){console.error("Voter data refresh failed:",e)}
    try{
      const [{data:cs},{data:ar},{data:ho},{data:vm},{data:ss}]=await Promise.all([
