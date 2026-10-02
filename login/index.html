@@ -590,13 +590,14 @@ function loginView(msg=""){
  <button class="btn soft full" style="margin-top:9px" onclick="signupView()">➕ नया Candidate Account बनाएं</button>
  <p id="msg" class="error">${e(msg)}</p></div>`;
 }
+let hindiRawName="";
 let hindiImeTimer=null;
 let hindiImeSeq=0;
 async function transliterateHindiText(text){
  const clean=String(text||"");
  if(!clean.trim()) return "";
- const url="https://inputtools.google.com/request?text="+encodeURIComponent(clean)+"&itc=hi-t-i0-und&num=1";
- const res=await fetch(url,{method:"GET"});
+ const url="https://inputtools.google.com/request?text="+encodeURIComponent(clean)+"&itc=hi-t-i0-und&num=5&cp=0&cs=1&ie=utf-8&oe=utf-8";
+ const res=await fetch(url,{method:"GET",mode:"cors"});
  if(!res.ok) throw new Error("Hindi input service unavailable");
  const data=await res.json();
  const suggestions=data?.[1]?.[0]?.[1];
@@ -606,26 +607,51 @@ function setupHindiInput(){
  const el=document.getElementById("suNameHi"),status=document.getElementById("suNameHiStatus");
  if(!el||el.dataset.hindiReady==="1") return;
  el.dataset.hindiReady="1";
- el.addEventListener("input",()=>{
+ hindiRawName="";
+ const render=async()=>{
+   const seq=++hindiImeSeq,raw=hindiRawName;
+   try{
+     if(status) status.style.display=raw.trim()?"block":"none";
+     const hi=await transliterateHindiText(raw);
+     if(seq!==hindiImeSeq) return;
+     el.value=hi;
+     el.setSelectionRange(el.value.length,el.value.length);
+   }catch(err){
+     console.warn("Hindi transliteration:",err);
+     if(seq===hindiImeSeq) el.value=raw;
+   }finally{
+     if(seq===hindiImeSeq&&status) status.style.display="none";
+   }
+ };
+ el.addEventListener("keydown",(ev)=>{
+   if(ev.ctrlKey||ev.metaKey||ev.altKey) return;
+   if(ev.key==="Backspace"){
+     ev.preventDefault();
+     hindiRawName=hindiRawName.slice(0,-1);
+     clearTimeout(hindiImeTimer);
+     hindiImeTimer=setTimeout(render,120);
+     return;
+   }
+   if(ev.key===" "){
+     ev.preventDefault();
+     if(hindiRawName&&!hindiRawName.endsWith(" ")) hindiRawName+=" ";
+     clearTimeout(hindiImeTimer);
+     hindiImeTimer=setTimeout(render,80);
+     return;
+   }
+   if(ev.key.length===1){
+     ev.preventDefault();
+     hindiRawName+=ev.key;
+     clearTimeout(hindiImeTimer);
+     hindiImeTimer=setTimeout(render,220);
+   }
+ });
+ el.addEventListener("paste",(ev)=>{
+   ev.preventDefault();
+   const text=(ev.clipboardData||window.clipboardData).getData("text")||"";
+   hindiRawName+=text;
    clearTimeout(hindiImeTimer);
-   const raw=el.value;
-   hindiImeTimer=setTimeout(async()=>{
-     const seq=++hindiImeSeq;
-     const m=raw.match(/^(.*?)(\\s*)([^\\s]*)$/);
-     if(!m||!m[3]) return;
-     const prefix=m[1],space=m[2],word=m[3];
-     try{
-       if(status) status.style.display="block";
-       const hi=await transliterateHindiText(word);
-       if(seq!==hindiImeSeq) return;
-       el.value=prefix+space+hi;
-       el.selectionStart=el.selectionEnd=el.value.length;
-     }catch(err){
-       console.warn("Hindi transliteration:",err);
-     }finally{
-       if(status) status.style.display="none";
-     }
-   },280);
+   hindiImeTimer=setTimeout(render,120);
  });
 }
 async function loadSignupPanchayats(){
@@ -718,7 +744,7 @@ async function compressSignupPhoto(file){
 }
 async function createCandidateAccount(){
  const msg=document.getElementById("signupMsg");msg.textContent="Account बनाया जा रहा है…";
- const name=document.getElementById("suName").value.trim(),nameHi=document.getElementById("suNameHi").value.trim(),post=document.getElementById("suPost").value,
+ const name=document.getElementById("suName").value.trim(),nameHi=(hindiRawName||document.getElementById("suNameHi").value.trim()).trim(),post=document.getElementById("suPost").value,
  d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS").value,gp=document.getElementById("suGP").value,mobile=document.getElementById("suMobile").value.replace(/\D/g,""),wa=document.getElementById("suWhatsApp").value.replace(/\D/g,""),
  email=document.getElementById("suEmail").value.trim(),pw=document.getElementById("suPassword").value,pw2=document.getElementById("suPassword2").value;
  const pId=selectedSignupPanchayatId;
