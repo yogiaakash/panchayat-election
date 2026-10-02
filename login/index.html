@@ -1503,18 +1503,18 @@ function cascade(from){
 }
 function clearFilters(){document.getElementById("q").value="";document.getElementById("ward").value="";document.getElementById("colony").innerHTML="<option value=\"\">पहले वार्ड चुनें</option>";document.getElementById("house").innerHTML="<option value=\"\">पहले कॉलोनी चुनें</option>";document.getElementById("colony").disabled=true;document.getElementById("house").disabled=true;document.getElementById("booth").value="";page=1;renderRows();}
 function houseCount(v){return voters.filter(x=>String(x.ward)===String(v.ward)&&String(x.colony)===String(v.colony)&&String(effectiveHouse(x))===String(effectiveHouse(v))).length}
-function showVoterMobile(v){
- const mob=voterMobileMap.get(String(v.id))?.mobile_number||"";
+async function showVoterMobile(v){
+ let mob=voterMobileMap.get(String(v.id))?.mobile_number||"";
  if(!mob){
    const raw=prompt("इस मतदाता का मोबाइल नंबर दर्ज करें:");
-   if(raw!==null){
-     const clean=raw.trim().replace(/[\s-]/g,"");
-     if(/^\d{10}$/.test(clean)){
-       document.getElementById("voterMobileInput")?.setAttribute("value",clean);
-       saveVoterMobile(Number(v.id));
-     }else alert("कृपया 10 अंकों का मोबाइल नंबर दर्ज करें।");
-   }
-   return;
+   if(raw===null)return;
+   const clean=raw.trim().replace(/[\s-]/g,"");
+   if(!/^\d{10}$/.test(clean)){alert("कृपया 10 अंकों का मोबाइल नंबर दर्ज करें।");return}
+   const {data,error}=await sb.from("voter_mobile_numbers").upsert({
+     user_id:currentUser.id,panchayat_id:currentAccess.panchayat_id,voter_id:Number(v.id),mobile_number:clean,updated_at:new Date().toISOString()
+   },{onConflict:"user_id,panchayat_id,voter_id"}).select().single();
+   if(error){alert("मोबाइल नंबर save नहीं हुआ: "+error.message);return}
+   voterMobileMap.set(String(v.id),data);mob=clean;
  }
  const safe=mob.replace(/[^0-9]/g,"");
  const wa=safe.length===10?"91"+safe:safe;
