@@ -1004,7 +1004,16 @@ async function load(userOverride=null){
        candidate.panchayat_samiti=p.panchayat_samiti||candidate.panchayat_samiti;
        candidate.district=p.district||candidate.district;
      }
-     if(share?.data?.family_share_message) familyShareMessage=share.data.family_share_message;
+     const localShareKey="family_share_message_"+user.id+"_"+currentAccess.panchayat_id;
+     if(share?.data?.family_share_message && !String(share.data.family_share_message).trim().startsWith("<")) {
+       familyShareMessage=share.data.family_share_message;
+       try{localStorage.setItem(localShareKey,familyShareMessage)}catch(_){}
+     }else{
+       try{
+         const cached=localStorage.getItem(localShareKey);
+         if(cached) familyShareMessage=cached;
+       }catch(_){}
+     }
      const profile=prof?.data;
      if(profile){
        candidate={...candidate,...profile};
@@ -1660,33 +1669,27 @@ async function shareHouse(){
 }
 async function saveFamilyShareMessage(){
  const ta=document.getElementById("familyShareMessage");
- if(!ta)return;
+ if(!ta)return false;
  const msg=ta.value.trim();
- if(!msg){alert("Message खाली नहीं हो सकता।");return}
+ if(!msg){alert("Message खाली नहीं हो सकता।");return false}
  const uid=currentUser?.id;
  const pid=currentAccess?.panchayat_id||candidate?.panchayat_id||null;
- if(!uid||!pid){alert("Candidate session/Panchayat information नहीं मिली। कृपया logout करके फिर login करें।");return}
+ if(!uid||!pid){alert("Candidate session/Panchayat information नहीं मिली। कृपया logout करके फिर login करें।");return false}
  try{
-  // Update first, then insert if this candidate has no saved message yet.
-  const {data:updated,error:updateError}=await sb.from("candidate_share_settings")
-    .update({family_share_message:msg,updated_at:new Date().toISOString()})
-    .eq("user_id",uid).eq("panchayat_id",pid).select("family_share_message").maybeSingle();
-  if(updateError)throw updateError;
-
-  if(!updated){
-    const {data:inserted,error:insertError}=await sb.from("candidate_share_settings")
-      .insert({user_id:uid,panchayat_id:pid,family_share_message:msg})
-      .select("family_share_message").single();
-    if(insertError)throw insertError;
-    familyShareMessage=inserted.family_share_message;
-  }else{
-    familyShareMessage=updated.family_share_message;
-  }
-  alert("WhatsApp message save हो गया। अगली बार login करने पर भी यही message रहेगा।");
+  const payload={user_id:uid,panchayat_id:pid,family_share_message:msg,updated_at:new Date().toISOString()};
+  const {data,error}=await sb.from("candidate_share_settings")
+    .upsert(payload,{onConflict:"user_id,panchayat_id"})
+    .select("family_share_message")
+    .single();
+  if(error)throw error;
+  familyShareMessage=data?.family_share_message||msg;
+  try{localStorage.setItem("family_share_message_"+uid+"_"+pid,familyShareMessage)}catch(_){}
+  alert("✅ WhatsApp message save हो गया।");
+  return true;
  }catch(error){
   console.error("Family WhatsApp message save failed:",error);
-  alert("Message save नहीं हुआ: "+(error?.message||String(error)));
- }
+  alert("❌ Message save नहीं हुआ: "+(error?.message||String(error)));
+  return false;
 }
 const DEFAULT_FAMILY_WHATSAPP_MESSAGE=`🙏 नमस्कार!
 
@@ -1706,7 +1709,7 @@ function openFamilySharePopup(a){
  const opts=saved.map((x,i)=>"<option value=\""+i+"\">"+e(x.v.name)+(x.m?" • 📱 "+e(x.m):" • मोबाइल दर्ज नहीं")+"</option>").join("");
  const def=saved.find(x=>x.m)?.m||"";
  const currentMsg=(familyShareMessage||"").trim()||DEFAULT_FAMILY_WHATSAPP_MESSAGE;
- familyShareBody.innerHTML="<div class=\"muted\">इस मकान के किसी भी परिवार सदस्य को voter slips भेजें।</div><label>परिवार सदस्य</label><select id=\"familyShareMember\" onchange=\"pickFamilyShareMember()\"><option value=\"-1\">मोबाइल नंबर चुनें</option>"+opts+"</select><div class=\"familyShareOr\">या</div><label>मोबाइल नंबर</label><input id=\"familySharePhone\" type=\"tel\" inputmode=\"numeric\" maxlength=\"10\" placeholder=\"10 अंकों का मोबाइल नंबर\" value=\""+e(def)+"\"><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"pickDeviceContact()\">👤 फोन Contacts से चुनें</button><label>WhatsApp Message</label><textarea id=\"familyShareMessage\" rows=\"10\" oninput=\"clearTimeout(window.familyMsgSaveTimer);window.familyMsgSaveTimer=setTimeout(saveFamilyShareMessage,800)\">"+e(currentMsg)+"</textarea><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"saveFamilyShareMessage()\">💾 Message Save करें</button><button class=\"btn green full\" style=\"margin-top:8px\" onclick=\"sendFamilyVoterSlips()\">📲 PDF + Message भेजें</button><div class=\"muted\" style=\"margin-top:8px\">Send दबाने पर selected number की WhatsApp chat खुलेगी और message तैयार होगा।</div>";
+ familyShareBody.innerHTML="<div class=\"muted\">इस मकान के किसी भी परिवार सदस्य को voter slips भेजें।</div><label>परिवार सदस्य</label><select id=\"familyShareMember\" onchange=\"pickFamilyShareMember()\"><option value=\"-1\">मोबाइल नंबर चुनें</option>"+opts+"</select><div class=\"familyShareOr\">या</div><label>मोबाइल नंबर</label><input id=\"familySharePhone\" type=\"tel\" inputmode=\"numeric\" maxlength=\"10\" placeholder=\"10 अंकों का मोबाइल नंबर\" value=\""+e(def)+"\"><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"pickDeviceContact()\">👤 फोन Contacts से चुनें</button><label>WhatsApp Message</label><textarea id=\"familyShareMessage\" rows=\"10\">"+e(currentMsg)+"</textarea><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"saveFamilyShareMessage()\">💾 Message Save करें</button><button class=\"btn green full\" style=\"margin-top:8px\" onclick=\"sendFamilyVoterSlips()\">📲 PDF + Message भेजें</button><div class=\"muted\" style=\"margin-top:8px\">Send दबाने पर selected number की WhatsApp chat खुलेगी और message तैयार होगा।</div>";
  familyShareDlg.showModal();
 }
 
