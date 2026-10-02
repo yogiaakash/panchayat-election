@@ -654,7 +654,7 @@ function setupHindiInput(){
    hindiImeTimer=setTimeout(render,120);
  });
 }
-async const hiPlaceCache=new Map();
+const hiPlaceCache=new Map();
 async function hindiPlaceName(name){
  const raw=String(name||"").trim();
  if(!raw)return "";
