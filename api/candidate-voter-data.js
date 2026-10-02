@@ -3,7 +3,7 @@ export default async function handler(req,res){
   try{
     const auth=req.headers.authorization||"";
     if(!auth.startsWith("Bearer ")) return res.status(401).json({error:"Authentication required"});
-    const base=(process.env.SUPABASE_URL||"https://ieoltipygxawhsvlxnsj").replace(/\/$/,"");
+    const base=(process.env.SUPABASE_URL||"https://ieoltipygxawhsvlxnsj.supabase.co").replace(/\/$/,"");
     const key=process.env.SUPABASE_ANON_KEY||process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||process.env.SUPABASE_PUBLISHABLE_KEY||"sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
     const r=await fetch(base+"/rest/v1/rpc/get_candidate_voters",{
       method:"POST",
