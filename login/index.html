@@ -1169,9 +1169,11 @@ function dashboard(){
      <span class="demoSub">पंचायत समिति: ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
      <span class="demoSub">जिला: ${e(c.hindi_district||c.district||"")}</span>
     </div>
-    <div style="display:flex;gap:7px;align-items:center">
-     <button class="profileIconBtn" onclick="openCandidateProfile()" aria-label="Candidate Profile" title="Candidate Profile">👤</button>
+    <div class="headerActions">
      <button class="demoLogout" onclick="logout.click()">Logout</button>
+     <button class="profileCircleBtn" onclick="openCandidateProfile()" aria-label="Candidate Profile" title="Candidate Profile">
+      <span class="profileCircleHead"></span><span class="profileCircleBody"></span>
+     </button>
     </div>
    </div>
   </div>
@@ -1781,7 +1783,7 @@ function prevPage(){if(page>1){page--;renderRows()}}function nextPage(){if(page<
 function rr(v){return [["Ward / वार्ड",v.ward],["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["मकान",effectiveHouse(v)],["कॉलोनी",v.colony],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]]}
 function slipHtml(v){return `<section class="vslip"><div class="gp">ग्राम पंचायत ${e(candidate.gram_panchayat||"")}</div><div class="cand">${e(candidate.hindi_name||candidate.name||"")}</div><div class="title">मतदाता पर्ची / Voter Slip</div><div class="ref">For voter-list reference only</div><div class="sliprows">${rr(v).map(x=>`<div class="sliprow"><b>${e(x[0])}</b><span>${e(x[1]??"-")}</span></div>`).join("")}</div></section>`}
 function slipDoc(content,title="Voter Slip"){return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><title>${e(title)}</title><style>@page{size:A4;margin:10mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111}body{font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.vslip{width:100%;min-height:277mm;border:1px solid #66736e;padding:7mm 8mm;page-break-after:always;break-after:page}.vslip:last-child{page-break-after:auto;break-after:auto}.gp{text-align:center;font-size:19px;font-weight:900;line-height:1.25;margin-top:1mm}.cand{text-align:center;font-size:17px;font-weight:900;line-height:1.25;margin-top:1mm}.title{text-align:center;font-size:21px;font-weight:900;margin-top:5mm;line-height:1.2}.ref{text-align:center;font-size:10px;color:#777;margin:1.5mm 0 10mm}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:15mm;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:12px;padding:3mm 1mm}.sliprow span{font-size:15px;padding:3mm 1mm;overflow-wrap:anywhere}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}.profilePhotoPreview img{width:100%;height:100%;object-fit:cover}.demoLogout{white-space:nowrap}.profile-card input[readonly]{background:#f3f5f4;color:#53645e}
-.profileIconBtn{width:34px;height:34px;border:1px solid rgba(255,255,255,.7);border-radius:50%;background:rgba(255,255,255,.16);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.12)}.profileIconBtn:active{transform:scale(.96)}
+.headerActions{display:flex;flex-direction:column;align-items:center;gap:4px;margin-left:6px}.profileCircleBtn{position:relative;width:34px;height:34px;border:1px solid rgba(255,255,255,.9);border-radius:50%;background:transparent;color:#fff;padding:0;cursor:pointer;display:block;box-sizing:border-box}.profileCircleBtn:active{transform:scale(.96)}.profileCircleHead{position:absolute;width:8px;height:8px;border:1.5px solid #fff;border-radius:50%;left:50%;top:7px;transform:translateX(-50%)}.profileCircleBody{position:absolute;width:15px;height:8px;border:1.5px solid #fff;border-bottom:0;border-radius:10px 10px 0 0;left:50%;bottom:6px;transform:translateX(-50%)}.profileCircleBtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
 </style></head><body>${content}<!-- redeploy-trigger: 2026-09-25-house-pdf-fix -->
 </body></html>`}
 function voterSlip(j){const v=typeof j==="string"?JSON.parse(j):j,w=open("","_blank");if(!w)return;w.document.write(slipDoc(slipHtml(v),"Voter Slip"));w.document.close();setTimeout(()=>w.print(),350)}
