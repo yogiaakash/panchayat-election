@@ -1503,6 +1503,26 @@ function cascade(from){
 }
 function clearFilters(){document.getElementById("q").value="";document.getElementById("ward").value="";document.getElementById("colony").innerHTML="<option value=\"\">पहले वार्ड चुनें</option>";document.getElementById("house").innerHTML="<option value=\"\">पहले कॉलोनी चुनें</option>";document.getElementById("colony").disabled=true;document.getElementById("house").disabled=true;document.getElementById("booth").value="";page=1;renderRows();}
 function houseCount(v){return voters.filter(x=>String(x.ward)===String(v.ward)&&String(x.colony)===String(v.colony)&&String(effectiveHouse(x))===String(effectiveHouse(v))).length}
+function showVoterMobile(v){
+ const mob=voterMobileMap.get(String(v.id))?.mobile_number||"";
+ if(!mob){
+   const raw=prompt("इस मतदाता का मोबाइल नंबर दर्ज करें:");
+   if(raw!==null){
+     const clean=raw.trim().replace(/[\s-]/g,"");
+     if(/^\d{10}$/.test(clean)){
+       document.getElementById("voterMobileInput")?.setAttribute("value",clean);
+       saveVoterMobile(Number(v.id));
+     }else alert("कृपया 10 अंकों का मोबाइल नंबर दर्ज करें।");
+   }
+   return;
+ }
+ const safe=mob.replace(/[^0-9]/g,"");
+ const wa=safe.length===10?"91"+safe:safe;
+ const d=document.getElementById("detailDlg");
+ if(!d){alert("मोबाइल नंबर: "+mob);return}
+ detailBody.innerHTML='<div class="title">📱 मोबाइल नंबर</div><div class="mobileQuickNumber">'+e(mob)+'</div><div class="grid2" style="margin-top:10px"><a class="btn soft" href="tel:'+e(mob)+'">📞 कॉल</a><a class="btn soft" href="https://wa.me/'+e(wa)+'" target="_blank" rel="noopener">💬 WhatsApp</a></div><button class="btn ghost full" style="margin-top:8px" onclick="this.closest(\'dialog\')?.close()">बंद करें</button>';
+ d.showModal();
+}
 function showDetail(v){
  const mob=voterMobileMap.get(String(v.id))?.mobile_number||"";
  detailBody.innerHTML=[
@@ -1555,8 +1575,9 @@ function renderRows(){
  const totalEl=document.getElementById("total"),maleEl=document.getElementById("male"),femaleEl=document.getElementById("female"),wardsEl=document.getElementById("wards"),coloniesEl=document.getElementById("colonies"),housesEl=document.getElementById("houses");
  if(totalEl)totalEl.textContent=a.length;if(maleEl)maleEl.textContent=a.filter(isMale).length;if(femaleEl)femaleEl.textContent=a.filter(isFemale).length;if(wardsEl)wardsEl.textContent=new Set(a.map(x=>x.ward)).size;if(coloniesEl)coloniesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony))).size;if(housesEl)housesEl.textContent=new Set(a.map(x=>String(x.ward)+"|"+String(x.colony)+"|"+String(effectiveHouse(x)))).size;
  const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages);const chunk=a.slice((page-1)*PER,page*PER);
- result.innerHTML=`<div class="muted" style="margin:0 0 8px 2px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard exactVoterCard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">🏠 ${e(effectiveHouse(v))}</span><span class="pill">आयु ${e(v.age)}</span><span class="pill">${e(v.colony)}</span>${voterMobileMap.get(String(v.id))?.mobile_number?`<span class="pill">📱 ${e(voterMobileMap.get(String(v.id)).mobile_number)}</span>`:""}</div><div class="actions"><button class="btn soft det" data-i="${i}">Details</button><button class="btn soft pdfb" data-i="${i}">📄 PDF Slip</button><button class="btn soft shareb" data-i="${i}">↗ Share</button><button class="btn soft famb" data-i="${i}">🏠 Family</button><button class="btn soft housechg" data-i="${i}">✏ Change House Number</button></div></article>`).join("")||'<div class="empty">कोई मतदाता नहीं मिला</div>'}</div>${a.length?`<div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`:""}`;
+ result.innerHTML=`<div class="muted" style="margin:0 0 8px 2px">${a.length} records</div><div class="cards">${chunk.map((v,i)=>`<article class="card vcard exactVoterCard"><div class="vtop"><div><div class="vname">${e(v.name)}</div><div class="vrel">संबंधी: ${e(v.relative_name)}</div></div><div class="vid">${e(v.epic)}</div></div><div class="meta"><span class="pill">Ward ${e(v.ward)}</span><span class="pill">🏠 ${e(effectiveHouse(v))}</span><span class="pill">आयु ${e(v.age)}</span><span class="pill">${e(v.colony)}</span>${voterMobileMap.get(String(v.id))?.mobile_number?`<span class="pill">📱 ${e(voterMobileMap.get(String(v.id)).mobile_number)}</span>`:""}</div><div class="actions"><button class="btn soft det" data-i="${i}">Details</button><button class="btn soft mobb" data-i="${i}">📱 Mobile</button><button class="btn soft pdfb" data-i="${i}">📄 PDF Slip</button><button class="btn soft shareb" data-i="${i}">↗ Share</button><button class="btn soft famb" data-i="${i}">🏠 Family</button><button class="btn soft housechg" data-i="${i}">✏ Change House Number</button></div></article>`).join("")||'<div class="empty">कोई मतदाता नहीं मिला</div>'}</div>${a.length?`<div class="pager"><button id="pPrev">← Previous</button><b>Page ${page} / ${pages}</b><button id="pNext">Next →</button></div>`:""}`;
  result.querySelectorAll(".det").forEach(x=>x.onclick=()=>showDetail(chunk[+x.dataset.i]));
+ result.querySelectorAll(".mobb").forEach(x=>x.onclick=()=>showVoterMobile(chunk[+x.dataset.i]));
  result.querySelectorAll(".pdfb").forEach(x=>x.onclick=()=>voterSlip(JSON.stringify(chunk[+x.dataset.i])));
  result.querySelectorAll(".shareb").forEach(x=>x.onclick=()=>shareInfo(chunk[+x.dataset.i]));
  result.querySelectorAll(".famb").forEach(x=>x.onclick=()=>openFamilyFromVoter(chunk[+x.dataset.i]));
