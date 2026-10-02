@@ -824,11 +824,16 @@ async function load(userOverride=null){
    try{
      const {data:{session}}=await sb.auth.getSession();
      if(!session?.access_token) throw new Error("No authenticated session");
-     const {data:out,error}=await sb.functions.invoke("candidate-voter-data",{
-       body:{},
-       headers:{Authorization:"Bearer "+session.access_token}
+     const resp=await fetch("/api/candidate-voter-data",{
+       method:"POST",
+       headers:{
+         "Authorization":"Bearer "+session.access_token,
+         "Content-Type":"application/json"
+       },
+       body:"{}"
      });
-     if(error) throw error;
+     const out=await resp.json().catch(()=>({}));
+     if(!resp.ok) throw new Error(out?.error||("Voter API HTTP "+resp.status));
      if(out?.error) throw new Error(out.error);
      voters=Array.isArray(out?.voters)?out.voters:[];
      masterVoterCount=Number(out?.master_count||0);
