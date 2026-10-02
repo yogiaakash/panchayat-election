@@ -839,7 +839,7 @@ async function load(userOverride=null){
      voterMobileMap=new Map((vm?.data||[]).map(x=>[String(x.voter_id),x]));
      dashboard();
    }).catch(e=>console.warn("Optional data refresh skipped:",e));
-
+ })();
 }
 
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0900-\u097f]+/g,"");
