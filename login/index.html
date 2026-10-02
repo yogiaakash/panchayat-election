@@ -659,27 +659,28 @@ async function hindiPlaceName(name){
  const raw=String(name||"").trim();
  if(!raw)return "";
 
- // Panchayat Samiti names are stored in English. Translate only the
- // actual place name, then append the fixed Hindi administrative term.
+ // Fixed Rajasthan Panchayat Samiti names. Keep these independent of
+ // browser cache / external transliteration so official names remain stable.
+ const fixed={
+   "AJMER RURAL PANCHAYAT SAMITI":"अजमेर ग्रामीण पंचायत समिति",
+   "ARAIN PANCHAYAT SAMITI":"अरांई पंचायत समिति",
+   "AREIN PANCHAYAT SAMITI":"अरांई पंचायत समिति",
+   "BADLYA PANCHAYAT SAMITI":"बाडल्या पंचायत समिति",
+   "BHINAY PANCHAYAT SAMITI":"भिनाय पंचायत समिति",
+   "KEKRI PANCHAYAT SAMITI":"केकड़ी पंचायत समिति",
+   "KISHANGARH (SILORA) PANCHAYAT SAMITI":"किशनगढ़ (सिलोरा) पंचायत समिति",
+   "PISANGAN PANCHAYAT SAMITI":"पीसांगन पंचायत समिति",
+   "SARWAR PANCHAYAT SAMITI":"सरवाड़ पंचायत समिति",
+   "SAWAR PANCHAYAT SAMITI":"सावर पंचायत समिति",
+   "SRINAGAR PANCHAYAT SAMITI":"श्रीनगर पंचायत समिति"
+ };
+ const key=raw.replace(/\\s+/g," ").toUpperCase();
+ if(fixed[key])return fixed[key];
+
+ // Generic Panchayat Samiti handling: translate only the place name.
  const psMatch=raw.match(/^(.*?)\\s+PAN(?:CHAYAT)?\\s+SAMITI$/i);
  if(psMatch){
    const base=psMatch[1].trim();
-   const exactBase={
-     "AJMER RURAL":"अजमेर ग्रामीण",
-     "ARAIN":"अरांई",
-     "AREIN":"अरांई",
-     "RURAL":"ग्रामीण",
-     "BADLYA":"बाडल्या",
-     "BHINAY":"भिनाय",
-     "KEKRI":"केकड़ी",
-     "KISHANGARH (SILORA)":"किशनगढ़ (सिलोरा)",
-     "PISANGAN":"पीसांगन",
-     "SARWAR":"सरवाड़",
-     "SAWAR":"सावर",
-     "SRINAGAR":"श्रीनगर"
-   };
-   const key=base.toUpperCase();
-   if(exactBase[key]) return exactBase[key]+" पंचायत समिति";
    const translated=await hindiPlaceName(base);
    return translated+" पंचायत समिति";
  }
@@ -687,10 +688,12 @@ async function hindiPlaceName(name){
  const exact={
    "AREIN":"अरांई",
    "ARAIN":"अरांई",
-   "RURAL":"ग्रामीण"
+   "RURAL":"ग्रामीण",
+   "AJMER RURAL":"अजमेर ग्रामीण"
  };
- const exactKey=raw.toUpperCase();
- if(exact[exactKey]){hiPlaceCache.set(raw,exact[exactKey]);return exact[exactKey];}
+ const exactKey=key;
+ if(exact[exactKey])return exact[exactKey];
+
  if(hiPlaceCache.has(raw))return hiPlaceCache.get(raw);
  try{
    const res=await fetch("https://inputtools.google.com/request?text="+encodeURIComponent(raw)+"&itc=hi-t-i0-und&num=5&cp=0&cs=1&ie=utf-8&oe=utf-8");
@@ -699,14 +702,12 @@ async function hindiPlaceName(name){
    const suggestions=data?.[1]?.[0]?.[1];
    const hi=Array.isArray(suggestions)&&suggestions[0] ? suggestions[0] : raw;
    hiPlaceCache.set(raw,hi);
-   try{localStorage.setItem("pd_hi_place_"+raw,hi)}catch(_){}
    return hi;
  }catch(err){
    console.warn("Place Hindi transliteration failed:",raw,err);
    return raw;
  }
 }
-
 async function hindiPlaceOptions(values){
  const out=[];
  for(const raw of values){
