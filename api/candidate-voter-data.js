@@ -3,19 +3,29 @@ export default async function handler(req,res){
   try{
     const auth=req.headers.authorization||"";
     if(!auth.startsWith("Bearer ")) return res.status(401).json({error:"Authentication required"});
-    const base=(process.env.SUPABASE_URL||"https://ieoltipygxawhsvlxnsj.supabase.co").replace(/\/$/,"");
-    const key=process.env.SUPABASE_ANON_KEY||process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||process.env.SUPABASE_PUBLISHABLE_KEY||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb2x0aXB5Z3hhd2hzdmx4bnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNDQyNTMsImV4cCI6MjEwNTgyMDI1M30.sqP5GY5or5TFHGHZn8F2ZwPWHjLv2f_p_K2js3z8KRk";
-    if(!key) return res.status(500).json({error:"Supabase API key is not configured on Vercel"});
-    const r=await fetch(base+"/functions/v1/candidate-voter-data",{
+    const base=(process.env.SUPABASE_URL||"https://ieoltipygxawhsvlxnsj").replace(/\/$/,"");
+    const key=process.env.SUPABASE_ANON_KEY||process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||process.env.SUPABASE_PUBLISHABLE_KEY||"sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
+    const r=await fetch(base+"/rest/v1/rpc/get_candidate_voters",{
       method:"POST",
       headers:{
         "Authorization":auth,
         "apikey":key,
-        "Content-Type":"application/json"
+        "Content-Type":"application/json",
+        "Accept":"application/json"
       },
-      body:JSON.stringify(req.body||{})
+      body:"{}"
     });
     const text=await r.text();
-    res.status(r.status).setHeader("Content-Type",r.headers.get("content-type")||"application/json").send(text);
-  }catch(e){res.status(502).json({error:"Supabase proxy failed: "+(e?.message||String(e))});}
+    if(!r.ok) return res.status(r.status).json({error:"Supabase voter RPC failed ("+r.status+")",details:text});
+    let voters=[];
+    try{voters=JSON.parse(text)}catch{}
+    const count=Array.isArray(voters)?voters.length:0;
+    return res.status(200).json({
+      success:true,
+      voters:Array.isArray(voters)?voters:[],
+      returned_count:count
+    });
+  }catch(e){
+    return res.status(502).json({error:"Supabase proxy failed: "+(e?.message||String(e))});
+  }
 }
