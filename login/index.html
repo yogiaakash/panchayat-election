@@ -1048,12 +1048,16 @@ function uniq(k,base=voters){return smart(base.map(x=>k==="house_no"?effectiveHo
 function options(k,label,base=voters){return `<option value="">${label}</option>`+uniq(k,base).map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}
 function hindiPostName(post){
  const m={
-  "Sarpanch":"सरपंच",
-  "Ward Panch":"वार्ड पंच",
-  "Panchayat Samiti Member":"पंचायत समिति सदस्य",
-  "Zila Parishad Member":"जिला परिषद सदस्य"
+  "Sarpanch":"सरपंच पद प्रत्याशी",
+  "Ward Panch":"वार्ड पंच पद प्रत्याशी",
+  "Panchayat Samiti Member":"पंचायत समिति सदस्य पद प्रत्याशी",
+  "Zila Parishad Member":"जिला परिषद सदस्य पद प्रत्याशी"
  };
- return m[String(post||"").trim()]||String(post||"");
+ const raw=String(post||"").trim();
+ if(!raw)return "";
+ if(m[raw])return m[raw];
+ if(/पद प्रत्याशी$/u.test(raw))return raw;
+ return raw+" पद प्रत्याशी";
 }
 function dashboard(){
  document.querySelector("header").style.display="none";
@@ -1076,7 +1080,7 @@ function dashboard(){
     <div class="demoAvatar">${c.photo_url?`<img src="${e(c.photo_url)}" alt="Candidate photo" onerror="this.remove();this.parentNode.textContent='${e((c.hindi_name||c.name||"प").slice(0,1))}'">`:`${e((c.hindi_name||c.name||"प").slice(0,1))}`}</div>
     <div style="min-width:0;flex:1">
      <span class="demoCandidateName">${e(c.hindi_name||c.name||"")}</span>
-     <span class="demoPost">${c.post?e(hindiPostName(c.post))+" पद प्रत्याशी":"अधिकृत पंचायत कार्यक्षेत्र"}</span>
+     <span class="demoPost">${c.post?e(hindiPostName(c.post)):"अधिकृत पंचायत कार्यक्षेत्र"}</span>
      <span class="demoGp">${e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
      <span class="demoSub">पंचायत समिति: ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
      <span class="demoSub">जिला: ${e(c.hindi_district||c.district||"")}</span>
@@ -1121,7 +1125,6 @@ function dashboard(){
   <select id="slipSortMode">
    <option value="serial">क्रम संख्या अनुसार</option>
    <option value="colony_house">कॉलोनी → मकान → क्रम संख्या</option>
-   <option value="house">मकान → क्रम संख्या</option>
   </select>
   <div class="muted" style="margin-top:5px">कॉलोनी/मकान विकल्प में एक ही परिवार के मतदाता साथ-साथ आएँगे। Slip का डिजाइन वही रहेगा।</div>
   <div id="slipCount" class="notice" style="margin-top:8px">पहले Ward चुनें</div>
@@ -1381,7 +1384,7 @@ function sortWardVoters(list,mode){
  const serialNum=v=>{const n=Number(String(v?.serial_no??"").replace(/[^0-9.-]/g,""));return Number.isFinite(n)?n:999999999};
  const text=v=>String(v??"").trim(); const coll=v=>text(v?.colony); const house=v=>text(effectiveHouse(v));
  const natural=(a,b)=>{const an=Number(a),bn=Number(b);if(Number.isFinite(an)&&Number.isFinite(bn)&&a!==""&&b!=="")return an-bn;return a.localeCompare(b,"hi",{numeric:true,sensitivity:"base"});};
- return [...list].sort((a,b)=>{if(mode==="serial")return serialNum(a)-serialNum(b);const c=natural(coll(a),coll(b));if(mode==="colony_house"){if(c!==0)return c;const h=natural(house(a),house(b));if(h!==0)return h;return serialNum(a)-serialNum(b)}const h=natural(house(a),house(b));if(h!==0)return h;return serialNum(a)-serialNum(b)});
+ return [...list].sort((a,b)=>{if(mode==="serial")return serialNum(a)-serialNum(b);const c=natural(coll(a),coll(b));if(mode==="colony_house"){if(c!==0)return c;const h=natural(house(a),house(b));if(h!==0)return h;return serialNum(a)-serialNum(b)}return serialNum(a)-serialNum(b)});
 }
 function generateWardPdfByMode(mode){const sel=document.getElementById("slipSortMode");if(sel)sel.value=mode;return generateExactWardPdf();}
 async function generateExactWardPdf(){
@@ -1635,7 +1638,7 @@ function neutralSlipHtml(v){
  return `<section class="vslip">
   <div class="gp">ग्राम पंचायत ${e(gpHi)}</div>
   <div class="cand">${e(candHi)}</div>
-  <div class="candidatePost">${e(postHi)} पद प्रत्याशी</div>
+  <div class="candidatePost">${e(postHi)}</div>
   <div class="civic">आपका विश्वास, हमारे गांव का विकास</div>
   <div class="civic">🙏 आपका सहयोग एवं आशीर्वाद अपेक्षित है - ${e(mobile)}</div>
   <div class="title">मतदाता पर्ची / Voter Slip</div>
@@ -1655,7 +1658,7 @@ async function makeWardGridPdf(list,filename,onProgress){
  const gp=candidate.gram_panchayat||"";
  const card=v=>`<div class="slip">
    <div class="candbox">
-    <div class="candtext"><div class="gp">ग्राम पंचायत:<br><strong>${e(gp)}</strong></div><div class="cname">${e(candName)}</div><div class="post">${e(post)}</div></div>
+    <div class="candtext"><div class="gp">ग्राम पंचायत:<br><strong>${e(gp)}</strong></div><div class="cname">${e(candName)}</div><div class="post">${e(hindiPostName(post))}</div></div>
     <div class="photo">${photo?`<img src="${e(photo)}" crossorigin="anonymous">`:"<div class='ph'>PHOTO</div>"}</div>
    </div>
    <div class="orange"><b>मतदाता पर्ची</b><span>मतदाता जानकारी</span></div>
