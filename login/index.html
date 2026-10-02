@@ -978,7 +978,44 @@ async function load(userOverride=null){
        if(rows.length<pageSize||(expectedCount>0&&all.length>=expectedCount)) break;
        if(offset>100000) throw new Error("Unexpected voter pagination limit");
      }
-     voters=all;
+     // Defense-in-depth: even if an older/deployed Edge Function returns unmasked
+     // rows, a FREE candidate's browser view must still remain masked.
+     const maskClientName=(value)=>{
+       const s=String(value??"").trim();
+       if(!s)return s;
+       if(s.length<=2)return s[0]+"**";
+       if(s.length===3)return s[0]+"**";
+       return s.slice(0,2)+"**"+s.slice(-1);
+     };
+     const maskClientRelative=(value)=>{
+       const s=String(value??"").trim();
+       if(!s)return s;
+       if(s.length<=2)return s[0]+"***";
+       if(s.length===3)return s[0]+"***";
+       return s.slice(0,2)+"***"+s.slice(-1);
+     };
+     const maskClientEpic=(value)=>{
+       const s=String(value??"").trim();
+       if(!s)return s;
+       const slash=s.lastIndexOf("/");
+       if(slash>=0 && s.length-slash>3){
+         const tail=s.slice(slash+1);
+         return s.slice(0,slash+1)+tail.slice(0,1)+"*****"+tail.slice(-2);
+       }
+       return s.length>5?s.slice(0,3)+"*****"+s.slice(-2):"*****";
+     };
+     const maskClientMobile=(value)=>{
+       const s=String(value??"").trim();
+       if(!s)return s;
+       return s.length>4?s.slice(0,2)+"******"+s.slice(-2):"********";
+     };
+     voters=currentAccess.access_level==="full" ? all : all.map(v=>({
+       ...v,
+       name:maskClientName(v.name),
+       relative_name:maskClientRelative(v.relative_name),
+       epic:maskClientEpic(v.epic),
+       mobile_number:v.mobile_number?maskClientMobile(v.mobile_number):v.mobile_number
+     }));
      masterVoterCount=expectedCount||all.length;
      console.log("Candidate voter data:",voters.length,currentAccess.access_level.toUpperCase(),"ACCESS");
      if(!voters.length) throw new Error("Database returned 0 voters");
