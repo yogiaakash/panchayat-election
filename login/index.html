@@ -1695,32 +1695,70 @@ async function pickDeviceContact(){
  if(!navigator.contacts?.select){alert("इस browser में Contacts Picker उपलब्ध नहीं है। Saved voter mobile या नंबर manually डालें।");return}
  try{const contacts=await navigator.contacts.select(["tel","name"],{multiple:false});const tel=contacts?.[0]?.tel?.[0]?.replace(/\D/g,"").slice(-10);if(tel)document.getElementById("familySharePhone").value=tel;else alert("इस contact में mobile number नहीं मिला।")}catch(x){if(x.name!=="AbortError")alert("Contacts access उपलब्ध नहीं है।")}
 }
+function showPendingFamilyPdfPopup(){
+ const p=window.__pendingFamilyPdf;
+ if(!p||document.getElementById("pendingFamilyPdfDlg"))return;
+ const dlg=document.createElement("dialog");
+ dlg.id="pendingFamilyPdfDlg";
+ dlg.style.cssText="border:0;border-radius:16px;padding:22px;max-width:390px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.25)";
+ dlg.innerHTML="<h3 style=\"margin:0 0 10px\">📄 अब Voter Slip PDF भेजें</h3><p style=\"margin:0 0 16px;color:#555\">WhatsApp message भेजने के बाद अब परिवार की voter slip PDF भेज सकते हैं।</p><div style=\"display:flex;gap:8px;justify-content:flex-end\"><button class=\"btn soft\" onclick=\"this.closest('dialog').remove();window.__pendingFamilyPdf=null\">बाद में</button><button class=\"btn green\" onclick=\"sendPendingFamilyPdf()\">📎 PDF भेजें</button></div>";
+ document.body.appendChild(dlg);
+ dlg.showModal();
+}
+async function sendPendingFamilyPdf(){
+ const p=window.__pendingFamilyPdf;
+ if(!p)return;
+ const dlg=document.getElementById("pendingFamilyPdfDlg");
+ try{
+  const file=await makePdfFile(p.voters,"House_"+p.house+"_Voter_Slips.pdf");
+  const gpHi=candidate.hindi_gram_panchayat||candidate.gram_panchayat||"";
+  const text="परिवार की मतदाता पर्ची\nमकान नंबर: "+p.house+"\nग्राम पंचायत: "+gpHi;
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+   try{
+    await navigator.share({title:"Family Voter Slips",text,files:[file]});
+    if(dlg)dlg.remove();
+    window.__pendingFamilyPdf=null;
+    return;
+   }catch(x){if(x.name==="AbortError")return}
+  }
+  const u=URL.createObjectURL(file),ln=document.createElement("a");
+  ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),5000);
+  if(dlg)dlg.remove();
+  window.__pendingFamilyPdf=null;
+  alert("PDF download हो गई है। WhatsApp chat में वापस जाकर इसे attach करके भेजें।");
+ }catch(x){alert("PDF तैयार नहीं हो सकी: "+(x.message||x))}
+}
+function initPendingFamilyPdfReturn(){
+ if(window.__pendingFamilyPdf){
+  setTimeout(showPendingFamilyPdfPopup,450);
+ }
+}
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="visible")initPendingFamilyPdfReturn();
+});
+window.addEventListener("focus",initPendingFamilyPdfReturn);
+
 async function sendFamilyVoterSlips(){
  const a=fam();if(!a.length)return;
  let phone=(document.getElementById("familySharePhone")?.value||"").replace(/\D/g,"");
  if(phone.length!==10){alert("कृपया 10 अंकों का mobile number दर्ज करें।");return}
  const msg=(document.getElementById("familyShareMessage")?.value||DEFAULT_FAMILY_WHATSAPP_MESSAGE).trim();
  try{
-  const file=await makePdfFile(a,"House_"+house.value+"_Voter_Slips.pdf");
   const gpHi=candidate.hindi_gram_panchayat||candidate.gram_panchayat||"";
   const text=msg+"\n\nमकान नंबर: "+house.value+"\nग्राम पंचायत: "+gpHi;
+
+  // Step 1: open the selected WhatsApp chat with ONLY the message.
   const waUrl="https://wa.me/91"+phone+"?text="+encodeURIComponent(text);
-  if(navigator.share&&navigator.canShare){
-   try{
-    if(navigator.canShare({files:[file]})){
-     await navigator.share({title:"Family Voter Slips",text,files:[file]});
-     familyShareDlg.close();
-     return;
-    }
-   }catch(x){if(x.name==="AbortError")return}
-  }
-  const u=URL.createObjectURL(file),ln=document.createElement("a");
-  ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();
-  setTimeout(()=>URL.revokeObjectURL(u),5000);
+  window.__pendingFamilyPdf={voters:a.map(v=>({...v})),house:house.value,phone};
   window.open(waUrl,"_blank");
   familyShareDlg.close();
- }catch(x){alert("Family voter slip तैयार नहीं हो सकी: "+x.message)}
-}sb.auth.onAuthStateChange((event,session)=>{
+
+  // When the user returns to this app, show the PDF-send popup.
+  setTimeout(initPendingFamilyPdfReturn,1200);
+ }catch(x){alert("WhatsApp message तैयार नहीं हो सकी: "+(x.message||x))}
+}
+sb.auth.onAuthStateChange((event,session)=>{
  if(event==="PASSWORD_RECOVERY"&&session){showRecoveryPasswordForm();return}
  if(event==="SIGNED_OUT"){currentUser=null;currentAccess=null}
 });
