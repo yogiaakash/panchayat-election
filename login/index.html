@@ -1310,13 +1310,9 @@ function syncVisitColony(){
  const w=document.getElementById("vrWard")?.value||"",sel=document.getElementById("vrColony");if(!sel)return;const old=sel.value;const cs=smart(voters.filter(v=>!w||String(v.ward)===w).map(v=>v.colony));sel.innerHTML=`<option value="">सभी कॉलोनी</option>${cs.map(x=>`<option value="${e(x)}">${e(x)}</option>`).join("")}`;if(cs.map(String).includes(old))sel.value=old;renderVisitRows();
 }
 function setVisitFilter(s){const x=document.getElementById("vrStatus");if(x){x.value=s;renderVisitRows()}}
-<style>
-.visitSummaryGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.visitStat{min-height:72px!important;padding:10px 7px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;border:1px solid #d7e5df!important;border-radius:12px!important;overflow:hidden}
-.visitStat b{font-size:24px!important;line-height:1!important;display:block!important}
-.visitStat small{font-size:11px!important;line-height:1.25!important;text-align:center!important;white-space:normal!important}
-@media(max-width:420px){.visitSummaryGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.visitStat{min-height:68px!important}.visitStat b{font-size:22px!important}.visitStat small{font-size:10.5px!important}}
-</style>
+const visitSummaryStyle=document.createElement("style");
+visitSummaryStyle.textContent=`.visitSummaryGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.visitStat{min-height:72px!important;padding:10px 7px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;border:1px solid #d7e5df!important;border-radius:12px!important;overflow:hidden}.visitStat b{font-size:24px!important;line-height:1!important;display:block!important}.visitStat small{font-size:11px!important;line-height:1.25!important;text-align:center!important;white-space:normal!important}@media(max-width:420px){.visitSummaryGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.visitStat{min-height:68px!important}.visitStat b{font-size:22px!important}.visitStat small{font-size:10.5px!important}}`;
+document.head.appendChild(visitSummaryStyle);
 function renderVisitRows(){
  const box=document.getElementById("vrRows");if(!box)return;const w=document.getElementById("vrWard")?.value||"",co=document.getElementById("vrColony")?.value||"",st=document.getElementById("vrStatus")?.value||"",rem=document.getElementById("vrRemaining")?.checked||false;
  const all=visitHouseRows().filter(x=>(!w||x.ward===w)&&(!co||x.colony===co));
