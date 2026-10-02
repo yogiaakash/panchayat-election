@@ -796,7 +796,7 @@ async function load(userOverride=null){
      const pageSize=500;
      let expectedCount=0;
      for(let offset=0;;offset+=pageSize){
-       const {data:{session}}=await sb.auth.getSession(); if(!session?.access_token) throw new Error("Login session token missing"); const {data:payload,error:pageError}=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize},headers:{Authorization:"Bearer "+session.access_token}});
+       const {data:{session}}=await sb.auth.getSession(); if(!session?.access_token) throw new Error("Login session token missing"); const {data:payload,error:pageError}=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:session.access_token}});
        if(pageError) throw pageError;
        if(payload?.error) throw new Error(payload.error);
        const rows=Array.isArray(payload?.voters)?payload.voters:[];
