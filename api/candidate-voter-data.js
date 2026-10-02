@@ -5,7 +5,7 @@ export default async function handler(req,res){
     if(!auth.startsWith("Bearer ")) return res.status(401).json({error:"Authentication required"});
     const base=(process.env.SUPABASE_URL||"https://ieoltipygxawhsvlxnsj.supabase.co").replace(/\/$/,"");
     const key=process.env.SUPABASE_ANON_KEY||process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||process.env.SUPABASE_PUBLISHABLE_KEY||"sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
-    const r=await fetch(base+"/rest/v1/rpc/get_candidate_voters",{
+    const authCheck=await fetch(base+"/auth/v1/user",{method:"GET",headers:{"Authorization":auth,"apikey":key}});\n    const authText=await authCheck.text();\n    if(!authCheck.ok) return res.status(401).json({error:"Supabase Auth rejected the login session",details:authText});\n    const authUser=JSON.parse(authText);\n    const r=await fetch(base+"/rest/v1/rpc/get_candidate_voters",{
       method:"POST",
       headers:{
         "Authorization":auth,
