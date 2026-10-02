@@ -1117,8 +1117,19 @@ function dashboard(){
   <div class="muted">एक Ward चुनें। उस Ward के सभी मतदाताओं की voter slips एक PDF में तैयार होंगी।</div>
   <label>Ward चुनें</label>
   <select id="slipWard" onchange="updateSlipCount()">${options("ward","Ward चुनें")}</select>
+  <label style="margin-top:9px">Slip का क्रम चुनें</label>
+  <select id="slipSortMode">
+   <option value="serial">क्रम संख्या अनुसार</option>
+   <option value="colony_house">कॉलोनी → मकान → क्रम संख्या</option>
+   <option value="house">मकान → क्रम संख्या</option>
+  </select>
+  <div class="muted" style="margin-top:5px">कॉलोनी/मकान विकल्प में एक ही परिवार के मतदाता साथ-साथ आएँगे। Slip का डिजाइन वही रहेगा।</div>
   <div id="slipCount" class="notice" style="margin-top:8px">पहले Ward चुनें</div>
-  <button id="generateWardBtn" class="btn green full" style="margin-top:10px" onclick="generateExactWardPdf()">📄 Ward-wise Voter Slip PDF Generate करें</button>
+  <button id="generateWardBtn" class="btn green full" style="margin-top:10px" onclick="generateExactWardPdf()">📄 चुने हुए क्रम में Ward PDF बनाएं</button>
+  <div class="grid2" style="margin-top:8px">
+   <button class="btn soft" onclick="generateWardPdfByMode(&quot;serial&quot;)">🔢 क्रम संख्या</button>
+   <button class="btn soft" onclick="generateWardPdfByMode(&quot;colony_house&quot;)">🏘️ कॉलोनी + मकान</button>
+  </div>
   <div id="pdfProgress" class="progressWrap">
    <div class="row"><b>PDF तैयार हो रही है…</b><span id="pdfPercent">0%</span></div>
    <div class="progressTrack"><div id="pdfFill" class="progressFill"></div></div>
@@ -1366,30 +1377,20 @@ let generatedWardPdfFile=null;
 function updateSlipCount(){const el=document.getElementById("slipWard"),info=document.getElementById("slipCount");if(!el||!info)return;const w=el.value;if(!w){info.textContent="पहले Ward चुनें";return}const n=voters.filter(v=>String(v.ward)===String(w)).length;info.innerHTML=`<b>Ward ${e(w)}</b> • ${n} voters • सभी की slips एक PDF में`;}
 function renderExactSlipPreview(list,w){const grid=document.getElementById("slipGrid");if(!grid)return;const demo=list.length?list:voters.slice(0,1);grid.innerHTML=Array.from({length:9},(_,i)=>{const p=demo[i%demo.length]||{};return `<div class="miniSlip"><div class="mh">ग्राम पंचायत ${e(candidate.gram_panchayat||"")}</div><div class="orange">मतदाता पर्ची</div><b>Ward:</b> ${e(w)}<br><b>क्रम:</b> ${e(p.serial_no??(i+1))} &nbsp; <b>EPIC:</b> ${e(p.epic||"-")}<br><b>नाम:</b> ${e(p.name||"-")}<br><b>पिता/पति:</b> ${e(p.relative_name||"-")}<br><b>मकान:</b> ${e(p.house_no||"-")}<br><b>क्षेत्र:</b> ${e(p.colony||"-")}<br><b>आयु:</b> ${e(p.age||"-")}</div>`}).join("");}
 function toggleSlipPreview(){const x=document.getElementById("slipPreview");if(x)x.style.display=x.style.display==="block"?"none":"block";}
+function sortWardVoters(list,mode){
+ const serialNum=v=>{const n=Number(String(v?.serial_no??"").replace(/[^0-9.-]/g,""));return Number.isFinite(n)?n:999999999};
+ const text=v=>String(v??"").trim(); const coll=v=>text(v?.colony); const house=v=>text(effectiveHouse(v));
+ const natural=(a,b)=>{const an=Number(a),bn=Number(b);if(Number.isFinite(an)&&Number.isFinite(bn)&&a!==""&&b!=="")return an-bn;return a.localeCompare(b,"hi",{numeric:true,sensitivity:"base"});};
+ return [...list].sort((a,b)=>{if(mode==="serial")return serialNum(a)-serialNum(b);const c=natural(coll(a),coll(b));if(mode==="colony_house"){if(c!==0)return c;const h=natural(house(a),house(b));if(h!==0)return h;return serialNum(a)-serialNum(b)}const h=natural(house(a),house(b));if(h!==0)return h;return serialNum(a)-serialNum(b)});
+}
+function generateWardPdfByMode(mode){const sel=document.getElementById("slipSortMode");if(sel)sel.value=mode;return generateExactWardPdf();}
 async function generateExactWardPdf(){
- const w=document.getElementById("slipWard")?.value;
- if(!w){alert("पहले Ward चुनें।");return}
- const list=voters.filter(v=>String(v.ward)===String(w));
- if(!list.length){alert("इस Ward में voter data नहीं मिला।");return}
- const box=document.getElementById("pdfProgress"),ready=document.getElementById("pdfReady"),preview=document.getElementById("slipPreview"),btn=document.getElementById("generateWardBtn");
- box.style.display="block";ready.classList.add("hidden");preview.style.display="none";btn.disabled=true;generatedWardPdfFile=null;
- const pctEl=document.getElementById("pdfPercent"),fill=document.getElementById("pdfFill"),textEl=document.getElementById("pdfProgressText"),detail=document.getElementById("pdfProgressDetail");
- const setp=(done,total)=>{const pct=total?Math.min(100,Math.round(done*100/total)):0;fill.style.width=pct+"%";pctEl.textContent=pct+"%";textEl.textContent=pct+"% Generated";detail.textContent=done+" / "+total+" voter slips तैयार"};
- try{
-  setp(0,list.length);
-  // Generate 9 slips per A4 page. This avoids creating hundreds of separate
-  // full-page canvases and reports real progress after every page.
-  generatedWardPdfFile=await makeWardGridPdf(list,`Ward_${w}_Voter_Slips.pdf`,(done,total)=>setp(done,total));
-  setp(list.length,list.length);
-  renderExactSlipPreview(list,w);
-  document.getElementById("pdfReadyText").textContent=`Ward ${w} के ${list.length} voter slips का PDF तैयार है`;
-  ready.classList.remove("hidden");
-  const u=URL.createObjectURL(generatedWardPdfFile),a=document.createElement("a");a.href=u;a.download=generatedWardPdfFile.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);
- }catch(err){
-  console.error("Ward PDF generation failed:",err);
-  alert("PDF तैयार नहीं हो सकी: "+(err?.message||err));
-  document.getElementById("pdfProgressDetail").textContent="PDF generation में समस्या आई";
- }finally{btn.disabled=false}
+ const w=document.getElementById("slipWard")?.value;if(!w){alert("पहले Ward चुनें।");return}
+ const raw=voters.filter(v=>String(v.ward)===String(w));if(!raw.length){alert("इस Ward में voter data नहीं मिला।");return}
+ const mode=document.getElementById("slipSortMode")?.value||"serial";const list=sortWardVoters(raw,mode);const modeLabel=mode==="colony_house"?"कॉलोनी + मकान + क्रम संख्या":mode==="house"?"मकान + क्रम संख्या":"क्रम संख्या";
+ const box=document.getElementById("pdfProgress"),ready=document.getElementById("pdfReady"),preview=document.getElementById("slipPreview"),btn=document.getElementById("generateWardBtn");box.style.display="block";ready.classList.add("hidden");preview.style.display="none";btn.disabled=true;generatedWardPdfFile=null;
+ const pctEl=document.getElementById("pdfPercent"),fill=document.getElementById("pdfFill"),textEl=document.getElementById("pdfProgressText"),detail=document.getElementById("pdfProgressDetail");const setp=(done,total)=>{const pct=total?Math.min(100,Math.round(done*100/total)):0;fill.style.width=pct+"%";pctEl.textContent=pct+"%";textEl.textContent=pct+"% Generated";detail.textContent=done+" / "+total+" voter slips तैयार"};
+ try{setp(0,list.length);generatedWardPdfFile=await makeWardGridPdf(list,"Ward_"+w+"_Voter_Slips_"+mode+".pdf",(done,total)=>setp(done,total));setp(list.length,list.length);renderExactSlipPreview(list,w);document.getElementById("pdfReadyText").textContent="Ward "+w+" के "+list.length+" voter slips तैयार हैं — क्रम: "+modeLabel;ready.classList.remove("hidden");const u=URL.createObjectURL(generatedWardPdfFile),a=document.createElement("a");a.href=u;a.download=generatedWardPdfFile.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}catch(err){console.error("Ward PDF generation failed:",err);alert("PDF तैयार नहीं हो सकी: "+(err?.message||err));document.getElementById("pdfProgressDetail").textContent="PDF generation में समस्या आई"}finally{btn.disabled=false}
 }
 async function shareGeneratedWardPdf(){if(!generatedWardPdfFile){alert("पहले PDF Generate करें।");return}await sharePdfFile(generatedWardPdfFile,"Ward Voter Information Slips","मतदाता सूची संदर्भ हेतु Ward voter slips");}
 function renderPanchayatStats(){
@@ -1663,8 +1664,9 @@ async function makeWardGridPdf(list,filename,onProgress){
     <div class="r split"><span><b>क्रम:</b> ${e(v.serial_no||"-")}</span><span><b>EPIC:</b> ${e(v.epic||"-")}</span></div>
     <div class="r"><b>मतदाता नाम :</b> ${e(v.name||"-")}</div>
     <div class="r"><b>पिता / पति :</b> ${e(v.relative_name||"-")}</div>
-    <div class="r split"><span><b>मकान नं.:</b> ${e(v.house_no||"-")}</span><span><b>लिंग/आयु:</b> ${e(v.gender||"-")} / ${e(v.age||"-")}</span></div>
-    <div class="r"><b>क्षेत्र :</b> ${e(v.colony||"-")}</div>
+    <div class="r split"><span><b>मकान नं.:</b> ${e(effectiveHouse(v)||"-")}</span><span><b>लिंग/आयु:</b> ${e(v.gender||"-")} / ${e(v.age||"-")}</span></div>
+    <div class="r"><b>कॉलोनी :</b> ${e(v.colony||"-")}</div>
+   <div class="r"><b>मकान नं. :</b> ${e(effectiveHouse(v)||"-")}</div>
     <div class="r booth"><b>मतदान केंद्र :</b> ${e(v.polling_station||"-")}</div>
    </div>
    <div class="foot">मतदाता सूची संदर्भ हेतु</div>
