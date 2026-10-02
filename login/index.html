@@ -937,6 +937,30 @@ async function load(userOverride=null){
    email:user.email||""
  };
 
+ // Restore the persistent candidate profile immediately after login.
+ // Do not wait for the optional post-render refresh, otherwise the first
+ // dashboard render can show the initials and the user sees a blank/stale home.
+ try{
+   const {data:profile,error:profileError}=await sb.from("candidate_profiles")
+     .select("*").eq("user_id",user.id).maybeSingle();
+   if(profileError) console.warn("Candidate profile load:",profileError);
+   if(profile){
+     candidate.id=profile.user_id||candidate.id;
+     candidate.name=profile.candidate_name||candidate.name;
+     candidate.hindi_name=profile.candidate_name_hindi||candidate.hindi_name;
+     candidate.post=profile.election_post||candidate.post;
+     candidate.gram_panchayat=profile.gram_panchayat||candidate.gram_panchayat;
+     candidate.panchayat_samiti=profile.panchayat_samiti||candidate.panchayat_samiti;
+     candidate.district=profile.district||candidate.district;
+     candidate.photo_url=profile.photo_url||candidate.photo_url||"";
+     candidate.mobile=profile.mobile||candidate.mobile;
+     candidate.whatsapp=profile.whatsapp||candidate.whatsapp;
+     candidate.email=profile.email||candidate.email;
+   }
+ }catch(profileLoadError){
+   console.warn("Candidate profile unavailable:",profileLoadError);
+ }
+
  // Always display the candidate's name in Hindi in the dashboard header.
  // Older accounts may have only the English name saved, so transliterate it
  // automatically instead of falling back to English.
@@ -1789,5 +1813,18 @@ sb.auth.onAuthStateChange((event,session)=>{
  if(event==="PASSWORD_RECOVERY"&&session){showRecoveryPasswordForm();return}
  if(event==="SIGNED_OUT"){currentUser=null;currentAccess=null}
 });
-load();
+(async()=>{
+ try{
+   const {data:{session}}=await sb.auth.getSession();
+   if(session?.user){
+     sb.functions.setAuth(session.access_token);
+     await load(session.user);
+   }else{
+     loginView();
+   }
+ }catch(err){
+   console.error("Initial session load failed:",err);
+   loginView("Login session load नहीं हो सका। कृपया फिर से Login करें।");
+ }
+})();
 </script></body></html>
