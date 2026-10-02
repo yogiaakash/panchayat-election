@@ -1315,9 +1315,24 @@ function renderVisitRows(){
  box.querySelectorAll(".visitOpen").forEach(btn=>btn.onclick=()=>openHouseFromVisit(rows[+btn.dataset.i]));
 }
 function openHouseFromVisit(x){
- showTab("info");const ops=document.getElementById("opsReports");if(ops)ops.classList.add("hidden");
- ward.value=String(x.ward||"");cascade("ward");colony.value=String(x.colony||"");cascade("colony");house.value=String(x.house||"");page=1;renderRows();
- setTimeout(()=>document.getElementById("familyBox")?.scrollIntoView({behavior:"smooth",block:"start"}),100);
+ // Visit Tracking is an OPS module. Its parent hides the voter-info tab,
+ // so switching only the tab state leaves a blank area. Explicitly activate
+ // the info module before applying the house filters.
+ showWorkspace();
+ setModuleVisibility("info");
+ const ops=document.getElementById("opsReports");if(ops){ops.classList.add("hidden");ops.innerHTML=""}
+ const w=String(x?.ward??""),co=String(x?.colony??""),h=String(x?.house??"");
+ ward.value=w;
+ cascade("ward");
+ colony.value=co;
+ cascade("colony");
+ house.value=h;
+ page=1;
+ renderRows();
+ setTimeout(()=>{
+   const box=document.getElementById("familyBox");
+   if(box && !box.classList.contains("hidden")) box.scrollIntoView({behavior:"smooth",block:"start"});
+ },150);
 }
 function syncNewVoterColonies(){
  const w=document.getElementById("newWard")?.value||"",sel=document.getElementById("newColony");if(!sel)return;const cs=smart(voters.filter(v=>String(v.ward)===String(w)).map(v=>v.colony).concat(additionRows.filter(v=>String(v.ward)===String(w)).map(v=>v.colony)));sel.innerHTML=cs.length?cs.map(x=>`<option value="${e(x)}">${e(x)}</option>`).join(""):'<option value="">कोई Colony उपलब्ध नहीं</option>';
