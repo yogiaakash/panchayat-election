@@ -713,7 +713,7 @@ function signupView(){
  app.innerHTML=`<div class="card login signupCard"><h2>📝 Candidate Account बनाएं</h2><p class="muted">अपनी जानकारी भरें और अपनी Panchayat चुनें। Account बनने के बाद आपके चुने हुए Panchayat का voter data उपलब्ध रहेगा।</p>
  <label>Candidate Name *</label><input id="suName" placeholder="पूरा नाम">
  <label>Candidate Name (Hindi)</label><div class="hindiInputWrap"><input id="suNameHi" placeholder="English में लिखें — जैसे Suman Barala" autocomplete="off" spellcheck="false"><span id="suNameHiStatus" class="hindiInputStatus">⌨ Hindi</span></div><div class="hindiInputHint">English में टाइप करें और Hindi अपने-आप बनेगी — जैसे <b>Suman Barala → सुमन बाराला</b></div>
- <label>Election Post *</label><select id="suPost"><option value="">Post चुनें</option><option>Sarpanch</option><option>Ward Panch</option><option>Panchayat Samiti Member</option><option>Zila Parishad Member</option></select>
+ <label>Election Post *</label><select id="suPost"><option value="">पद चुनें</option><option value="Sarpanch">सरपंच</option><option value="Ward Panch">वार्ड पंच</option><option value="Panchayat Samiti Member">पंचायत समिति सदस्य</option><option value="Zila Parishad Member">जिला परिषद सदस्य</option></select>
  <label>District *</label><select id="suDistrict" onchange="signupFilterPS()"><option>Loading…</option></select>
  <label>Panchayat Samiti *</label><select id="suPS" onchange="signupFilterGP()" disabled><option>पहले जिला चुनें</option></select>
  <label>Gram Panchayat *</label><select id="suGP" onchange="signupSelectGP()" disabled><option>पहले Panchayat Samiti चुनें</option></select>
