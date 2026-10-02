@@ -658,6 +658,32 @@ const hiPlaceCache=new Map();
 async function hindiPlaceName(name){
  const raw=String(name||"").trim();
  if(!raw)return "";
+
+ // Panchayat Samiti names are stored in English. Translate only the
+ // actual place name, then append the fixed Hindi administrative term.
+ const psMatch=raw.match(/^(.*?)\\s+PAN(?:CHAYAT)?\\s+SAMITI$/i);
+ if(psMatch){
+   const base=psMatch[1].trim();
+   const exactBase={
+     "AJMER RURAL":"अजमेर ग्रामीण",
+     "ARAIN":"अरांई",
+     "AREIN":"अरांई",
+     "RURAL":"ग्रामीण",
+     "BADLYA":"बाडल्या",
+     "BHINAY":"भिनाय",
+     "KEKRI":"केकड़ी",
+     "KISHANGARH (SILORA)":"किशनगढ़ (सिलोरा)",
+     "PISANGAN":"पीसांगन",
+     "SARWAR":"सरवाड़",
+     "SAWAR":"सावर",
+     "SRINAGAR":"श्रीनगर"
+   };
+   const key=base.toUpperCase();
+   if(exactBase[key]) return exactBase[key]+" पंचायत समिति";
+   const translated=await hindiPlaceName(base);
+   return translated+" पंचायत समिति";
+ }
+
  const exact={
    "AREIN":"अरांई",
    "ARAIN":"अरांई",
@@ -667,21 +693,20 @@ async function hindiPlaceName(name){
  if(exact[exactKey]){hiPlaceCache.set(raw,exact[exactKey]);return exact[exactKey];}
  if(hiPlaceCache.has(raw))return hiPlaceCache.get(raw);
  try{
-   const saved=localStorage.getItem("pd_hi_place_"+raw);
-   if(saved){hiPlaceCache.set(raw,saved);return saved}
- }catch(_){}
- try{
-   const res=await fetch("https://inputtools.google.com/request?text="+encodeURIComponent(raw)+"&itc=hi-t-i0-und&num=1&ie=utf-8&oe=utf-8");
+   const res=await fetch("https://inputtools.google.com/request?text="+encodeURIComponent(raw)+"&itc=hi-t-i0-und&num=5&cp=0&cs=1&ie=utf-8&oe=utf-8");
+   if(!res.ok)throw new Error("Hindi input service unavailable");
    const data=await res.json();
-   const hi=data?.[1]?.[0]?.[1]?.[0];
-   if(hi){
-     hiPlaceCache.set(raw,hi);
-     try{localStorage.setItem("pd_hi_place_"+raw,hi)}catch(_){}
-     return hi;
-   }
- }catch(err){console.warn("Place Hindi transliteration failed:",raw,err)}
- return raw;
+   const suggestions=data?.[1]?.[0]?.[1];
+   const hi=Array.isArray(suggestions)&&suggestions[0] ? suggestions[0] : raw;
+   hiPlaceCache.set(raw,hi);
+   try{localStorage.setItem("pd_hi_place_"+raw,hi)}catch(_){}
+   return hi;
+ }catch(err){
+   console.warn("Place Hindi transliteration failed:",raw,err);
+   return raw;
+ }
 }
+
 async function hindiPlaceOptions(values){
  const out=[];
  for(const raw of values){
