@@ -973,14 +973,14 @@ async function load(userOverride=null){
        all.push(...rows);
        expectedCount=Number(payload?.master_count||expectedCount||0);
        if(payload?.panchayat_id) currentAccess.panchayat_id=payload.panchayat_id;
+       if(typeof payload?.full_access==="boolean") currentAccess.access_level=payload.full_access?"full":"masked";
        console.log("Candidate voter page:",offset,"+",rows.length,"of",expectedCount);
        if(rows.length<pageSize||(expectedCount>0&&all.length>=expectedCount)) break;
        if(offset>100000) throw new Error("Unexpected voter pagination limit");
      }
      voters=all;
      masterVoterCount=expectedCount||all.length;
-     currentAccess={...currentAccess,access_level:"full"};
-     console.log("Candidate voter data:",voters.length,"FULL ACCESS");
+     console.log("Candidate voter data:",voters.length,currentAccess.access_level.toUpperCase(),"ACCESS");
      if(!voters.length) throw new Error("Database returned 0 voters");
    }catch(e){
      console.error("Voter data refresh failed:",e);
@@ -1491,7 +1491,7 @@ function renderPanchayatStats(){
  const ages=voters.map(x=>Number(x.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1):"-";
  const g18=ages.filter(a=>a>=18&&a<=25).length,g26=ages.filter(a=>a>=26&&a<=40).length,g41=ages.filter(a=>a>=41&&a<=60).length,g60=ages.filter(a=>a>60).length;
  const wards=smart(voters.map(x=>x.ward));
- const stat=(n,label)=>`<div class="stat statLine"><b>${e(n)}</b><span>-</span><strong>${label}</strong></div>`;
+ const stat=(n,label)=>`<div class="stat statLine"><b>${currentAccess.access_level==="full"?e(n):"****"}</b><span>-</span><strong>${label}</strong></div>`;
  box.innerHTML=`<div class="card" style="margin:0">
    <div class="title">📊 पंचायत सांख्यिकी</div>
    <div class="muted">मतदाता सूची के आधार पर पंचायत के मुख्य आँकड़े</div>
@@ -1534,7 +1534,7 @@ function renderDetailedStats(){
  const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
  const ages=a.map(x=>Number(x.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((x,y)=>x+y,0)/ages.length).toFixed(1):"-";
  const hs=new Set(a.map(v=>String(v.ward)+"|"+String(v.colony)+"|"+String(effectiveHouse(v)))).size,cs=new Set(a.map(v=>String(v.colony))).size;
- const stat=(n,label)=>`<div class="stat statLine"><b>${e(n)}</b><span>-</span><strong>${label}</strong></div>`;
+ const stat=(n,label)=>`<div class="stat statLine"><b>${currentAccess.access_level==="full"?e(n):"****"}</b><span>-</span><strong>${label}</strong></div>`;
  box.innerHTML=`<div class="statsList detailedStatsList">
    ${stat(a.length,"कुल मतदाता")}
    ${stat(a.filter(isMale).length,"पुरुष")}
@@ -1546,7 +1546,7 @@ function renderDetailedStats(){
   ${co?`<div class="notice statSelection"><b>${e(co)}</b>${w?` <span>• वार्ड ${e(w)}</span>`:""}</div>`:w?`<div class="notice statSelection"><b>वार्ड ${e(w)}</b></div>`:""}`;
 }
 function renderWardOverview(){
- const box=document.getElementById("wardOverview");if(!box)return;const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");const wards=smart(voters.map(v=>v.ward));box.innerHTML=wards.length?wards.map(w=>{const a=voters.filter(v=>String(v.ward)===String(w));const ages=a.map(v=>Number(v.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((x,y)=>x+y,0)/ages.length).toFixed(1):"-",hs=new Set(a.map(v=>String(v.colony)+"|"+String(effectiveHouse(v)))).size;return `<div class="member row"><div><b>Ward ${e(w)}</b><div class="muted">${hs} Houses • Avg Age ${avg}</div></div><div style="text-align:right"><b>${a.length} Voters</b><div class="muted">Male ${a.filter(isMale).length} • Female ${a.filter(isFemale).length}</div></div></div>`}).join(""):'<div class="empty">कोई Ward data नहीं</div>';
+ const box=document.getElementById("wardOverview");if(!box)return;const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");const wards=smart(voters.map(v=>v.ward));const masked=currentAccess.access_level!=="full";box.innerHTML=wards.length?wards.map(w=>{const a=voters.filter(v=>String(v.ward)===String(w));const ages=a.map(v=>Number(v.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((x,y)=>x+y,0)/ages.length).toFixed(1):"-",hs=new Set(a.map(v=>String(v.colony)+"|"+String(effectiveHouse(v)))).size;return `<div class="member row"><div><b>Ward ${e(w)}</b><div class="muted">${masked?"****":hs} Houses • Avg Age ${masked?"****":avg}</div></div><div style="text-align:right"><b>${masked?"****":a.length} Voters</b><div class="muted">Male ${masked?"****":a.filter(isMale).length} • Female ${masked?"****":a.filter(isFemale).length}</div></div></div>`}).join(""):'<div class="empty">कोई Ward data नहीं</div>';
 }
 let azLetter="";
 function initAZLetters(){const box=document.getElementById("azLetters");if(!box)return;box.innerHTML=`<button class="badge azLetterBtn" data-l="">ALL</button>${Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map(l=>`<button class="badge azLetterBtn" data-l="${l}">${l}</button>`).join("")}`;box.querySelectorAll(".azLetterBtn").forEach(b=>b.onclick=()=>{azLetter=b.dataset.l;renderAZ()});}
