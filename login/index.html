@@ -1531,7 +1531,20 @@ function generateAZPdfExact(mode){
  const prog=document.getElementById("azProgress"),txt=document.getElementById("azProgressText"),pct=document.getElementById("azPct"),bar=document.getElementById("azBar"),proc=document.getElementById("azProcessed"),ready=document.getElementById("azReady");if(!list.length){alert("Voter data नहीं मिला।");return}prog.style.display="block";ready.innerHTML="";let n=0;txt.textContent="PDF तैयार हो रही है…";pct.textContent="0%";bar.style.width="0%";
  const timer=setInterval(()=>{n=Math.min(list.length,n+Math.max(1,Math.ceil(list.length/18)));const p=Math.round(n/list.length*100);pct.textContent=p+"%";bar.style.width=p+"%";proc.textContent=n+" / "+list.length+" voters processed";if(n>=list.length){clearInterval(timer);txt.textContent="PDF Ready";ready.innerHTML=`<div class="member" style="margin-top:10px"><b>✓ Alphabetical PDF तैयार</b><div class="muted">${mode==="ward"?`Ward ${e(ward)}`:"पूरी Panchayat"} • ${list.length} voters</div><button id="azOpenPdf" class="btn soft full" style="margin-top:7px">⬇ Open / Save PDF</button></div>`;document.getElementById("azOpenPdf").onclick=()=>openAZPrint(list,mode==="ward"?`Ward ${ward} A–Z`:"Panchayat A–Z")}},35);
 }
-function downloadAZCsv(){const a=azData(),rows=[["Serial","Name","English Name","Relative","EPIC","Ward","House","Age","Gender"],...a.map(v=>[v.serial_no,v.name,v.en,v.relative_name,v.epic,v.ward,v.house_no,v.age,v.gender])],csv="\uFEFF"+rows.map(r=>r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(",")).join("\n"),b=new Blob([csv],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),ln=document.createElement("a");ln.href=u;ln.download=(document.getElementById("azWard")?.value?`Ward_${document.getElementById("azWard").value}`:"Panchayat_Combined")+"_AZ_List.csv";ln.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function downloadAZCsv(){
+ const ward=document.getElementById("azWard")?.value||"";
+ const q=(document.getElementById("azQ")?.value||"").trim();
+ const letter=azLetter||"";
+ // Export the COMPLETE result matching the current A-Z selection.
+ // The visible list is limited to 500 records, but CSV exports ALL matches.
+ const a=azData();
+ const safeQ=q.replace(/[^a-z0-9]+/gi,"_").replace(/^_|_$/g,"");
+ const fileScope=ward?("Ward_"+ward):(q?("Panchayat_Search_"+safeQ):(letter?("Panchayat_"+letter):"Panchayat_Combined"));
+ const rows=[["Serial","Name","English Name","Relative","EPIC","Ward","Colony","House","Age","Gender","Polling Station"],...a.map(v=>[v.serial_no,v.name,v.en,v.relative_name,v.epic,v.ward,v.colony,effectiveHouse(v),v.age,v.gender,v.polling_station])];
+ const csv="\uFEFF"+rows.map(r=>r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(",")).join("\n");
+ const b=new Blob([csv],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),ln=document.createElement("a");
+ ln.href=u;ln.download=fileScope+"_AZ_List_ALL.csv";document.body.appendChild(ln);ln.click();ln.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
 const DV={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ए":"e","ऐ":"ai","ओ":"o","औ":"au","ऋ":"ri"},DC={"क":"k","ख":"kh","ग":"g","घ":"gh","ङ":"ng","च":"ch","छ":"chh","ज":"j","झ":"jh","ञ":"ny","ट":"t","ठ":"th","ड":"d","ढ":"dh","ण":"n","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"ph","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ळ":"l"},DM={"ा":"aa","ि":"i","ी":"ee","ु":"u","ू":"oo","ृ":"ri","े":"e","ै":"ai","ो":"o","ौ":"au","ं":"n","ँ":"n","ः":"h","्":""};
 function roman(s){s=String(s||"");let o="";for(let i=0;i<s.length;i++){let ch=s[i];if(DV[ch]){o+=DV[ch];continue}if(DC[ch]){let nx=s[i+1];o+=DC[ch];if(DM[nx]!==undefined){o+=DM[nx];i++}else o+="a";continue}if(DM[ch]!==undefined){o+=DM[ch];continue}o+=ch}return norm(o).replace(/aa/g,"a").replace(/ee/g,"i").replace(/oo/g,"u").replace(/ph/g,"f").replace(/sh/g,"s").replace(/v/g,"w")}
 function matchQ(v,q){if(!q)return true;const nq=norm(q),rq=roman(q),fields=[v.name,v.epic,v.relative_name,v.house_no,v.colony,v.ward,v.polling_station];return fields.some(x=>norm(x).includes(nq)||roman(x).includes(nq)||roman(x).includes(rq))}
