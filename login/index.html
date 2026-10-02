@@ -824,7 +824,7 @@ async function load(userOverride=null){
    try{
      const {data:{session}}=await sb.auth.getSession();
      if(!session?.access_token) throw new Error("No authenticated session");
-     const resp=await fetch("/api/candidate-voter-data",{
+     const resp=await fetch("/login/api/candidate-voter-data",{
        method:"POST",
        headers:{
          "Authorization":"Bearer "+session.access_token,
