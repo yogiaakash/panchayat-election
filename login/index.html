@@ -1665,13 +1665,28 @@ async function saveFamilyShareMessage(){
  if(error){alert("Message save नहीं हुआ: "+error.message);return}
  familyShareMessage=data.family_share_message;
  alert("WhatsApp message save हो गया। अब यही message आगे भी रहेगा।");
-}function openFamilySharePopup(a){
+}const DEFAULT_FAMILY_WHATSAPP_MESSAGE=`🙏 नमस्कार!
+
+आपके परिवार की मतदाता पर्ची संलग्न है।
+कृपया परिवार के सभी सदस्यों का नाम, वार्ड संख्या, मकान नंबर, मतदाता क्रमांक एवं मतदान केंद्र ध्यानपूर्वक जांच लें।
+
+यदि किसी जानकारी में त्रुटि दिखाई दे, तो कृपया आधिकारिक मतदाता सूची/निर्वाचन कार्यालय से सत्यापन कर लें।
+
+मतदान के दिन अपनी मतदाता जानकारी एवं आवश्यक पहचान दस्तावेज साथ रखें।
+
+आपकी जागरूक भागीदारी लोकतंत्र को मजबूत बनाती है।
+
+धन्यवाद एवं शुभकामनाएँ। 🙏`;
+
+function openFamilySharePopup(a){
  const saved=a.map(v=>({v,m:voterMobileMap.get(String(v.id))?.mobile_number||""}));
  const opts=saved.map((x,i)=>"<option value=\""+i+"\">"+e(x.v.name)+(x.m?" • 📱 "+e(x.m):" • मोबाइल दर्ज नहीं")+"</option>").join("");
  const def=saved.find(x=>x.m)?.m||"";
- familyShareBody.innerHTML="<div class=\"muted\">इस मकान के किसी भी परिवार सदस्य को voter slips भेजें।</div><label>परिवार सदस्य</label><select id=\"familyShareMember\" onchange=\"pickFamilyShareMember()\"><option value=\"-1\">मोबाइल नंबर चुनें</option>"+opts+"</select><div class=\"familyShareOr\">या</div><label>मोबाइल नंबर</label><input id=\"familySharePhone\" type=\"tel\" inputmode=\"numeric\" maxlength=\"10\" placeholder=\"10 अंकों का मोबाइल नंबर\" value=\""+e(def)+"\"><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"pickDeviceContact()\">👤 फोन Contacts से चुनें</button><label>WhatsApp Message</label><textarea id=\"familyShareMessage\" rows=\"3\>"+e(familyShareMessage)+"</textarea><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"saveFamilyShareMessage()\">💾 Message Save करें</button><button class=\"btn green full\" style=\"margin-top:8px\" onclick=\"sendFamilyVoterSlips()\">📲 WhatsApp पर भेजें</button><div class=\"muted\" style=\"margin-top:8px\">Saved voter mobile होने पर नंबर अपने-आप भर जाएगा।</div>";
+ const currentMsg=(familyShareMessage||"").trim()||DEFAULT_FAMILY_WHATSAPP_MESSAGE;
+ familyShareBody.innerHTML="<div class=\"muted\">इस मकान के किसी भी परिवार सदस्य को voter slips भेजें।</div><label>परिवार सदस्य</label><select id=\"familyShareMember\" onchange=\"pickFamilyShareMember()\"><option value=\"-1\">मोबाइल नंबर चुनें</option>"+opts+"</select><div class=\"familyShareOr\">या</div><label>मोबाइल नंबर</label><input id=\"familySharePhone\" type=\"tel\" inputmode=\"numeric\" maxlength=\"10\" placeholder=\"10 अंकों का मोबाइल नंबर\" value=\""+e(def)+"\"><button class=\"btn soft full\" style=\"margin-top:8px\" onclick=\"pickDeviceContact()\">👤 फोन Contacts से चुनें</button><label>WhatsApp Message</label><textarea id=\"familyShareMessage\" rows=\"10\">"+e(currentMsg)+"</textarea><button class=\"btn green full\" style=\"margin-top:8px\" onclick=\"sendFamilyVoterSlips()\">📲 PDF + Message भेजें</button><div class=\"muted\" style=\"margin-top:8px\">Send दबाने पर selected number की WhatsApp chat खुलेगी और message तैयार होगा।</div>";
  familyShareDlg.showModal();
 }
+
 function pickFamilyShareMember(){
  const i=Number(document.getElementById("familyShareMember")?.value||-1), a=fam(), v=a[i], inp=document.getElementById("familySharePhone");
  if(i>=0&&v&&inp){const m=voterMobileMap.get(String(v.id))?.mobile_number||"";if(m)inp.value=m;}
@@ -1684,14 +1699,26 @@ async function sendFamilyVoterSlips(){
  const a=fam();if(!a.length)return;
  let phone=(document.getElementById("familySharePhone")?.value||"").replace(/\D/g,"");
  if(phone.length!==10){alert("कृपया 10 अंकों का mobile number दर्ज करें।");return}
- const msg=document.getElementById("familyShareMessage")?.value?.trim()||familyShareMessage;
+ const msg=(document.getElementById("familyShareMessage")?.value||DEFAULT_FAMILY_WHATSAPP_MESSAGE).trim();
  try{
   const file=await makePdfFile(a,"House_"+house.value+"_Voter_Slips.pdf");
-  const text=msg+"\n\nमकान नंबर: "+house.value+"\nपंचायत: "+(candidate.gram_panchayat||"");
+  const gpHi=candidate.hindi_gram_panchayat||candidate.gram_panchayat||"";
+  const text=msg+"\n\nमकान नंबर: "+house.value+"\nग्राम पंचायत: "+gpHi;
   const waUrl="https://wa.me/91"+phone+"?text="+encodeURIComponent(text);
-  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title:"Family Voter Slips",text,files:[file]});familyShareDlg.close();return}catch(x){if(x.name==="AbortError")return}}
-  const u=URL.createObjectURL(file),ln=document.createElement("a");ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();window.open(waUrl,"_blank");familyShareDlg.close();
-  alert("WhatsApp message खुल गया है और PDF download हो गई है। यदि PDF auto-attach न हो, तो WhatsApp chat में PDF attach करें।");
+  if(navigator.share&&navigator.canShare){
+   try{
+    if(navigator.canShare({files:[file]})){
+     await navigator.share({title:"Family Voter Slips",text,files:[file]});
+     familyShareDlg.close();
+     return;
+    }
+   }catch(x){if(x.name==="AbortError")return}
+  }
+  const u=URL.createObjectURL(file),ln=document.createElement("a");
+  ln.href=u;ln.download=file.name;document.body.appendChild(ln);ln.click();ln.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),5000);
+  window.open(waUrl,"_blank");
+  familyShareDlg.close();
  }catch(x){alert("Family voter slip तैयार नहीं हो सकी: "+x.message)}
 }sb.auth.onAuthStateChange((event,session)=>{
  if(event==="PASSWORD_RECOVERY"&&session){showRecoveryPasswordForm();return}
