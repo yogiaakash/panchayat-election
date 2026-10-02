@@ -1659,15 +1659,36 @@ async function shareHouse(){
  openFamilySharePopup(a);
 }
 async function saveFamilyShareMessage(){
- const ta=document.getElementById("familyShareMessage");if(!ta)return;
- const msg=ta.value.trim();if(!msg){alert("Message खाली नहीं हो सकता।");return}
- const {data,error}=await sb.from("candidate_share_settings").upsert({
-  user_id:currentUser.id,panchayat_id:currentAccess.panchayat_id,family_share_message:msg,updated_at:new Date().toISOString()
- },{onConflict:"user_id,panchayat_id"}).select().single();
- if(error){alert("Message save नहीं हुआ: "+error.message);return}
- familyShareMessage=data.family_share_message;
- alert("WhatsApp message save हो गया। अब यही message आगे भी रहेगा।");
-}const DEFAULT_FAMILY_WHATSAPP_MESSAGE=`🙏 नमस्कार!
+ const ta=document.getElementById("familyShareMessage");
+ if(!ta)return;
+ const msg=ta.value.trim();
+ if(!msg){alert("Message खाली नहीं हो सकता।");return}
+ const uid=currentUser?.id;
+ const pid=currentAccess?.panchayat_id||candidate?.panchayat_id||null;
+ if(!uid||!pid){alert("Candidate session/Panchayat information नहीं मिली। कृपया logout करके फिर login करें।");return}
+ try{
+  // Update first, then insert if this candidate has no saved message yet.
+  const {data:updated,error:updateError}=await sb.from("candidate_share_settings")
+    .update({family_share_message:msg,updated_at:new Date().toISOString()})
+    .eq("user_id",uid).eq("panchayat_id",pid).select("family_share_message").maybeSingle();
+  if(updateError)throw updateError;
+
+  if(!updated){
+    const {data:inserted,error:insertError}=await sb.from("candidate_share_settings")
+      .insert({user_id:uid,panchayat_id:pid,family_share_message:msg})
+      .select("family_share_message").single();
+    if(insertError)throw insertError;
+    familyShareMessage=inserted.family_share_message;
+  }else{
+    familyShareMessage=updated.family_share_message;
+  }
+  alert("WhatsApp message save हो गया। अगली बार login करने पर भी यही message रहेगा।");
+ }catch(error){
+  console.error("Family WhatsApp message save failed:",error);
+  alert("Message save नहीं हुआ: "+(error?.message||String(error)));
+ }
+}
+const DEFAULT_FAMILY_WHATSAPP_MESSAGE=`🙏 नमस्कार!
 
 आपके परिवार की मतदाता पर्ची संलग्न है।
 कृपया परिवार के सभी सदस्यों का नाम, वार्ड संख्या, मकान नंबर, मतदाता क्रमांक एवं मतदान केंद्र ध्यानपूर्वक जांच लें।
