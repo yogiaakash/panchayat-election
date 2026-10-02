@@ -739,12 +739,16 @@ async function signupFilterPS(){
   const {data,error}=await sb.rpc("get_signup_panchayat_samitis",{p_district:d});
   if(error)throw error;
   const vals=(data||[]).map(x=>x.panchayat_samiti).filter(Boolean);
-  ps.innerHTML='<option value="">Panchayat Samiti चुनें</option>';
-  for(const x of await hindiPlaceOptions(vals)){
-   ps.insertAdjacentHTML("beforeend",'<option value="'+e(x.en)+'">'+e(x.hi)+'</option>');
+  ps.innerHTML='<option value="">पंचायत समिति चुनें</option>';
+  for(const raw of vals){
+   const hi=await hindiPlaceName(raw);
+   ps.insertAdjacentHTML("beforeend",'<option value="'+e(raw)+'">'+e(hi)+'</option>');
   }
   ps.disabled=false;
- }catch(err){ps.innerHTML='<option value="">Load नहीं हुआ</option>';document.getElementById("signupMsg").textContent="Panchayat Samiti load नहीं हुई: "+(err.message||err)}
+ }catch(err){
+  ps.innerHTML='<option value="">Load नहीं हुआ</option>';
+  document.getElementById("signupMsg").textContent="Panchayat Samiti load नहीं हुई: "+(err.message||err);
+ }
 }
 async function signupFilterGP(){
  const d=document.getElementById("suDistrict").value,psv=document.getElementById("suPS").value,gp=document.getElementById("suGP");
