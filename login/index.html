@@ -925,6 +925,17 @@ async function load(userOverride=null){
    email:user.email||""
  };
 
+ // Always display the candidate's name in Hindi in the dashboard header.
+ // Older accounts may have only the English name saved, so transliterate it
+ // automatically instead of falling back to English.
+ if(candidate.name && !/[\\u0900-\\u097F]/.test(candidate.hindi_name||"")){
+   try{
+     candidate.hindi_name=await transliterateHindiText(candidate.name);
+   }catch(_){
+     candidate.hindi_name=candidate.name;
+   }
+ }
+
  // Prepare dashboard state; render only after voter data has finished loading.
  voters=[];
  masterVoterCount=0;
@@ -984,7 +995,10 @@ async function load(userOverride=null){
      if(profile){
        candidate={...candidate,...profile};
        candidate.name=profile.candidate_name||profile.name||candidate.name;
-       candidate.hindi_name=profile.candidate_name_hindi||profile.hindi_name||candidate.hindi_name||candidate.name;
+       candidate.hindi_name=profile.candidate_name_hindi||profile.hindi_name||candidate.hindi_name||"";
+       if(!/[\\u0900-\\u097F]/.test(candidate.hindi_name||"") && candidate.name){
+         try{candidate.hindi_name=await transliterateHindiText(candidate.name)}catch(_){candidate.hindi_name=candidate.name}
+       }
        candidate.post=profile.election_post||profile.post||candidate.post;
      }
      candidate.hindi_gram_panchayat=await hindiPlaceName(candidate.gram_panchayat);
