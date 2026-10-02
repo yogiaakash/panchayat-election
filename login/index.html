@@ -1127,12 +1127,19 @@ async function saveCandidateProfile(){
  const file=document.getElementById("profilePhoto");
  let photo=file?.dataset?.compressed||"";
  if(file?.files?.[0]&&!photo)photo=await compressSignupPhoto(file.files[0]);
- const payload={user_id:currentUser.id,mobile,whatsapp,updated_at:new Date().toISOString()};
- if(photo)payload.photo_url=photo;
- const {data,error}=await sb.from("candidate_profiles").upsert(payload,{onConflict:"user_id"}).select().single();
+ // Do not upsert a partial candidate_profiles row: candidate_name and other
+ // required profile fields are NOT NULL. Update the existing profile instead.
+ const changes={mobile,whatsapp,updated_at:new Date().toISOString()};
+ if(photo)changes.photo_url=photo;
+ const {data,error}=await sb.from("candidate_profiles")
+   .update(changes)
+   .eq("user_id",currentUser.id)
+   .select()
+   .single();
  if(error){console.error(error);msg.textContent="Profile save नहीं हुई: "+error.message;return}
- candidate.mobile=mobile;candidate.whatsapp=whatsapp;
- if(photo)candidate.photo_url=photo;
+ candidate.mobile=data.mobile||mobile;
+ candidate.whatsapp=data.whatsapp||whatsapp;
+ if(data.photo_url)candidate.photo_url=data.photo_url;
  msg.textContent="✓ Profile successfully updated.";
  setTimeout(()=>dashboard(),500);
 }
