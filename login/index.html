@@ -789,40 +789,8 @@ async function load(userOverride=null){
  voterMobileMap=new Map();
 
  (async()=>{
+   // Load the voter data first. Do not wait for optional profile/access tables.
    try{
-     const {data:dbAccess}=await sb.from("panchayat_access")
-       .select("panchayat_id,candidate_id,access_level,status,expires_at")
-       .eq("user_id",user.id).eq("status","active")
-       .or("expires_at.is.null,expires_at.gt."+new Date().toISOString())
-       .limit(1).maybeSingle();
-     if(dbAccess){
-       currentAccess=dbAccess;
-     }
-   }catch(e){console.warn("Access refresh skipped:",e)}
-
-   try{
-     const {data:p}=await sb.from("panchayats").select("*").eq("id",currentAccess.panchayat_id).maybeSingle();
-     if(p){
-       candidate.gram_panchayat=p.gram_panchayat||candidate.gram_panchayat;
-       candidate.panchayat_samiti=p.panchayat_samiti||candidate.panchayat_samiti;
-       candidate.district=p.district||candidate.district;
-     }
-   }catch(e){console.warn("Panchayat refresh skipped:",e)}
-
-   try{
-     const {data:profile}=await sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle();
-     if(profile){
-       candidate={...candidate,...profile,
-         gram_panchayat:profile.gram_panchayat||candidate.gram_panchayat,
-         panchayat_samiti:profile.panchayat_samiti||candidate.panchayat_samiti,
-         district:profile.district||candidate.district,
-         photo_url:profile.photo_url||candidate.photo_url};
-     }
-   }catch(e){console.warn("Candidate profile refresh skipped:",e)}
-
-   try{
-     // Load voters in small authenticated pages. Supabase/PostgREST limits collection responses,
-     // so never request the whole Panchayat in one browser RPC.
      const all=[];
      const pageSize=500;
      for(let offset=0;;offset+=pageSize){
@@ -838,25 +806,40 @@ async function load(userOverride=null){
      masterVoterCount=all.length;
      currentAccess={...currentAccess,access_level:"full"};
      console.log("Candidate voter data:",voters.length,"FULL ACCESS");
-     if(!voters.length) throw new Error("Database returned 0 voters for this authenticated account");
-   }catch(e){console.error("Voter data refresh failed:",e)}
-   try{
-     const [{data:cs},{data:ar},{data:ho},{data:vm},{data:ss}]=await Promise.all([
-       sb.from("voter_contact_status").select("*").eq("panchayat_id",currentAccess.panchayat_id),
-       sb.from("voter_addition_requests").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("created_at",{ascending:false}),
-       sb.from("voter_house_overrides").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
-       sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
-       sb.from("candidate_share_settings").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id).maybeSingle()
-     ]);
-     contactMap=new Map((cs||[]).map(x=>[String(x.voter_id),x]));
-     additionRows=ar||[];
-     houseOverrideMap=new Map((ho||[]).map(x=>[String(x.voter_id),x]));
-     voterMobileMap=new Map((vm||[]).map(x=>[String(x.voter_id),x]));
-     if(ss?.family_share_message)familyShareMessage=ss.family_share_message;
-   }catch(e){console.warn("Extra data refresh skipped:",e)}
+     if(!voters.length) throw new Error("Database returned 0 voters");
+   }catch(e){
+     console.error("Voter data refresh failed:",e);
+     loginView("Voter data load failed: "+(e?.message||String(e)));
+     return;
+   }
 
+   // Render as soon as voter data is ready.
    dashboard();
- })();
+
+   // Optional metadata can load after the dashboard is visible.
+   Promise.all([
+     sb.from("panchayats").select("*").eq("id",currentAccess.panchayat_id).maybeSingle(),
+     sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle(),
+     sb.from("voter_contact_status").select("*").eq("panchayat_id",currentAccess.panchayat_id),
+     sb.from("voter_addition_requests").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("created_at",{ascending:false}),
+     sb.from("voter_house_overrides").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
+     sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id)
+   ]).then(([pr,prof,cs,ar,ho,vm])=>{
+     const p=pr?.data;
+     if(p){
+       candidate.gram_panchayat=p.gram_panchayat||candidate.gram_panchayat;
+       candidate.panchayat_samiti=p.panchayat_samiti||candidate.panchayat_samiti;
+       candidate.district=p.district||candidate.district;
+     }
+     const profile=prof?.data;
+     if(profile) candidate={...candidate,...profile};
+     contactMap=new Map((cs?.data||[]).map(x=>[String(x.voter_id),x]));
+     additionRows=ar?.data||[];
+     houseOverrideMap=new Map((ho?.data||[]).map(x=>[String(x.voter_id),x]));
+     voterMobileMap=new Map((vm?.data||[]).map(x=>[String(x.voter_id),x]));
+     dashboard();
+   }).catch(e=>console.warn("Optional data refresh skipped:",e));
+
 }
 
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0900-\u097f]+/g,"");
