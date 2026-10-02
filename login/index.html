@@ -822,26 +822,12 @@ async function load(userOverride=null){
    }catch(e){console.warn("Candidate profile refresh skipped:",e)}
 
    try{
-     const paid=["lifetime","paid"].includes(String(currentAccess.access_level||"").toLowerCase());
-     if(paid){
-       for(let from=0;;from+=1000){
-         const {data:batch,error}=await sb.from("voters").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("id",{ascending:true}).range(from,from+999);
-         if(error)break;
-         voters.push(...(batch||[]));
-         if(!batch||batch.length<1000)break;
-       }
-       masterVoterCount=voters.length;
-     }else{
-       const {data:panchayatMeta}=await sb.from("panchayats").select("voter_count").eq("id",currentAccess.panchayat_id).maybeSingle();
-       masterVoterCount=Number(panchayatMeta?.voter_count||0);
-       const freeLimit=Math.max(1,Math.ceil(masterVoterCount*.10));
-       if(freeLimit>0){
-         const {data:batch}=await sb.from("voters").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("id",{ascending:true}).range(0,freeLimit-1);
-         voters=batch||[];
-       }
-     }
+     const {data:batch,error}=await sb.rpc("get_candidate_voters");
+     if(error)throw error;
+     voters=Array.isArray(batch)?batch:[];
+     const {data:panchayatMeta}=await sb.from("panchayats").select("voter_count").eq("id",currentAccess.panchayat_id).maybeSingle();
+     masterVoterCount=Number(panchayatMeta?.voter_count||0);
    }catch(e){console.warn("Voter data refresh skipped:",e)}
-
    try{
      const [{data:cs},{data:ar},{data:ho},{data:vm},{data:ss}]=await Promise.all([
        sb.from("voter_contact_status").select("*").eq("panchayat_id",currentAccess.panchayat_id),
