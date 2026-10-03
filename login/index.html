@@ -960,7 +960,27 @@ async function load(userOverride=null){
  voterMobileMap=new Map();
 
  (async()=>{
-   // Load the voter data first. Do not wait for optional profile/access tables.
+   // Refresh this signed-in user's access before applying any client-side masking.
+   // Full access is granted only by the server-backed panchayat_access row.
+   try{
+     const {data:accessRow,error:accessError}=await sb.from("panchayat_access")
+       .select("panchayat_id,access_level,status,expires_at")
+       .eq("user_id",user.id)
+       .eq("panchayat_id",currentAccess.panchayat_id)
+       .eq("status","active")
+       .order("created_at",{ascending:false})
+       .limit(1).maybeSingle();
+     if(accessError) throw accessError;
+     if(accessRow){
+       const level=String(accessRow.access_level||"free").trim().toLowerCase();
+       const expired=accessRow.expires_at && new Date(accessRow.expires_at)<=new Date();
+       currentAccess={...currentAccess,...accessRow,access_level:(!expired&&["paid","lifetime","admin"].includes(level))?"full":"free"};
+     }
+   }catch(accessErr){
+     console.warn("Access refresh failed; keeping free access for safety:",accessErr);
+   }
+
+   // Load voter data after access has been verified.
    try{
      const all=[];
      const pageSize=500;
