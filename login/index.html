@@ -570,9 +570,54 @@ body.authPage .signupCard input,body.authPage .signupCard select{min-height:46px
 body.authPage .signupCard .primary{background:linear-gradient(135deg,#0a8a56,#087443)}
 @media(max-width:850px){body.authPage main#app{padding:36px 18px 55px!important}.authShell{grid-template-columns:1fr;max-width:620px;gap:26px}.authIntroPanel{text-align:center;padding:10px 10px 0}.authIntroPanel>p{margin-left:auto;margin-right:auto}.authBenefits{width:max-content;max-width:100%;margin:20px auto 0;text-align:left}.authIndependent{display:none}}
 @media(max-width:560px){body.authPage header{height:62px;padding:0 16px}.authHomeLink{font-size:12px}.authBrand{font-size:25px!important}.authBrand small{font-size:7.5px!important}body.authPage main#app{min-height:calc(100vh - 62px);padding:25px 13px 42px!important}.authIntroPanel{display:none}.authShell{display:block}.authLoginCard{padding:27px 20px 23px!important;border-radius:21px!important}.authLoginCard h2{font-size:24px}.authCardIcon{width:44px;height:44px}.authBackHome{margin-top:10px}body.authPage .signupCard{padding:24px 18px!important;border-radius:20px!important}}
+</style>
+<style id="panchayatx-signup-premium-theme">
+/* Header logo correction */
+body.authPage .authBrand{display:block!important;line-height:1!important}
+body.authPage .authBrandName{display:block;color:#087443;font-size:29px;font-weight:950;letter-spacing:-.8px;white-space:nowrap}
+body.authPage .authBrandName b{color:#f47b00}
+body.authPage .authBrand>small{display:block;margin-top:5px;color:#43866a;font-size:8.5px;font-weight:700;letter-spacing:.15px}
+body.authPage .authBrand>span:not(.authBrandName){display:inline}
+
+/* Signup shell */
+.signupShell{width:min(1160px,100%);margin:0 auto;display:grid;grid-template-columns:.72fr 1.28fr;gap:34px;align-items:start}
+.signupIntroPanel{position:sticky;top:100px;padding:28px 12px 26px 4px}
+.signupIntroPanel h1{margin:16px 0 13px;color:#123d32;font-size:clamp(31px,3.1vw,44px);line-height:1.08;letter-spacing:-1.1px}
+.signupIntroPanel h1 span{display:block;color:#f47b00}
+.signupIntroPanel>p{margin:0;color:#65766f;font-size:13.5px;line-height:1.72}
+.signupSteps{display:grid;gap:12px;margin-top:24px}
+.signupSteps>div{display:grid;grid-template-columns:34px 1fr;gap:11px;align-items:center;padding:12px 13px;border:1px solid #dce9e2;border-radius:15px;background:rgba(255,255,255,.7)}
+.signupSteps>div>b{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#e7f4eb;color:#087443;font-size:13px}
+.signupSteps strong{display:block;color:#244b3d;font-size:12.5px}.signupSteps small{display:block;margin-top:2px;color:#7b8983;font-size:10.5px}
+.signupTrustNote{margin-top:17px;padding:12px 13px;border-radius:14px;background:#fff7e9;border:1px solid #f0ddb8;color:#7b5d2d;font-size:11px;line-height:1.55}
+
+body.authPage .signupPremiumCard{width:100%!important;max-width:none!important;margin:0!important;padding:30px!important;border-radius:25px!important;background:rgba(255,255,255,.96)!important;border:1px solid #dce8e1!important;box-shadow:0 20px 55px rgba(16,70,49,.10)!important;position:relative}
+.signupPremiumCard:before{content:"";position:absolute;left:0;top:0;width:100%;height:5px;border-radius:25px 25px 0 0;background:linear-gradient(90deg,#087443 0 76%,#f47b00 76% 100%)}
+.signupCardHead{display:flex;gap:13px;align-items:center}.signupCardHead .authCardIcon{margin:0}.signupCardHead h2{margin:1px 0 0!important;font-size:25px!important;line-height:1.1}
+.signupLead{margin:13px 0 0;color:#718078;font-size:12.5px;line-height:1.6}.signupLead b{color:#f47b00}
+.signupSectionTitle{display:flex;align-items:center;gap:10px;margin:25px 0 11px;padding-top:19px;border-top:1px solid #e7eee9}
+.signupSectionTitle>span{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#e7f4eb;color:#087443;font-size:10px;font-weight:950}
+.signupSectionTitle b{display:block;color:#173d32;font-size:14px}.signupSectionTitle small{display:block;color:#85918c;font-size:9.5px;margin-top:1px}
+.signupFormGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.signupField.signupFull{grid-column:1/-1}
+body.authPage .signupField label{margin:0 0 6px!important;color:#315547;font-size:11.5px!important;font-weight:850!important}
+body.authPage .signupField input,body.authPage .signupField select{width:100%;height:46px;min-height:46px;padding:10px 12px;border:1px solid #d6e3dc!important;border-radius:12px!important;background:#fbfdfc!important;color:#173d32;font-size:12.5px}
+body.authPage .signupField input:focus,body.authPage .signupField select:focus{outline:0!important;border-color:#0b8c5a!important;box-shadow:0 0 0 3px rgba(8,116,67,.075)!important;background:#fff!important}
+body.authPage .signupField select:disabled{background:#f2f5f3!important;color:#9aa59f!important}
+.signupField .hindiInputHint{margin:5px 0 0;color:#84918b;font-size:9.5px;line-height:1.4}
+.signupUploadBox{position:relative;display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:15px 16px;border:1px dashed #bbd6c8;border-radius:16px;background:#f8fcf9;overflow:hidden}
+.signupUploadIcon{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:#e8f5ed;font-size:19px}
+.signupUploadCopy b{display:block;color:#274d3f;font-size:12.5px}.signupUploadCopy span{display:block;margin-top:2px;color:#85928d;font-size:9.5px}
+body.authPage .signupUploadBox input[type=file]{width:auto;max-width:185px;padding:7px;border:1px solid #d8e4dd;border-radius:10px;background:#fff;font-size:10px}
+.signupPhotoPreview:empty{display:none}.signupPhotoPreview{margin-top:10px}.signupPhotoPreview img{width:78px!important;height:78px!important;border:3px solid #e2b24b!important;box-shadow:0 5px 14px rgba(0,0,0,.08)}
+.signupActions{display:grid;grid-template-columns:1.35fr .65fr;gap:10px;margin-top:22px}.signupCreateBtn,.signupBackBtn{min-height:48px;border-radius:13px!important;font-size:13px!important}.signupCreateBtn{background:linear-gradient(135deg,#0a8a56,#087443)!important;box-shadow:0 9px 22px rgba(8,116,67,.18)!important}.signupBackBtn{background:#f1f7f3!important;color:#315a4b!important;border:1px solid #dfeae4!important}
+.signupMsg{min-height:18px;margin:10px 0 0;font-size:11.5px}.signupTermsNote{margin:4px 0 0;text-align:center;color:#8a9691;font-size:9.5px;line-height:1.5}.signupTermsNote a{color:#087443;font-weight:800}
+@media(max-width:920px){.signupShell{grid-template-columns:1fr;max-width:760px}.signupIntroPanel{position:static;text-align:center;padding:4px 24px 0}.signupIntroPanel>p{max-width:640px;margin:auto}.signupSteps{grid-template-columns:repeat(3,1fr);gap:8px}.signupSteps>div{display:block;text-align:center;padding:10px 7px}.signupSteps>div>b{margin:0 auto 7px}.signupTrustNote{max-width:600px;margin:14px auto 0}}
+@media(max-width:650px){.signupIntroPanel{display:none}.signupFormGrid{grid-template-columns:1fr}.signupField.signupFull{grid-column:auto}body.authPage .signupPremiumCard{padding:24px 17px!important;border-radius:20px!important}.signupUploadBox{grid-template-columns:42px 1fr}.signupUploadBox input[type=file]{grid-column:1/-1;max-width:none!important;width:100%!important}.signupActions{grid-template-columns:1fr}.signupCardHead h2{font-size:22px!important}.signupSectionTitle{margin-top:20px;padding-top:16px}}
+@media(max-width:420px){body.authPage .authHomeLink{display:none}.signupCardHead .authCardIcon{width:42px;height:42px}.signupLead{font-size:11.5px}}
 </style></head>
 <body>
-<header><a class="brand authBrand" href="/" aria-label="PanchayatX Home">Panchayat<span>X</span><small>हर पंचायत, डिजिटल पंचायत</small></a><div class="authHeaderRight"><a class="authHomeLink" href="/">होम</a><button id="logout" class="btn ghost hidden">Logout</button></div></header>
+<header><a class="brand authBrand" href="/" aria-label="PanchayatX Home"><span class="authBrandName">Panchayat<b>X</b></span><small>हर पंचायत, डिजिटल पंचायत</small></a><div class="authHeaderRight"><a class="authHomeLink" href="/">होम</a><button id="logout" class="btn ghost hidden">Logout</button></div></header>
 <main id="app"></main>
 <script>
 window.PANCHAYAT_FULL_ACCESS_PRICE=1;
@@ -807,22 +852,65 @@ async function loadSignupPanchayats(){
 function signupView(){
  document.body.classList.add("authPage");
  document.querySelector("header").style.display="flex";logout.classList.add("hidden");
- app.innerHTML=`<div class="card login signupCard"><h2>📝 Candidate Account बनाएं</h2><p class="muted">अपनी जानकारी भरें और अपनी Panchayat चुनें। Account बनने के बाद आपके चुने हुए Panchayat का voter data उपलब्ध रहेगा।</p>
- <label>Candidate Name *</label><input id="suName" placeholder="पूरा नाम">
- <label>Candidate Name (Hindi)</label><div class="hindiInputWrap"><input id="suNameHi" placeholder="English में लिखें — जैसे Suman Barala" autocomplete="off" spellcheck="false"><span id="suNameHiStatus" class="hindiInputStatus">⌨ Hindi</span></div><div class="hindiInputHint">English में टाइप करें और Hindi अपने-आप बनेगी — जैसे <b>Suman Barala → सुमन बाराला</b></div>
- <label>Election Post *</label><select id="suPost"><option value="">पद चुनें</option><option value="Sarpanch">सरपंच</option><option value="Ward Panch">वार्ड पंच</option><option value="Panchayat Samiti Member">पंचायत समिति सदस्य</option><option value="Zila Parishad Member">जिला परिषद सदस्य</option></select>
- <label>District *</label><select id="suDistrict" onchange="signupFilterPS()"><option>Loading…</option></select>
- <label>Panchayat Samiti *</label><select id="suPS" onchange="signupFilterGP()" disabled><option>पहले जिला चुनें</option></select>
- <label>Gram Panchayat *</label><select id="suGP" onchange="signupSelectGP()" disabled><option>पहले Panchayat Samiti चुनें</option></select>
- <label>Mobile *</label><input id="suMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर">
- <label>WhatsApp Number</label><input id="suWhatsApp" type="tel" inputmode="numeric" maxlength="10">
- <label>Email / Login ID *</label><input id="suEmail" type="email" autocomplete="username">
- <label>Password *</label><input id="suPassword" type="password" autocomplete="new-password">
- <label>Confirm Password *</label><input id="suPassword2" type="password" autocomplete="new-password">
- <label>Candidate Photo</label><input id="suPhoto" type="file" accept="image/*" onchange="previewSignupPhoto()"><div id="suPhotoPreview"></div>
- <button class="btn primary full" style="margin-top:16px" onclick="createCandidateAccount()">Create Account</button>
- <button class="btn ghost full" style="margin-top:8px" onclick="location.href='/login/'">← वापस Login</button>
- <p id="signupMsg" class="error"></p></div>`;
+ app.innerHTML=`<section class="signupShell">
+  <aside class="signupIntroPanel">
+    <span class="authEyebrow">PanchayatX New Candidate</span>
+    <h1>अपना Candidate Account <span>कुछ आसान steps में बनाएं</span></h1>
+    <p>अपनी जानकारी और Panchayat चुनें। Account बनने के बाद assigned Panchayat का available voter data और workflow tools access कर सकेंगे।</p>
+    <div class="signupSteps">
+      <div><b>1</b><span><strong>Basic Details</strong><small>नाम, पद और contact</small></span></div>
+      <div><b>2</b><span><strong>Panchayat Select</strong><small>District से Gram Panchayat तक</small></span></div>
+      <div><b>3</b><span><strong>Secure Login</strong><small>Email और password बनाएं</small></span></div>
+    </div>
+    <div class="signupTrustNote">🔐 आपका account केवल assigned Panchayat access के लिए बनाया जाता है।</div>
+  </aside>
+
+  <div class="card login signupCard signupPremiumCard">
+    <div class="signupCardHead">
+      <div class="authCardIcon">👤</div>
+      <div><span class="authCardKicker">Create Account</span><h2>Candidate Account बनाएं</h2></div>
+    </div>
+    <p class="signupLead">Required details भरें और अपनी Panchayat चुनें। <b>*</b> वाले fields आवश्यक हैं।</p>
+
+    <div class="signupSectionTitle"><span>01</span><div><b>उम्मीदवार की जानकारी</b><small>Basic candidate profile</small></div></div>
+    <div class="signupFormGrid">
+      <div class="signupField"><label>Candidate Name *</label><input id="suName" placeholder="पूरा नाम"></div>
+      <div class="signupField"><label>Candidate Name (Hindi)</label><div class="hindiInputWrap"><input id="suNameHi" placeholder="English में लिखें — जैसे Suman Barala" autocomplete="off" spellcheck="false"><span id="suNameHiStatus" class="hindiInputStatus">⌨ Hindi</span></div><div class="hindiInputHint">English में type करें → Hindi अपने-आप बनेगी</div></div>
+      <div class="signupField signupFull"><label>Election Post *</label><select id="suPost"><option value="">पद चुनें</option><option value="Sarpanch">सरपंच</option><option value="Ward Panch">वार्ड पंच</option><option value="Panchayat Samiti Member">पंचायत समिति सदस्य</option><option value="Zila Parishad Member">जिला परिषद सदस्य</option></select></div>
+    </div>
+
+    <div class="signupSectionTitle"><span>02</span><div><b>अपनी पंचायत चुनें</b><small>Assigned area selection</small></div></div>
+    <div class="signupFormGrid">
+      <div class="signupField"><label>District *</label><select id="suDistrict" onchange="signupFilterPS()"><option>Loading…</option></select></div>
+      <div class="signupField"><label>Panchayat Samiti *</label><select id="suPS" onchange="signupFilterGP()" disabled><option>पहले जिला चुनें</option></select></div>
+      <div class="signupField signupFull"><label>Gram Panchayat *</label><select id="suGP" onchange="signupSelectGP()" disabled><option>पहले Panchayat Samiti चुनें</option></select></div>
+    </div>
+
+    <div class="signupSectionTitle"><span>03</span><div><b>Contact और Login</b><small>Secure account credentials</small></div></div>
+    <div class="signupFormGrid">
+      <div class="signupField"><label>Mobile *</label><input id="suMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर"></div>
+      <div class="signupField"><label>WhatsApp Number</label><input id="suWhatsApp" type="tel" inputmode="numeric" maxlength="10" placeholder="WhatsApp नंबर"></div>
+      <div class="signupField signupFull"><label>Email / Login ID *</label><input id="suEmail" type="email" autocomplete="username" placeholder="name@example.com"></div>
+      <div class="signupField"><label>Password *</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="कम से कम 6 characters"></div>
+      <div class="signupField"><label>Confirm Password *</label><input id="suPassword2" type="password" autocomplete="new-password" placeholder="Password दोबारा डालें"></div>
+    </div>
+
+    <div class="signupSectionTitle"><span>04</span><div><b>Candidate Photo</b><small>Optional profile photo</small></div></div>
+    <div class="signupUploadBox">
+      <div class="signupUploadIcon">📷</div>
+      <div class="signupUploadCopy"><b>Candidate Photo Upload करें</b><span>JPG, PNG या phone gallery से image चुनें</span></div>
+      <input id="suPhoto" type="file" accept="image/*" onchange="previewSignupPhoto()">
+    </div>
+    <div id="suPhotoPreview" class="signupPhotoPreview"></div>
+
+    <div class="signupActions">
+      <button class="btn primary signupCreateBtn" onclick="createCandidateAccount()">Create Account</button>
+      <button class="btn ghost signupBackBtn" onclick="location.href='/login/'">← वापस Login</button>
+    </div>
+    <p id="signupMsg" class="error signupMsg"></p>
+    <p class="signupTermsNote">Account बनाकर आप PanchayatX के <a href="/terms.html">Terms</a> और <a href="/privacy.html">Privacy Policy</a> से सहमत होते हैं।</p>
+  </div>
+ </section>`;
  setupHindiInput();
  loadSignupPanchayats();
 }
