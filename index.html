@@ -32,6 +32,16 @@
 .trust{display:none}
 @media(max-width:1050px){.navin{padding:0 22px}.heroIn{grid-template-columns:1fr;padding:0}.heroCopy{padding:48px 24px}.visual{min-height:730px}.hero h1{font-size:58px}.phone{margin:auto;width:365px}.saffron{right:25px}.heroProof{margin-bottom:10px}}
 @media(max-width:650px){.nav{height:66px}.navin{height:66px}.logo{font-size:23px}.logo:after{font-size:9px}.hero h1{font-size:40px}.hero p{font-size:15px}.featureChips{grid-template-columns:1fr}.heroBenefits,.heroProof{grid-template-columns:1fr}.visual{min-height:560px}.phone{width:285px;margin-left:0}.saffron{font-size:24px;right:4px}.actions .btn{width:100%}}
+</style><style>
+.featureChips{grid-template-columns:1fr 1fr;gap:10px 12px;max-width:650px;margin:12px 0 10px}
+.featureChips .chip{position:relative;display:grid;grid-template-columns:44px 1fr 22px;align-items:center;gap:10px;padding:10px 12px;border:1px solid #dfe9e3;border-radius:14px;background:#fff;color:#173b31;text-decoration:none;box-shadow:0 5px 16px rgba(18,62,50,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}
+.featureChips .chip:hover{transform:translateY(-2px);border-color:#bcd9ca;background:#fbfffc;box-shadow:0 10px 22px rgba(18,62,50,.11)}
+.featureChips .chip:focus-visible{outline:3px solid rgba(8,116,67,.18);outline-offset:2px}
+.featureChips .chip .bubble{width:44px;height:44px;border-radius:12px;background:#e8f4ed;display:grid;place-items:center;font-size:20px;grid-row:auto}
+.featureChips .chipText{min-width:0;display:block}.featureChips .chipText b{display:block;font-size:13.5px;line-height:1.15;color:#123d32;margin:0 0 4px}.featureChips .chipText small{display:block;font-size:10.5px;line-height:1.25;color:#76827d;margin:0;font-weight:500}
+.featureChips .chipArrow{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#edf7f1;color:#087443;font-size:13px;font-weight:900;transition:transform .18s ease,background .18s ease}
+.featureChips .chip:hover .chipArrow{transform:translateX(2px);background:#dff0e6}
+@media(max-width:650px){.featureChips{grid-template-columns:1fr;gap:9px}.featureChips .chip{grid-template-columns:42px 1fr 22px;padding:10px 11px}.featureChips .chip .bubble{width:42px;height:42px}}
 </style></head><body>
 <script>if(location.hash&&(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1))||location.hash.includes("access_token="))){location.replace("./reset-password.html"+location.hash)}else if(new URLSearchParams(location.search).has("code")){location.replace("./reset-password.html"+location.search)}</script>
 <nav class="nav"><div class="navin"><a class="logo" href="/">Panchayat<b>X</b></a><div class="links"><a href="#features">फीचर्स</a><a href="#how">कैसे काम करता है</a><a href="#pricing">कीमत</a><a href="/about.html">हमारे बारे में</a><a href="/contact.html">संपर्क</a><a class="btn outline" href="/demo/">लाइव डेमो</a><a class="btn" href="/login/">लॉगिन</a></div></div></nav>
@@ -40,12 +50,12 @@
 <h1>स्मार्ट पंचायत,<span>आसान चुनाव प्रबंधन</span></h1>
 <p><b>PanchayatX</b> के साथ अपने अधिकृत पंचायत चुनाव कार्य को डिजिटल बनाएं — मतदाता खोज, विज़िट ट्रैकिंग, वोटर स्लिप, नई मतदाता रिपोर्ट, पंचायत आँकड़े और A-Z सूची एक ही ऐप में।</p>
 <div class="featureChips">
-<div class="chip"><span class="bubble">🔎</span><b>मतदाता खोज</b><small>नाम, मकान, वार्ड से तुरंत खोज</small></div>
-<div class="chip"><span class="bubble">📄</span><b>Ward-wise Voter Slip</b><small>PDF में वोटर स्लिप तैयार करें</small></div>
-<div class="chip"><span class="bubble">🚶</span><b>विज़िट ट्रैकिंग</b><small>फील्ड विज़िट की रिकॉर्डिंग</small></div>
-<div class="chip"><span class="bubble">🆕</span><b>नए मतदाता रिपोर्ट</b><small>Supplement सूची आसानी से देखें</small></div>
-<div class="chip"><span class="bubble">📊</span><b>पंचायत आँकड़े</b><small>अधिकृत डेटा का संक्षिप्त सार</small></div>
-<div class="chip"><span class="bubble">🔤</span><b>A-Z वोटर लिस्ट</b><small>सभी मतदाताओं की क्रमबद्ध सूची</small></div>
+<a class="chip" href="/demo/" aria-label="मतदाता खोज डेमो देखें"><span class="bubble">🔎</span><span class="chipText"><b>मतदाता खोज</b><small>नाम, मकान, वार्ड से तुरंत खोज</small></span><span class="chipArrow">→</span></a>
+<a class="chip" href="/demo/" aria-label="Ward-wise Voter Slip डेमो देखें"><span class="bubble">📄</span><span class="chipText"><b>Ward-wise Voter Slip</b><small>PDF में वोटर स्लिप तैयार करें</small></span><span class="chipArrow">→</span></a>
+<a class="chip" href="/demo/" aria-label="विज़िट ट्रैकिंग डेमो देखें"><span class="bubble">🚶</span><span class="chipText"><b>विज़िट ट्रैकिंग</b><small>फील्ड विज़िट की रिकॉर्डिंग</small></span><span class="chipArrow">→</span></a>
+<a class="chip" href="/demo/" aria-label="नए मतदाता रिपोर्ट डेमो देखें"><span class="bubble">🆕</span><span class="chipText"><b>नए मतदाता रिपोर्ट</b><small>Supplement सूची आसानी से देखें</small></span><span class="chipArrow">→</span></a>
+<a class="chip" href="/demo/" aria-label="पंचायत आँकड़े डेमो देखें"><span class="bubble">📊</span><span class="chipText"><b>पंचायत आँकड़े</b><small>अधिकृत डेटा का संक्षिप्त सार</small></span><span class="chipArrow">→</span></a>
+<a class="chip" href="/demo/" aria-label="A-Z वोटर लिस्ट डेमो देखें"><span class="bubble">🔤</span><span class="chipText"><b>A-Z वोटर लिस्ट</b><small>सभी मतदाताओं की क्रमबद्ध सूची</small></span><span class="chipArrow">→</span></a>
 </div>
 <div class="actions"><a class="btn" href="/demo/">▶ लाइव डेमो देखें →</a><a class="btn light" href="/buy.html">🛒 फुल एक्सेस पाएं ₹4,999 →</a></div>
 </div>
