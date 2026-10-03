@@ -43,7 +43,7 @@ async function loadRequests(){
  const manualHtml=(manual||[]).length?`<div style="overflow:auto"><table><tr><th>Candidate</th><th>Panchayat</th><th>Amount / Method</th><th>UTR / Date</th><th>Proof</th><th>Status</th><th>Action</th></tr>${manual.map(r=>`<tr>
   <td><b>${esc(r.candidate_name||"-")}</b><br><span class=muted>${esc(r.mobile||"")}<br>${esc(r.email||"")}</span></td>
   <td>${esc(r.gram_panchayat||r.panchayat_id||"-")}</td>
-  <td><b>₹${esc(r.amount)}</b><br>${esc(r.payment_method||"-")}<br><span class=muted>Receiver: ${esc(r.receiver_phone||"-")}</span></td>
+  <td><b>₹${esc(r.amount)}</b><br>${esc(r.payment_method||"-")}<br><span class=muted>UPI: ${esc(r.receiver_upi_id||"-")}<br>Phone: ${esc(r.receiver_phone||"-")}</span></td>
   <td>${esc(r.payment_reference||"-")}<br><span class=muted>${esc(r.payment_date||"")}</span></td>
   <td>${r.proof_data_url?`<img src="${esc(r.proof_data_url)}" alt="Payment proof" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #d9e7e1;cursor:pointer" onclick="window.open(this.src,'_blank')">`:"-"}</td>
   <td class="${r.status==="approved"?"good":r.status==="rejected"?"bad":""}">${esc(r.status)}</td>
