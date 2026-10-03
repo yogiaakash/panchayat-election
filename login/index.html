@@ -1071,13 +1071,26 @@ async function load(userOverride=null){
      }
      const profile=prof?.data;
      if(profile){
+       const previousPhoto=candidate.photo_url||meta.photo_url||"";
        candidate={...candidate,...profile};
        candidate.name=profile.candidate_name||profile.name||candidate.name;
        candidate.hindi_name=profile.candidate_name_hindi||profile.hindi_name||candidate.hindi_name||"";
+       candidate.photo_url=(profile.photo_url&&String(profile.photo_url).trim())?profile.photo_url:previousPhoto;
+       candidate.mobile=profile.mobile||candidate.mobile||"";
+       candidate.whatsapp=profile.whatsapp||candidate.whatsapp||"";
        if(!/[\\u0900-\\u097F]/.test(candidate.hindi_name||"") && candidate.name){
          try{candidate.hindi_name=await transliterateHindiText(candidate.name)}catch(_){candidate.hindi_name=candidate.name}
        }
        candidate.post=profile.election_post||profile.post||candidate.post;
+
+       // Profile loads after the first dashboard render; update the visible
+       // candidate photo immediately instead of waiting for another login.
+       const avatar=document.querySelector(".demoAvatar");
+       if(avatar){
+         avatar.innerHTML=candidate.photo_url
+           ? '<img src="'+e(candidate.photo_url)+'" alt="Candidate photo" onerror="this.remove();this.parentNode.textContent=\''+e((candidate.hindi_name||candidate.name||"प").slice(0,1))+'\'">'
+           : e((candidate.hindi_name||candidate.name||"प").slice(0,1));
+       }
      }
      candidate.hindi_gram_panchayat=await hindiPlaceName(candidate.gram_panchayat);
      candidate.hindi_panchayat_samiti=await hindiPlaceName(candidate.panchayat_samiti);
@@ -1174,9 +1187,21 @@ async function saveCandidateProfile(){
    .select()
    .single();
  if(error){console.error(error);msg.textContent="Profile save नहीं हुई: "+error.message;return}
+
+ // Keep the same profile values in Supabase Auth metadata as a persistent
+ // fallback. updateUser merges user_metadata and does not change login email.
+ if(photo){
+   const {error:authMetaError}=await sb.auth.updateUser({data:{
+     photo_url:photo,
+     mobile:mobile||candidate.mobile||"",
+     whatsapp:whatsapp||candidate.whatsapp||""
+   }});
+   if(authMetaError) console.warn("Auth metadata photo backup failed:",authMetaError);
+ }
+
  candidate.mobile=data.mobile||mobile;
  candidate.whatsapp=data.whatsapp||whatsapp;
- if(data.photo_url)candidate.photo_url=data.photo_url;
+ candidate.photo_url=(data.photo_url&&String(data.photo_url).trim())?data.photo_url:(photo||candidate.photo_url||"");
  msg.textContent="✓ Profile successfully updated.";
  setTimeout(()=>dashboard(),500);
 }
