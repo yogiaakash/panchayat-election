@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             builtInZoomControls = false
             displayZoomControls = false
             textZoom = 100
-            userAgentString = userAgentString + " PanchayatXAndroid/2.2"
+            userAgentString = userAgentString + " PanchayatXAndroid/2.3"
         }
 
         web.addJavascriptInterface(DownloadBridge(), "AndroidDownloader")
@@ -134,6 +134,12 @@ class MainActivity : AppCompatActivity() {
                   var style=document.createElement('style');
                   style.id='px-android-mobile-css';
                   style.textContent=[
+                    'body{width:100%!important;max-width:none!important;overflow-x:hidden!important}',
+                    'body:not(.authPage){background:#f3f7f4!important}',
+                    'main#app{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;box-shadow:none!important}',
+                    '#demoHome{width:100%!important;max-width:none!important;margin:0!important}',
+                    '#demoHome .demoBottomNav{left:0!important;transform:none!important;width:100%!important;max-width:none!important}',
+                    '.moduleOpen .demoHead{left:0!important;transform:none!important;width:100%!important;max-width:none!important}',
                     'body.authPage{min-height:100dvh!important;overflow-x:hidden!important;background:#fff!important}',
                     'body.authPage header{height:58px!important;padding:0 16px!important;width:100%!important;box-sizing:border-box!important;box-shadow:0 1px 8px rgba(15,70,48,.06)!important}',
                     'body.authPage .authHeaderRight,body.authPage .authHomeLink,body.authPage .authBackHome,body.authPage .authIntroPanel,body.authPage .signupIntroPanel{display:none!important}',
