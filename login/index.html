@@ -977,11 +977,24 @@ async function compressSignupPhoto(file){
 }
 async function createCandidateAccount(){
  const msg=document.getElementById("signupMsg");msg.textContent="Account बनाया जा रहा है…";
- const name=document.getElementById("suName").value.trim(),nameHi=(hindiRawName||document.getElementById("suNameHi").value.trim()).trim(),post=document.getElementById("suPost").value,
+ const name=document.getElementById("suName").value.trim(),post=document.getElementById("suPost").value,
  d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS").value,gp=document.getElementById("suGP").value,mobile=document.getElementById("suMobile").value.replace(/\D/g,""),wa=document.getElementById("suWhatsApp").value.replace(/\D/g,""),
  email=document.getElementById("suEmail").value.trim(),pw=document.getElementById("suPassword").value,pw2=document.getElementById("suPassword2").value;
+ let nameHi=document.getElementById("suNameHi").value.trim();
  const pId=selectedSignupPanchayatId;
  if(!name||!post||!pId||mobile.length!==10||!email||pw.length<6||pw!==pw2){msg.textContent="कृपया सभी required details सही भरें। Password कम से कम 6 characters का होना चाहिए।";return}
+ // Always persist the visible Hindi candidate name, never the raw English IME buffer.
+ // If an older browser/input flow leaves English here, transliterate once before signup.
+ if(!hasHindiText(nameHi)){
+   try{
+     const converted=await transliterateHindiText(nameHi||name);
+     if(hasHindiText(converted)) nameHi=converted;
+   }catch(_){}
+ }
+ if(!hasHindiText(nameHi)){
+   msg.textContent="Candidate Name (Hindi) सही नहीं बना। कृपया Hindi नाम भरें और फिर Create Account करें।";
+   return;
+ }
  let photo="";
  const file=document.getElementById("suPhoto")?.files?.[0];
  if(file){try{photo=await compressSignupPhoto(file)}catch(err){msg.textContent=err.message;return}}
@@ -2225,6 +2238,13 @@ async function makePdfFile(list,filename){if(!window.html2canvas||!window.jspdf)
 async function makeWardGridPdf(list,filename,onProgress){
  if(!window.html2canvas||!window.jspdf)throw new Error("PDF library not loaded");
  await prepareCandidateHindiHeader();
+ // Existing profiles may contain English in candidate_name_hindi; resolve again at PDF time.
+ if(candidate?.name && !hasHindiText(candidate?.hindi_name)){
+   try{
+     const converted=await transliterateHindiText(candidate.name);
+     if(hasHindiText(converted)) candidate.hindi_name=converted;
+   }catch(_){}
+ }
  const host=document.createElement("div");host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1";document.body.appendChild(host);
  const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
  const wardNo=String(list[0]?.ward||"").padStart(3,"0"), totalPages=Math.ceil(list.length/9);
