@@ -599,7 +599,7 @@ function loginView(msg=""){
  <label>Email / Login ID</label><input id="email" type="email" autocomplete="username">
  <label>Password</label><input id="password" type="password" autocomplete="current-password">
  <button class="btn primary" style="width:100%;margin-top:16px" onclick="signIn()">Login</button><button class="btn ghost full" style="margin-top:8px" onclick="forgotPassword()">🔑 Password भूल गए?</button>
- <button class="btn soft full" style="margin-top:9px" onclick="signupView()">➕ नया Candidate Account बनाएं</button>
+ <button class="btn soft full" style="margin-top:9px" onclick="location.href='/login/?signup=1'">➕ नया Candidate Account बनाएं</button>
  <p id="msg" class="error">${e(msg)}</p></div>`;
 }
 let hindiRawName="";
@@ -762,7 +762,7 @@ function signupView(){
  <label>Confirm Password *</label><input id="suPassword2" type="password" autocomplete="new-password">
  <label>Candidate Photo</label><input id="suPhoto" type="file" accept="image/*" onchange="previewSignupPhoto()"><div id="suPhotoPreview"></div>
  <button class="btn primary full" style="margin-top:16px" onclick="createCandidateAccount()">Create Account</button>
- <button class="btn ghost full" style="margin-top:8px" onclick="loginView()">← वापस Login</button>
+ <button class="btn ghost full" style="margin-top:8px" onclick="location.href='/login/'">← वापस Login</button>
  <p id="signupMsg" class="error"></p></div>`;
  setupHindiInput();
  loadSignupPanchayats();
@@ -2205,21 +2205,27 @@ sb.auth.onAuthStateChange((event,session)=>{
  if(event==="PASSWORD_RECOVERY"&&session){showRecoveryPasswordForm();return}
  if(event==="SIGNED_OUT"){currentUser=null;currentAccess=null}
 });
-// Always render something immediately; never leave the login page blank while
-// Supabase checks an existing session.
-loginView("Session check हो रहा है…");
-(async()=>{
- try{
-   const {data:{session}}=await sb.auth.getSession();
-   if(session?.user){
-     sb.functions.setAuth(session.access_token);
-     await load(session.user);
-   }else{
-     loginView();
-   }
- }catch(err){
-   console.error("Initial session load failed:",err);
-   loginView("Login session load नहीं हो सका। कृपया फिर से Login करें।");
- }
-})();
+// Keep Login and New Candidate creation on distinct URLs.
+const initialSignupMode=new URLSearchParams(location.search).get("signup")==="1";
+if(initialSignupMode){
+ signupView();
+}else{
+ // Always render something immediately; never leave the login page blank while
+ // Supabase checks an existing session.
+ loginView("Session check हो रहा है…");
+ (async()=>{
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(session?.user){
+      sb.functions.setAuth(session.access_token);
+      await load(session.user);
+    }else{
+      loginView();
+    }
+  }catch(err){
+    console.error("Initial session load failed:",err);
+    loginView("Login session load नहीं हो सका। कृपया फिर से Login करें।");
+  }
+ })();
+}
 </script></body></html>
