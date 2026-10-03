@@ -2180,45 +2180,68 @@ async function setContactStatus(v,status){if(!currentUser||!currentAccess)return
 async function openAdditionForm(){const w=ward.value,co=colony.value,h=house.value;if(!(w&&co&&h)){alert("पहले Ward, Colony और House चुनें।");return}const name=prompt("जोड़ने हेतु सदस्य का नाम");if(!name)return;const relative=prompt("पिता / पति / अन्य का नाम")||"";const ageText=prompt("आयु (optional)")||"";const mobile=prompt("मोबाइल (optional)")||"";const age=ageText?Number(ageText):null;if(age!==null&&(!Number.isFinite(age)||age<0||age>130)){alert("आयु सही भरें।");return}const row={user_id:currentUser.id,panchayat_id:currentAccess.panchayat_id,ward:w,colony:co,house_no:h,name:name.trim(),relative_name:relative.trim(),age,mobile:mobile.replace(/\D/g,"").slice(-10),status:"addition_required"};const {data,error}=await sb.from("voter_addition_requests").insert(row).select().single();if(error){alert(error.message);return}additionRows.unshift(data);updateFieldSummary();familyPanel();alert("New Voter (Supp-2) provisional report में जोड़ दिया गया।");}
 function showHouseAdditions(){const w=ward.value,co=colony.value,h=house.value,a=additionRows.filter(x=>String(x.ward)===String(w)&&String(x.colony)===String(co)&&String(x.house_no)===String(h)&&x.status!=="closed");if(!a.length){alert("इस परिवार के लिए कोई pending Supp-2 entry नहीं है।");return}alert(a.map((x,i)=>(i+1)+". "+x.name+" — "+x.status).join("\n"));}
 function prevPage(){if(page>1){page--;renderRows()}}function nextPage(){if(page<Math.ceil(filtered().length/PER)){page++;renderRows()}}
+function voterPdfHeaderData(){
+ const gp=candidate?.hindi_gram_panchayat||candidate?.gram_panchayat||"";
+ const ps=candidate?.hindi_panchayat_samiti||candidate?.panchayat_samiti||"";
+ const district=candidate?.hindi_district||candidate?.district||"";
+ const name=candidate?.hindi_name||candidate?.name||"";
+ const rawPost=hindiPostName(candidate?.post||candidate?.election_post||"");
+ const post=rawPost?(rawPost.includes("प्रत्याशी")?rawPost:(rawPost+" पद प्रत्याशी")):"";
+ const number=String(candidate?.mobile||candidate?.whatsapp||"").replace(/\D/g,"");
+ return {
+   gp,ps,district,name,post,
+   number,
+   message:"यह मतदाता पर्ची केवल मतदाता सूची संदर्भ हेतु है।"
+ };
+}
+function voterPdfHeaderHtml(){
+ const h=voterPdfHeaderData();
+ return `<div class="pdfHeader">
+   <div class="gp">ग्राम पंचायत : ${e(h.gp)}</div>
+   <div class="cand">${e(h.name)}</div>
+   ${h.post?`<div class="candidatePost">${e(h.post)}</div>`:""}
+   <div class="area">पंचायत समिति : ${e(h.ps)} &nbsp; | &nbsp; जिला : ${e(h.district)}</div>
+   <div class="civic">${e(h.message)}</div>
+   ${h.number?`<div class="contactLine">संपर्क : ${e(h.number)}</div>`:""}
+   <div class="title">मतदाता पर्ची</div>
+  </div>`;
+}
+
 function rr(v){return [["Ward / वार्ड",v.ward],["क्रम संख्या",v.serial_no],["Voter ID",v.epic],["नाम",v.name],["पिता/पति/अन्य",v.relative_name],["मकान",effectiveHouse(v)],["कॉलोनी",v.colony],["मतदान केंद्र",v.polling_station],["आयु",v.age],["लिंग",v.gender]]}
-function slipHtml(v){return `<section class="vslip"><div class="gp">ग्राम पंचायत ${e(candidate.gram_panchayat||"")}</div><div class="cand">${e(candidate.hindi_name||candidate.name||"")}</div><div class="title">मतदाता पर्ची / Voter Slip</div><div class="ref">For voter-list reference only</div><div class="sliprows">${rr(v).map(x=>`<div class="sliprow"><b>${e(x[0])}</b><span>${e(x[1]??"-")}</span></div>`).join("")}</div></section>`}
-function slipDoc(content,title="Voter Slip"){return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><title>${e(title)}</title><style>@page{size:A4;margin:10mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111}body{font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.vslip{width:100%;min-height:277mm;border:1px solid #66736e;padding:7mm 8mm;page-break-after:always;break-after:page}.vslip:last-child{page-break-after:auto;break-after:auto}.gp{text-align:center;font-size:19px;font-weight:900;line-height:1.25;margin-top:1mm}.cand{text-align:center;font-size:17px;font-weight:900;line-height:1.25;margin-top:1mm}.title{text-align:center;font-size:21px;font-weight:900;margin-top:5mm;line-height:1.2}.ref{text-align:center;font-size:10px;color:#777;margin:1.5mm 0 10mm}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:15mm;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:12px;padding:3mm 1mm}.sliprow span{font-size:15px;padding:3mm 1mm;overflow-wrap:anywhere}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}.profilePhotoPreview img{width:100%;height:100%;object-fit:cover}.demoLogout{white-space:nowrap}.profile-card input[readonly]{background:#f3f5f4;color:#53645e}
+function slipHtml(v){return `<section class="vslip">${voterPdfHeaderHtml()}<div class="sliprows">${rr(v).map(x=>`<div class="sliprow"><b>${e(x[0])}</b><span>${e(x[1]??"-")}</span></div>`).join("")}</div></section>`}
+function slipDoc(content,title="Voter Slip"){return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><title>${e(title)}</title><style>@page{size:A4;margin:10mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111}body{font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.vslip{width:100%;min-height:277mm;border:1px solid #66736e;padding:7mm 8mm;page-break-after:always;break-after:page}.vslip:last-child{page-break-after:auto;break-after:auto}.pdfHeader{text-align:center;padding:1mm 0 7mm}.gp{text-align:center;font-size:19px;font-weight:900;line-height:1.25;margin-top:1mm}.cand{text-align:center;font-size:17px;font-weight:900;line-height:1.25;margin-top:1.5mm}.candidatePost{text-align:center;font-size:13px;font-weight:800;color:#176b3b;margin-top:1mm}.area{text-align:center;font-size:10px;color:#555;margin-top:1mm}.civic{text-align:center;font-size:10px;color:#555;margin-top:1.5mm}.contactLine{text-align:center;font-size:10px;font-weight:800;color:#333;margin-top:1mm}.title{text-align:center;font-size:21px;font-weight:900;margin-top:3mm;line-height:1.2}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:15mm;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:12px;padding:3mm 1mm}.sliprow span{font-size:15px;padding:3mm 1mm;overflow-wrap:anywhere}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}.profilePhotoPreview img{width:100%;height:100%;object-fit:cover}.demoLogout{white-space:nowrap}.profile-card input[readonly]{background:#f3f5f4;color:#53645e}
 .headerActions{position:absolute!important;top:8px!important;right:8px!important;z-index:999!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important}
 </style></head><body>${content}<!-- redeploy-trigger: 2026-09-25-house-pdf-fix -->
 </body></html>`}
 function voterSlip(j){const v=typeof j==="string"?JSON.parse(j):j,w=open("","_blank");if(!w)return;w.document.write(slipDoc(slipHtml(v),"Voter Slip"));w.document.close();setTimeout(()=>w.print(),350)}
 function neutralSlipHtml(v){
- const gpHi=candidate.hindi_gram_panchayat||candidate.gram_panchayat||"";
- const candHi=candidate.hindi_name||candidate.name||"";
- const postHi=hindiPostName(candidate.post||candidate.election_post||"");
- const mobile=candidate.mobile||candidate.whatsapp||"";
  return `<section class="vslip">
-  <div class="gp">ग्राम पंचायत ${e(gpHi)}</div>
-  <div class="cand">${e(candHi)}</div>
-  <div class="candidatePost">${e(postHi)}</div>
-  <div class="civic">आपका विश्वास, हमारे गांव का विकास</div>
-  <div class="civic">🙏 आपका सहयोग एवं आशीर्वाद अपेक्षित है - ${e(mobile)}</div>
-  <div class="title">मतदाता पर्ची / Voter Slip</div>
-  <div class="ref">For voter-list reference only</div>
+  ${voterPdfHeaderHtml()}
   <div class="sliprows">${rr(v).map(x=>`<div class="sliprow"><b>${e(x[0])}</b><span>${e(x[1]??"-")}</span></div>`).join("")}</div>
  </section>`
 }
-async function makePdfFile(list,filename){if(!window.html2canvas||!window.jspdf)throw new Error("PDF library not loaded");const host=document.createElement("div");host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1";document.body.appendChild(host);const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});try{for(let i=0;i<list.length;i++){host.innerHTML=slipDoc(neutralSlipHtml(list[i]),"Voter Information Slip").match(/<body>([\s\S]*)<\/body>/i)[1];const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.vslip{width:794px;min-height:1123px;border:1px solid #66736e;padding:24px 25px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.gp{text-align:center;font-size:24px;font-weight:900;margin-top:0}.cand{text-align:center;font-size:22px;font-weight:900;margin-top:7px}.candidatePost{text-align:center;font-size:15px;font-weight:800;color:#176b3b;margin-top:2px}.civic{text-align:center;font-size:15px;color:#555;margin-top:7px;line-height:1.25}.title{text-align:center;font-size:27px;font-weight:900;margin-top:10px}.ref{text-align:center;font-size:13px;color:#777;margin:7px 0 43px}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:62px;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:15px;padding:12px 5px;color:#444}.sliprow span{font-size:19px;padding:12px 5px;overflow-wrap:anywhere}';host.prepend(st);await Promise.all(Array.from(host.querySelectorAll("img")).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve})));const canvas=await html2canvas(host,{scale:3,backgroundColor:"#fff",useCORS:true,allowTaint:false,imageTimeout:30000});const img=canvas.toDataURL("image/png");if(i)pdf.addPage();pdf.addImage(img,"PNG",0,0,210,297,undefined,"FAST")}return new File([pdf.output("blob")],filename,{type:"application/pdf"})}finally{host.remove()}}
+async function makePdfFile(list,filename){if(!window.html2canvas||!window.jspdf)throw new Error("PDF library not loaded");await prepareCandidateHindiHeader();const host=document.createElement("div");host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1";document.body.appendChild(host);const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});try{for(let i=0;i<list.length;i++){host.innerHTML=slipDoc(neutralSlipHtml(list[i]),"Voter Information Slip").match(/<body>([\s\S]*)<\/body>/i)[1];const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.vslip{width:794px;min-height:1123px;border:1px solid #66736e;padding:24px 25px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.pdfHeader{text-align:center;padding:2px 0 30px}.gp{text-align:center;font-size:24px;font-weight:900;margin-top:0}.cand{text-align:center;font-size:22px;font-weight:900;margin-top:7px}.candidatePost{text-align:center;font-size:15px;font-weight:800;color:#176b3b;margin-top:3px}.area{text-align:center;font-size:13px;color:#555;margin-top:5px}.civic{text-align:center;font-size:13px;color:#555;margin-top:5px;line-height:1.35}.contactLine{text-align:center;font-size:13px;font-weight:800;color:#333;margin-top:4px}.title{text-align:center;font-size:27px;font-weight:900;margin-top:10px}.sliprows{border-top:1px solid #d3d3d3}.sliprow{display:grid;grid-template-columns:32% 68%;align-items:center;min-height:62px;border-bottom:1px solid #d3d3d3}.sliprow b{font-size:15px;padding:12px 5px;color:#444}.sliprow span{font-size:19px;padding:12px 5px;overflow-wrap:anywhere}';host.prepend(st);await Promise.all(Array.from(host.querySelectorAll("img")).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve})));const canvas=await html2canvas(host,{scale:3,backgroundColor:"#fff",useCORS:true,allowTaint:false,imageTimeout:30000});const img=canvas.toDataURL("image/png");if(i)pdf.addPage();pdf.addImage(img,"PNG",0,0,210,297,undefined,"FAST")}return new File([pdf.output("blob")],filename,{type:"application/pdf"})}finally{host.remove()}}
 async function makeWardGridPdf(list,filename,onProgress){
  if(!window.html2canvas||!window.jspdf)throw new Error("PDF library not loaded");
+ await prepareCandidateHindiHeader();
  const host=document.createElement("div");host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1";document.body.appendChild(host);
  const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
  const wardNo=String(list[0]?.ward||"").padStart(3,"0"), totalPages=Math.ceil(list.length/9);
  const photo=candidate.photo_url||"";
- const candName=candidate.hindi_name||candidate.name||"";
- const post=candidate.post||"";
- const gp=candidate.gram_panchayat||"";
+ const h=voterPdfHeaderData();
+ const candName=h.name;
+ const post=h.post;
+ const gp=h.gp;
+ const ps=h.ps;
+ const district=h.district;
+ const mobile=h.number;
+ const defaultMessage=h.message;
  const card=v=>`<div class="slip">
    <div class="candbox">
-    <div class="candtext"><div class="gp">ग्राम पंचायत:<br><strong>${e(gp)}</strong></div><div class="cname">${e(candName)}</div><div class="post">${e(hindiPostName(post))}</div></div>
+    <div class="candtext"><div class="gp">ग्राम पंचायत : <strong>${e(gp)}</strong></div><div class="cname">${e(candName)}</div><div class="post">${e(post)}</div><div class="area">पंचायत समिति : ${e(ps)} | जिला : ${e(district)}</div><div class="msg">${e(defaultMessage)}</div>${mobile?`<div class="mobile">संपर्क : ${e(mobile)}</div>`:""}</div>
     <div class="photo">${photo?`<img src="${e(photo)}" crossorigin="anonymous">`:"<div class='ph'>PHOTO</div>"}</div>
    </div>
-   <div class="orange"><b>मतदाता पर्ची</b><span>मतदाता जानकारी</span></div>
+   <div class="orange"><b>मतदाता पर्ची</b><span>मतदाता सूची संदर्भ</span></div>
    <div class="panrow"><b>पंचायत :</b><span>${e(gp)}</span><b>वार्ड :</b><strong>${e(String(v.ward||wardNo).padStart(3,"0"))}</strong></div>
    <div class="details">
     <div class="r split"><span><b>क्रम:</b> ${e(v.serial_no||"-")}</span><span><b>EPIC:</b> ${e(v.epic||"-")}</span></div>
@@ -2234,8 +2257,8 @@ async function makeWardGridPdf(list,filename,onProgress){
  try{
   for(let p=0;p<list.length;p+=9){
    const chunk=list.slice(p,p+9),pageNo=Math.floor(p/9)+1;
-   host.innerHTML=`<div class="page"><div class="pagehead"><b>पंचायत आम चुनाव, 2026</b><b>पंचायत: ${e(gp)} &nbsp; वार्ड: ${e(wardNo)}</b><span>Page ${pageNo} of ${totalPages}</span></div><div class="rule"></div><div class="grid">${chunk.map(card).join("")}</div></div>`;
-   const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.page{width:794px;height:1123px;padding:13px 14px 12px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.pagehead{height:29px;display:grid;grid-template-columns:1fr 1.4fr .6fr;align-items:center;font-size:11px}.pagehead b:nth-child(2){text-align:center}.pagehead span{text-align:right}.rule{border-top:1px solid #555;margin:1px 0 8px}.grid{height:1054px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px}.slip{border:1.4px dashed #7d8783;position:relative;overflow:hidden;background:#fff;padding:5px 5px 25px}.candbox{height:121px;display:grid;grid-template-columns:1fr 78px;gap:5px;padding:8px 3px 4px}.candtext{text-align:center;display:flex;flex-direction:column;justify-content:center}.gp{font-size:18px;line-height:1.08;font-weight:800;color:#f56a00}.gp strong{font-size:20px}.cname{font-size:13px;line-height:1.15;font-weight:900;color:#176b3b;margin-top:5px}.post{font-size:11px;font-weight:800}.photo{display:flex;align-items:center;justify-content:center}.photo img,.ph{width:72px;height:94px;border:1px solid #555;border-radius:10px;object-fit:cover;background:#eee}.ph{display:flex;align-items:center;justify-content:center;font-size:9px;color:#777}.orange{height:31px;background:#f56a00;color:#fff;margin:0 -5px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;font-size:11px}.orange b{font-size:14px}.panrow{height:43px;display:grid;grid-template-columns:auto 1fr auto auto;gap:5px;align-items:center;border-bottom:1px solid #999;font-size:10px}.panrow span{border:1px solid #777;border-radius:4px;text-align:center;padding:4px 3px;font-weight:800}.panrow strong{font-size:12px}.details{font-size:9.4px;line-height:1.25}.r{padding:3px 2px;border-bottom:1px dashed #bbb;overflow-wrap:anywhere}.split{display:grid;grid-template-columns:1fr 1.25fr;gap:5px}.booth{font-size:8.6px;min-height:30px}.foot{position:absolute;left:5px;right:5px;bottom:5px;height:24px;background:#e7f4e7;border-top:2px solid #77a778;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800}';host.prepend(st);
+   host.innerHTML=`<div class="page"><div class="pagehead"><b>पंचायत मतदाता पर्ची</b><b>ग्राम पंचायत : ${e(gp)} &nbsp; | &nbsp; वार्ड : ${e(wardNo)}</b><span>पृष्ठ ${pageNo} / ${totalPages}</span></div><div class="rule"></div><div class="grid">${chunk.map(card).join("")}</div></div>`;
+   const st=document.createElement("style");st.textContent='*{box-sizing:border-box}.page{width:794px;height:1123px;padding:13px 14px 12px;background:#fff;color:#111;font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Arial,sans-serif}.pagehead{height:29px;display:grid;grid-template-columns:1fr 1.4fr .6fr;align-items:center;font-size:11px}.pagehead b:nth-child(2){text-align:center}.pagehead span{text-align:right}.rule{border-top:1px solid #555;margin:1px 0 8px}.grid{height:1054px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px}.slip{border:1.4px dashed #7d8783;position:relative;overflow:hidden;background:#fff;padding:5px 5px 25px}.candbox{height:137px;display:grid;grid-template-columns:1fr 72px;gap:5px;padding:5px 3px 3px}.candtext{text-align:center;display:flex;flex-direction:column;justify-content:center}.gp{font-size:12px;line-height:1.08;font-weight:800;color:#111}.gp strong{font-size:13px}.cname{font-size:13px;line-height:1.15;font-weight:900;color:#176b3b;margin-top:4px}.post{font-size:10px;font-weight:800}.area{font-size:7.8px;color:#555;margin-top:2px;line-height:1.15}.msg{font-size:7.5px;color:#666;margin-top:2px;line-height:1.15}.mobile{font-size:8px;font-weight:800;color:#333;margin-top:2px}.photo{display:flex;align-items:center;justify-content:center}.photo img,.ph{width:66px;height:86px;border:1px solid #555;border-radius:10px;object-fit:cover;background:#eee}.ph{display:flex;align-items:center;justify-content:center;font-size:9px;color:#777}.orange{height:28px;background:#f56a00;color:#fff;margin:0 -5px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;font-size:11px}.orange b{font-size:14px}.panrow{height:39px;display:grid;grid-template-columns:auto 1fr auto auto;gap:5px;align-items:center;border-bottom:1px solid #999;font-size:10px}.panrow span{border:1px solid #777;border-radius:4px;text-align:center;padding:4px 3px;font-weight:800}.panrow strong{font-size:12px}.details{font-size:9.4px;line-height:1.25}.r{padding:3px 2px;border-bottom:1px dashed #bbb;overflow-wrap:anywhere}.split{display:grid;grid-template-columns:1fr 1.25fr;gap:5px}.booth{font-size:8.6px;min-height:30px}.foot{position:absolute;left:5px;right:5px;bottom:5px;height:24px;background:#e7f4e7;border-top:2px solid #77a778;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800}';host.prepend(st);
    await Promise.all(Array.from(host.querySelectorAll("img")).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve})));
    const canvas=await html2canvas(host,{scale:3,backgroundColor:"#fff",useCORS:true,allowTaint:false,imageTimeout:30000});
    if(p)pdf.addPage();pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,0,210,297,undefined,"FAST");if(onProgress)onProgress(Math.min(list.length,p+chunk.length),list.length);
@@ -2307,18 +2330,15 @@ async function saveFamilyShareMessage(){
   return false;
  }
 }
-const DEFAULT_FAMILY_WHATSAPP_MESSAGE=`🙏 नमस्कार!
+const DEFAULT_FAMILY_WHATSAPP_MESSAGE=`नमस्कार,
 
 आपके परिवार की मतदाता पर्ची संलग्न है।
-कृपया परिवार के सभी सदस्यों का नाम, वार्ड संख्या, मकान नंबर, मतदाता क्रमांक एवं मतदान केंद्र ध्यानपूर्वक जांच लें।
 
-यदि किसी जानकारी में त्रुटि दिखाई दे, तो कृपया आधिकारिक मतदाता सूची/निर्वाचन कार्यालय से सत्यापन कर लें।
+यह मतदाता पर्ची केवल मतदाता सूची संदर्भ हेतु है। कृपया नाम, वार्ड, मकान नंबर, मतदाता क्रमांक और मतदान केंद्र की जानकारी जांच लें।
 
-मतदान के दिन अपनी मतदाता जानकारी एवं आवश्यक पहचान दस्तावेज साथ रखें।
+यदि किसी जानकारी में अंतर दिखाई दे, तो आधिकारिक मतदाता सूची/निर्वाचन कार्यालय से सत्यापन करें।
 
-आपकी जागरूक भागीदारी लोकतंत्र को मजबूत बनाती है।
-
-धन्यवाद एवं शुभकामनाएँ। 🙏`;
+धन्यवाद।`;
 
 function openFamilySharePopup(a){
  const saved=a.map(v=>({v,m:voterMobileMap.get(String(v.id))?.mobile_number||""}));
