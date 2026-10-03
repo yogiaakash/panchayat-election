@@ -42,6 +42,14 @@
 .featureChips .chipArrow{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#edf7f1;color:#087443;font-size:13px;font-weight:900;transition:transform .18s ease,background .18s ease}
 .featureChips .chip:hover .chipArrow{transform:translateX(2px);background:#dff0e6}
 @media(max-width:650px){.featureChips{grid-template-columns:1fr;gap:9px}.featureChips .chip{grid-template-columns:42px 1fr 22px;padding:10px 11px}.featureChips .chip .bubble{width:42px;height:42px}}
+</style><style>
+.actions{display:flex!important;gap:18px!important;flex-wrap:wrap!important;margin-top:20px!important;align-items:center!important;justify-content:center!important}
+.actions .btn{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:240px!important;min-height:58px!important;padding:0 28px!important;border-radius:16px!important;font-size:15px!important;font-weight:900!important;letter-spacing:.2px!important;text-decoration:none!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:0 14px 30px rgba(8,116,67,.20),inset 0 1px 0 rgba(255,255,255,.20)!important;background:linear-gradient(135deg,#0e8c52 0%,#087443 55%,#065d35 100%)!important;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease!important;overflow:hidden!important}
+.actions .btn::before{content:"";position:absolute;top:0;left:-35%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:skewX(-20deg)}
+.actions .btn:hover{transform:translateY(-2px);filter:brightness(1.03);box-shadow:0 18px 34px rgba(8,116,67,.26),inset 0 1px 0 rgba(255,255,255,.22)!important}
+.actions .btn.light{background:linear-gradient(135deg,#ff9b0a 0%,#f47b00 55%,#d96500 100%)!important;box-shadow:0 14px 30px rgba(244,123,0,.24),inset 0 1px 0 rgba(255,255,255,.18)!important}
+.actions .btn.light:hover{box-shadow:0 18px 34px rgba(244,123,0,.30),inset 0 1px 0 rgba(255,255,255,.22)!important}
+@media(max-width:650px){.actions{flex-direction:column!important;justify-content:center!important;align-items:center!important}.actions .btn{width:100%!important;max-width:300px!important;min-width:unset!important}}
 </style></head><body>
 <script>if(location.hash&&(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1))||location.hash.includes("access_token="))){location.replace("./reset-password.html"+location.hash)}else if(new URLSearchParams(location.search).has("code")){location.replace("./reset-password.html"+location.search)}</script>
 <nav class="nav"><div class="navin"><a class="logo" href="/">Panchayat<b>X</b></a><div class="links"><a href="#features">फीचर्स</a><a href="#how">कैसे काम करता है</a><a href="#pricing">कीमत</a><a href="/about.html">हमारे बारे में</a><a href="/contact.html">संपर्क</a><a class="btn outline" href="/demo/">लाइव डेमो</a><a class="btn" href="/login/">लॉगिन</a></div></div></nav>
