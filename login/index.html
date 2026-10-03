@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panchayat Digital</title>
+<title>PanchayatX | Candidate Login</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
@@ -536,9 +536,43 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
 .hindiInputWrap{position:relative}
 .hindiInputHint{font-size:10px;color:#6d7f76;margin-top:5px}
 .hindiInputStatus{position:absolute;right:10px;bottom:12px;font-size:11px;color:#087451;display:none}
+</style>
+<style id="panchayatx-auth-home-theme">
+body.authPage{min-height:100vh;background:
+ radial-gradient(circle at 8% 18%,rgba(8,116,67,.08),transparent 27%),
+ radial-gradient(circle at 94% 78%,rgba(244,123,0,.10),transparent 28%),
+ linear-gradient(135deg,#f4faf6 0%,#fbfcfa 56%,#fff8ec 100%);color:#173d32}
+body.authPage header{height:68px;padding:0 max(22px,calc((100vw - 1180px)/2));border-radius:0;background:#fff;border:0;border-bottom:1px solid #e5ece7;box-shadow:0 2px 14px rgba(15,70,48,.05);display:flex;align-items:center}
+body.authPage .authBrand{display:flex;flex-direction:column;align-items:flex-start;color:#087443;font-size:29px;font-weight:950;line-height:.85;text-decoration:none;letter-spacing:-.7px}
+body.authPage .authBrand span{color:#f47b00}
+body.authPage .authBrand small{display:block;margin-top:7px;color:#43866a;font-size:8.5px;font-weight:700;letter-spacing:.15px}
+.authHeaderRight{margin-left:auto;display:flex;align-items:center;gap:14px}.authHomeLink{color:#315e4e;font-size:13px;font-weight:800;padding:9px 12px;border-radius:10px}.authHomeLink:hover{background:#f0f7f3;color:#087443}
+body.authPage main#app{max-width:none!important;width:100%;min-height:calc(100vh - 68px);margin:0!important;padding:56px 22px 70px!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+.authShell{width:min(1080px,100%);margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:42px;align-items:center}
+.authIntroPanel{padding:34px 18px 34px 10px}.authEyebrow{display:inline-flex;padding:7px 11px;border-radius:999px;background:#e7f4eb;border:1px solid #cfe7d7;color:#087443;font-size:11px;font-weight:900;letter-spacing:.3px}
+.authIntroPanel h1{margin:18px 0 14px;font-size:clamp(38px,4.5vw,58px);line-height:1.05;letter-spacing:-1.7px;color:#123d32}.authIntroPanel h1 span{color:#f47b00}.authIntroPanel>p{max-width:620px;margin:0;color:#61736c;font-size:15px;line-height:1.75}
+.authBenefits{display:grid;grid-template-columns:1fr;gap:10px;margin-top:24px}.authBenefits div{display:flex;align-items:center;gap:10px;color:#345c4d;font-size:13px;font-weight:750}.authBenefits b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#e4f3e9;color:#087443;font-size:12px}
+.authIndependent{margin-top:25px;padding-top:17px;border-top:1px solid #dce7e1;color:#7a8882;font-size:10.5px;line-height:1.5}
+body.authPage .card.login{max-width:none;margin:0}
+.authLoginCard{position:relative;padding:34px 34px 30px!important;border-radius:25px!important;border:1px solid #dce8e1!important;background:rgba(255,255,255,.95)!important;box-shadow:0 20px 55px rgba(16,70,49,.11)!important}
+.authLoginCard:before{content:"";position:absolute;left:0;top:0;width:100%;height:5px;border-radius:25px 25px 0 0;background:linear-gradient(90deg,#087443 0 72%,#f47b00 72% 100%)}
+.authCardIcon{width:50px;height:50px;display:grid;place-items:center;margin-bottom:14px;border-radius:15px;background:#e9f5ed;font-size:21px}.authCardKicker{display:block;color:#087443;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px}.authLoginCard h2{margin:0 0 5px;color:#143d32;font-size:27px;letter-spacing:-.4px}.authLoginCard>.muted{margin:0 0 20px;color:#718078;font-size:13px}
+body.authPage .authLoginCard label{margin:13px 0 6px;color:#254b3d;font-size:12.5px;font-weight:850}
+.authInputWrap{display:flex;align-items:center;min-height:49px;border:1px solid #d7e3dc;border-radius:13px;background:#fbfdfc;transition:.18s ease;overflow:hidden}.authInputWrap:focus-within{border-color:#0b8c5a;box-shadow:0 0 0 3px rgba(8,116,67,.08);background:#fff}.authInputWrap>span{width:42px;text-align:center;color:#7c998d;font-size:13px}.authInputWrap input{border:0!important;border-radius:0!important;background:transparent!important;outline:0!important;padding:12px 12px 12px 0!important;min-width:0}
+.authPrimaryBtn{width:100%;min-height:49px;margin-top:17px!important;border-radius:13px!important;background:linear-gradient(135deg,#0a8a56,#087443)!important;color:#fff!important;font-size:14px!important;box-shadow:0 9px 22px rgba(8,116,67,.18)!important}.authPrimaryBtn:hover{transform:translateY(-1px)}
+.authSecondaryBtn{width:100%;min-height:44px;margin-top:9px!important;border-radius:12px!important;background:#edf7f2!important;color:#087443!important;border:1px solid #dbece3!important}
+.authDivider{display:flex;align-items:center;gap:10px;margin:15px 0 10px;color:#96a39d;font-size:10px}.authDivider:before,.authDivider:after{content:"";height:1px;background:#e2e9e5;flex:1}.authDivider span{padding:0 4px}
+.authCreateBtn{width:100%;min-height:45px;margin:0!important;border-radius:12px!important;background:#fff8ec!important;color:#a85800!important;border:1px solid #f0d7af!important;font-weight:850!important}.authCreateBtn:hover{background:#fff3dd!important}
+.authMsg{min-height:18px;margin:10px 0 0;font-size:12px}.authBackHome{display:block;margin-top:7px;text-align:center;color:#6e7e77;font-size:11px;font-weight:700}.authBackHome:hover{color:#087443}
+body.authPage .signupCard{width:min(720px,100%);max-width:720px!important;margin:0 auto!important;padding:32px!important;border-radius:24px!important;border:1px solid #dce8e1!important;box-shadow:0 18px 50px rgba(16,70,49,.09)!important}
+body.authPage .signupCard h2{color:#123d32;font-size:27px;margin-top:0}body.authPage .signupCard .muted{font-size:13px;line-height:1.6}
+body.authPage .signupCard input,body.authPage .signupCard select{min-height:46px;border-radius:12px;border-color:#d7e3dc;background:#fbfdfc}body.authPage .signupCard input:focus,body.authPage .signupCard select:focus{outline:0;border-color:#0b8c5a;box-shadow:0 0 0 3px rgba(8,116,67,.08);background:#fff}
+body.authPage .signupCard .primary{background:linear-gradient(135deg,#0a8a56,#087443)}
+@media(max-width:850px){body.authPage main#app{padding:36px 18px 55px!important}.authShell{grid-template-columns:1fr;max-width:620px;gap:26px}.authIntroPanel{text-align:center;padding:10px 10px 0}.authIntroPanel>p{margin-left:auto;margin-right:auto}.authBenefits{width:max-content;max-width:100%;margin:20px auto 0;text-align:left}.authIndependent{display:none}}
+@media(max-width:560px){body.authPage header{height:62px;padding:0 16px}.authHomeLink{font-size:12px}.authBrand{font-size:25px!important}.authBrand small{font-size:7.5px!important}body.authPage main#app{min-height:calc(100vh - 62px);padding:25px 13px 42px!important}.authIntroPanel{display:none}.authShell{display:block}.authLoginCard{padding:27px 20px 23px!important;border-radius:21px!important}.authLoginCard h2{font-size:24px}.authCardIcon{width:44px;height:44px}.authBackHome{margin-top:10px}body.authPage .signupCard{padding:24px 18px!important;border-radius:20px!important}}
 </style></head>
 <body>
-<header><div class="brand">Panchayat Digital</div><button id="logout" class="btn ghost hidden">Logout</button></header>
+<header><a class="brand authBrand" href="/" aria-label="PanchayatX Home">Panchayat<span>X</span><small>हर पंचायत, डिजिटल पंचायत</small></a><div class="authHeaderRight"><a class="authHomeLink" href="/">होम</a><button id="logout" class="btn ghost hidden">Logout</button></div></header>
 <main id="app"></main>
 <script>
 window.PANCHAYAT_FULL_ACCESS_PRICE=1;
@@ -593,14 +627,38 @@ function latinize(v){
 }
 const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function loginView(msg=""){
+ document.body.classList.add("authPage");
  document.querySelector("header").style.display="flex";
  logout.classList.add("hidden");
- app.innerHTML=`<div class="card login"><h2>Candidate Login</h2><p class="muted">अपने Email और Password से लॉगिन करें।</p>
- <label>Email / Login ID</label><input id="email" type="email" autocomplete="username">
- <label>Password</label><input id="password" type="password" autocomplete="current-password">
- <button class="btn primary" style="width:100%;margin-top:16px" onclick="signIn()">Login</button><button class="btn ghost full" style="margin-top:8px" onclick="forgotPassword()">🔑 Password भूल गए?</button>
- <button class="btn soft full" style="margin-top:9px" onclick="location.href='/login/?signup=1'">➕ नया Candidate Account बनाएं</button>
- <p id="msg" class="error">${e(msg)}</p></div>`;
+ app.innerHTML=`<section class="authShell">
+ <div class="authIntroPanel">
+   <span class="authEyebrow">PanchayatX Candidate Access</span>
+   <h1>अपनी पंचायत का काम<br><span>एक ही जगह संभालें</span></h1>
+   <p>Assigned Panchayat data, voter search, house/family view, reports और voter-slip tools के लिए सुरक्षित candidate access.</p>
+   <div class="authBenefits">
+     <div><b>✓</b><span>Assigned Panchayat Data</span></div>
+     <div><b>✓</b><span>Mobile + Web Access</span></div>
+     <div><b>✓</b><span>Secure Candidate Login</span></div>
+   </div>
+   <div class="authIndependent">Independent digital workflow software • Not an official government portal</div>
+ </div>
+ <div class="card login authLoginCard">
+   <div class="authCardIcon">🔐</div>
+   <span class="authCardKicker">Welcome Back</span>
+   <h2>Candidate Login</h2>
+   <p class="muted">अपने registered Email और Password से लॉगिन करें।</p>
+   <label>Email / Login ID</label>
+   <div class="authInputWrap"><span>✉</span><input id="email" type="email" autocomplete="username" placeholder="name@example.com"></div>
+   <label>Password</label>
+   <div class="authInputWrap"><span>●</span><input id="password" type="password" autocomplete="current-password" placeholder="अपना password डालें"></div>
+   <button class="btn primary authPrimaryBtn" onclick="signIn()">Login</button>
+   <button class="btn ghost full authSecondaryBtn" onclick="forgotPassword()">🔑 Password भूल गए?</button>
+   <div class="authDivider"><span>या</span></div>
+   <button class="btn soft full authCreateBtn" onclick="location.href='/login/?signup=1'">＋ नया Candidate Account बनाएं</button>
+   <p id="msg" class="error authMsg">${e(msg)}</p>
+   <a class="authBackHome" href="/">← PanchayatX Home पर जाएं</a>
+ </div>
+</section>`;
 }
 let hindiRawName="";
 let hindiImeTimer=null;
@@ -747,6 +805,7 @@ async function loadSignupPanchayats(){
  }
 }
 function signupView(){
+ document.body.classList.add("authPage");
  document.querySelector("header").style.display="flex";logout.classList.add("hidden");
  app.innerHTML=`<div class="card login signupCard"><h2>📝 Candidate Account बनाएं</h2><p class="muted">अपनी जानकारी भरें और अपनी Panchayat चुनें। Account बनने के बाद आपके चुने हुए Panchayat का voter data उपलब्ध रहेगा।</p>
  <label>Candidate Name *</label><input id="suName" placeholder="पूरा नाम">
@@ -857,6 +916,7 @@ async function forgotPassword(){
  msg.textContent=error?error.message:"Password reset link आपके email पर भेज दिया गया है।";
 }
 function showRecoveryPasswordForm(){
+ document.body.classList.add("authPage");
  document.querySelector("header").style.display="flex";
  logout.classList.add("hidden");
  app.innerHTML=`<div class="card login"><h2>🔐 नया Password बनाएं</h2><p class="muted">आपका password reset link valid है। नया password डालें।</p>
@@ -1251,6 +1311,7 @@ function halfMaskNumber(value){
  return "*".repeat(hide)+s.slice(hide);
 }
 function dashboard(){
+ document.body.classList.remove("authPage");
  document.querySelector("header").style.display="none";
  const c=candidate;
  const total=voters.length;
