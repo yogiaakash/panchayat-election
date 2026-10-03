@@ -1024,6 +1024,51 @@ async function updateRecoveryPassword(){
  msg.textContent="Password successfully update हो गया। Login किया जा रहा है…";
  setTimeout(()=>load(),500);
 }
+function hasHindiText(value){
+ return /[\u0900-\u097F]/.test(String(value||""));
+}
+async function prepareCandidateHindiHeader(){
+ if(!candidate)return;
+ if(candidate.name && !hasHindiText(candidate.hindi_name)){
+   try{
+     const hi=await transliterateHindiText(candidate.name);
+     if(hasHindiText(hi)) candidate.hindi_name=hi;
+   }catch(_){}
+ }
+ const gpSource=candidate.gram_panchayat||"";
+ if(gpSource && !hasHindiText(candidate.hindi_gram_panchayat)){
+   try{
+     const hi=await hindiPlaceName(gpSource);
+     if(hi) candidate.hindi_gram_panchayat=hi;
+   }catch(_){}
+ }
+ const psSource=candidate.panchayat_samiti||"";
+ if(psSource && !hasHindiText(candidate.hindi_panchayat_samiti)){
+   try{
+     const hi=await hindiPlaceName(psSource);
+     if(hi) candidate.hindi_panchayat_samiti=hi;
+   }catch(_){}
+ }
+ const districtSource=candidate.district||"";
+ if(districtSource && !hasHindiText(candidate.hindi_district)){
+   try{
+     const hi=await hindiPlaceName(districtSource);
+     if(hi) candidate.hindi_district=hi;
+   }catch(_){}
+ }
+}
+function refreshCandidateHeaderText(){
+ if(!candidate)return;
+ const nameEl=document.querySelector(".demoCandidateName");
+ const gpEl=document.querySelector(".demoGp");
+ const psEl=document.querySelector(".demoPs");
+ const districtEl=document.querySelector(".demoDistrict");
+ if(nameEl) nameEl.textContent=candidate.hindi_name||candidate.name||"";
+ if(gpEl) gpEl.textContent="ग्राम पंचायत : "+(candidate.hindi_gram_panchayat||candidate.gram_panchayat||"");
+ if(psEl) psEl.textContent="पंचायत समिति : "+(candidate.hindi_panchayat_samiti||candidate.panchayat_samiti||"");
+ if(districtEl) districtEl.textContent="जिला : "+(candidate.hindi_district||candidate.district||"");
+}
+
 async function signIn(){
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,msg=document.getElementById("msg");
  msg.textContent="Signing in…";
@@ -1226,7 +1271,10 @@ async function load(userOverride=null){
      voterMobileMap=new Map();
    }
 
-   // Render only after persistent mobile numbers have been loaded.
+   // Prepare Hindi candidate / Panchayat header before the first dashboard render.
+   await prepareCandidateHindiHeader();
+
+   // Render only after persistent mobile numbers and Hindi header fields are ready.
    dashboard();
 
    // Optional metadata can load after the dashboard is visible.
@@ -1281,6 +1329,8 @@ async function load(userOverride=null){
      candidate.hindi_gram_panchayat=await hindiPlaceName(candidate.gram_panchayat);
      candidate.hindi_panchayat_samiti=await hindiPlaceName(candidate.panchayat_samiti);
      candidate.hindi_district=await hindiPlaceName(candidate.district);
+     await prepareCandidateHindiHeader();
+     refreshCandidateHeaderText();
      contactMap=new Map((cs?.data||[]).map(x=>[String(x.voter_id),x]));
      additionRows=ar?.data||[];
      houseOverrideMap=new Map((ho?.data||[]).map(x=>[String(x.voter_id),x]));
@@ -1423,9 +1473,9 @@ function dashboard(){
     <div style="min-width:0;flex:1">
      <span class="demoCandidateName">${e(c.hindi_name||c.name||"")}</span>
      <span class="demoPost">${c.post?e(hindiPostName(c.post)):"अधिकृत पंचायत कार्यक्षेत्र"}</span>
-     <span class="demoGp">${e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
-     <span class="demoSub">पंचायत समिति: ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
-     <span class="demoSub">जिला: ${e(c.hindi_district||c.district||"")}</span>
+     <span class="demoGp">ग्राम पंचायत : ${e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
+     <span class="demoSub demoPs">पंचायत समिति : ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
+     <span class="demoSub demoDistrict">जिला : ${e(c.hindi_district||c.district||"")}</span>
     </div>
     <div class="headerActions">
      <button class="demoLogout" onclick="logout.click()">Logout</button>
