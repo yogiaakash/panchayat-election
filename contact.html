@@ -26,6 +26,11 @@
 .emailStrong{font-size:20px!important;word-break:break-word}
 @media(max-width:900px){.contactDirectTwo{grid-template-columns:1fr}.contactDirectItem{grid-template-columns:54px 1fr auto}}
 @media(max-width:620px){.contactDirectItem{grid-template-columns:48px 1fr;padding:17px}.contactDirectItem .contactCallBtn{grid-column:1/-1;width:100%}.emailStrong{font-size:18px!important}}
+
+.contactActionGroup{display:flex;gap:8px;align-items:center}
+.contactWhatsBtn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border-radius:13px;background:#25D366;color:#fff;font-weight:900;font-size:13px;box-shadow:0 10px 20px rgba(37,211,102,.18)}
+.contactWhatsBtn:hover{transform:translateY(-1px)}
+@media(max-width:620px){.contactActionGroup{grid-column:1/-1;width:100%}.contactActionGroup .contactCallBtn,.contactActionGroup .contactWhatsBtn{flex:1}}
 </style></head><body><nav class="nav"><div class="navin"><a class="logo" href="/">Panchayat<b>X</b></a><div class="links"><a href="/#features">फीचर्स</a><a href="/#how">कैसे काम करता है</a><a href="/#pricing">कीमत</a><a href="/about.html">हमारे बारे में</a><a href="/contact.html">संपर्क</a><a class="btn outline" href="/login/?signup=1">पंचायत डेटा फ्री देखें</a><a class="btn" href="/login/">लॉगिन</a></div></div></nav><main class="policyMain"><section class="policyIntro"><h1><span class="policyGreen">सही समस्या के लिए —</span> <span class="policyOrange">सही सहायता</span></h1><p>Account, payment verification, app usage, privacy या deletion से जुड़ी सहायता के लिए नीचे दिए गए विषय देखें। Registered users को support उनके account/registration के साथ उपलब्ध support channel के माध्यम से दिया जाता है।</p></section><section class="contactDirect contactDirectTwo">
   <div class="contactDirectItem">
     <div class="contactDirectIcon">☎</div>
@@ -34,7 +39,7 @@
       <strong>9079683980</strong>
       <small>Account, payment verification और technical support के लिए</small>
     </div>
-    <a class="contactCallBtn" href="tel:+919079683980">Call Now</a>
+    <div class="contactActionGroup"><a class="contactCallBtn" href="tel:+919079683980">Call Now</a><a class="contactWhatsBtn" href="https://wa.me/919079683980" target="_blank" rel="noopener">WhatsApp</a></div>
   </div>
   <div class="contactDirectItem">
     <div class="contactDirectIcon">✉</div>
