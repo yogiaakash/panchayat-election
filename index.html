@@ -105,6 +105,43 @@
 .featureHelp span{font-size:12.5px;line-height:1.5;color:#596861}
 @media(max-width:900px){.featureGridPremium{grid-template-columns:repeat(2,1fr)}.featureHead{text-align:left}.featureLead{margin-left:0}}
 @media(max-width:620px){.featureSection{padding-top:52px!important;padding-bottom:56px!important}.featureGridPremium{grid-template-columns:1fr;gap:14px}.featureCardPremium{min-height:0;padding:20px}.featureHead h2{font-size:32px}.featureLead{font-size:14.5px}}
+</style><style id="mobile-premium-showcase">
+.mobilePremium{position:relative;overflow:hidden;background:linear-gradient(135deg,#f7fbf8 0%,#eef7f1 52%,#fff7e8 100%);border-top:1px solid #e6eee9;border-bottom:1px solid #e8eee9}
+.mobilePremium:before{content:"";position:absolute;width:380px;height:380px;border-radius:50%;background:#f7a22a18;right:-120px;top:-140px;filter:blur(2px)}
+.mobilePremium:after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;background:#0b8a5420;left:-150px;bottom:-210px}
+.mobilePremiumInner{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:78px 26px;display:grid;grid-template-columns:1.12fr .88fr;gap:76px;align-items:center}
+.mobilePremiumCopy{max-width:650px}
+.mobilePremiumBadge{display:inline-flex;align-items:center;padding:8px 14px;border-radius:999px;background:#e3f3e9;border:1px solid #cee6d7;color:#087443;font-size:13px;font-weight:800;margin-bottom:15px}
+.mobilePremiumCopy h2{margin:0 0 16px;color:#123d32;font-size:clamp(38px,4vw,54px);line-height:1.08;letter-spacing:-1.2px}
+.mobilePremiumCopy h2 em{font-style:normal;color:#f47b00}
+.mobilePremiumLead{margin:0 0 26px;max-width:610px;color:#65746e;font-size:16px;line-height:1.75}
+.mobileBenefitList{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.mobileBenefit{display:flex;gap:12px;align-items:flex-start;padding:15px 15px;border:1px solid #dfeae3;border-radius:16px;background:rgba(255,255,255,.82);box-shadow:0 7px 22px rgba(15,70,48,.045)}
+.mobileBenefitIcon{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:#e8f5ed;display:grid;place-items:center;font-size:18px}
+.mobileBenefit b{display:block;color:#173e32;font-size:14px;margin:1px 0 4px}
+.mobileBenefit p{margin:0;color:#78847f;font-size:11.5px;line-height:1.45}
+.mobilePremiumCta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px}
+.mobilePremiumBtn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 21px;border-radius:14px;background:linear-gradient(135deg,#0b8d55,#087443);color:#fff;text-decoration:none;font-size:14px;font-weight:900;box-shadow:0 12px 24px rgba(8,116,67,.18);transition:.2s ease}
+.mobilePremiumBtn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(8,116,67,.24)}
+.mobilePremiumBtn span{font-size:20px;line-height:1}
+.mobilePremiumNote{color:#829089;font-size:11.5px}
+.mobileDeviceStage{position:relative;min-height:500px;display:flex;align-items:center;justify-content:center}
+.mobileGlow{position:absolute;width:330px;height:330px;border-radius:50%;background:radial-gradient(circle,#0b8a5422 0%,#0b8a5400 70%)}
+.mobileDevice{position:relative;width:292px;padding:9px;background:#121715;border-radius:42px;box-shadow:0 34px 75px rgba(20,53,42,.26);transform:rotate(3deg);border:1px solid #2b312f}
+.mobileNotch{position:absolute;z-index:5;top:15px;left:50%;transform:translateX(-50%);width:91px;height:24px;border-radius:20px;background:#0a0d0c}
+.mobileScreenPremium{position:relative;overflow:hidden;min-height:455px;padding:18px 14px 12px;border-radius:33px;background:linear-gradient(180deg,#087443 0 31%,#f7faf8 31% 100%)}
+.mobileAppHeader{display:flex;justify-content:space-between;align-items:center;color:#fff;padding:2px 5px 16px}
+.mobileBrand{font-size:17px;font-weight:900}.mobileBrand span{color:#ff9a13}.mobileStatus{font-size:10px;color:#9bf0c0}
+.mobileWelcome{color:#fff;padding:13px 8px 25px}.mobileWelcome small{display:block;opacity:.78;font-size:9px}.mobileWelcome strong{display:block;font-size:21px;margin:4px 0}.mobileWelcome span{font-size:9.5px;opacity:.88}
+.mobileQuickGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:1px}
+.mobileQuick{min-height:82px;padding:10px 8px;border-radius:13px;border:1px solid #dce7df;background:#fff;text-align:center;box-shadow:0 4px 10px rgba(12,61,42,.04)}
+.mobileQuick i{display:grid;place-items:center;margin:0 auto 6px;width:31px;height:31px;border-radius:9px;background:#e8f5ed;font-style:normal;font-size:15px}
+.mobileQuick b{display:block;font-size:9.5px;color:#173e32}.mobileQuick span{display:block;margin-top:3px;color:#8a948f;font-size:7.5px}
+.mobileSummary{margin-top:10px;padding:10px 11px;border-radius:13px;border:1px solid #dce7df;background:#fff;display:flex;align-items:center;justify-content:space-between}
+.mobileSummary>div{display:flex;gap:8px;align-items:center}.mobileSummary p{margin:0}.mobileSummary b{display:block;color:#173e32;font-size:9.5px}.mobileSummary small{display:block;color:#88928e;font-size:7px;margin-top:2px}.mobileArrow{color:#087443;font-size:19px}
+.mobileBottomNav{margin-top:11px;padding:7px 3px 0;border-top:1px solid #e5ece8;display:grid;grid-template-columns:repeat(4,1fr);text-align:center;color:#89938f;font-size:12px}.mobileBottomNav span{display:flex;flex-direction:column;gap:1px}.mobileBottomNav small{font-size:6.5px}.mobileBottomNav .active{color:#087443;font-weight:800}
+@media(max-width:900px){.mobilePremiumInner{grid-template-columns:1fr;gap:38px;padding:58px 22px}.mobilePremiumCopy{max-width:none}.mobileDeviceStage{min-height:470px}.mobileBenefitList{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.mobilePremiumInner{padding:48px 18px}.mobilePremiumCopy h2{font-size:36px}.mobilePremiumLead{font-size:14px}.mobileBenefitList{grid-template-columns:1fr}.mobilePremiumCta{align-items:flex-start;flex-direction:column}.mobilePremiumBtn{width:100%;box-sizing:border-box}.mobileDeviceStage{min-height:425px}.mobileDevice{width:255px}}
 </style></head><body>
 <script>if(location.hash&&(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1))||location.hash.includes("access_token="))){location.replace("./reset-password.html"+location.hash)}else if(new URLSearchParams(location.search).has("code")){location.replace("./reset-password.html"+location.search)}</script>
 <nav class="nav"><div class="navin"><a class="logo" href="/">Panchayat<b>X</b></a><div class="links"><a href="#features">फीचर्स</a><a href="#how">कैसे काम करता है</a><a href="#pricing">कीमत</a><a href="/about.html">हमारे बारे में</a><a href="/contact.html">संपर्क</a><a class="btn outline" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" href="/login/">लॉगिन</a></div></div></nav>
@@ -175,7 +212,73 @@
     </article>
   </div>
 </section>
-<section class="purple"><div class="section showcase"><div><span class="eyebrow">मोबाइल पर आसान</span><h2>पूरी मतदाता सूची का काम अब आपके मोबाइल में</h2><p class="lead">मोबाइल और कंप्यूटर दोनों के लिए बनाया गया, ताकि अधिकृत टीम जरूरत के समय आसानी से काम कर सके।</p><div class="checks"><div class="check"><i>✓</i><div><b>तेज़ फ़िल्टर</b><br><span class="lead">पंचायत से वार्ड, कॉलोनी और मकान स्तर तक आसानी से जाएँ।</span></div></div><div class="check"><i>✓</i><div><b>स्थानीय व्यवस्था</b><br><span class="lead">ऐप में किए गए स्थानीय बदलाव आधिकारिक मतदाता सूची से अलग रहते हैं।</span></div></div><div class="check"><i>✓</i><div><b>पहले पंचायत डेटा फ्री देखें</b><br><span class="lead">अपनी पंचायत का उपलब्ध डेटा फ्री में देखें।</span></div></div></div></div><div class="phone"><div class="screen"><div class="head"><small>PanchayatX</small><h3 style="margin:5px 0">उम्मीदवार डैशबोर्ड</h3><small>आपका स्वागत है</small></div><div class="tile"><b>⌕ मतदाता खोजें</b><br><small style="color:#81889a">Name, EPIC, house...</small></div><div class="tile"><b>⌂ मकान अनुसार मतदाता</b><br><small style="color:#81889a">Family & local grouping</small></div><div class="tile"><b>▥ आँकड़े व रिपोर्ट</b><br><small style="color:#81889a">Operational summaries</small></div><div class="tile"><b>▤ Voter Slips</b><br><small style="color:#81889a">Print-ready tools</small></div></div></div></div></section>
+<section class="mobilePremium">
+  <div class="mobilePremiumInner">
+    <div class="mobilePremiumCopy">
+      <span class="mobilePremiumBadge">मोबाइल + वेब पर आसान</span>
+      <h2>पंचायत का फील्ड वर्क,<br><em>अब एक ही स्मार्ट ऐप में</em></h2>
+      <p class="mobilePremiumLead">PanchayatX उम्मीदवार और अधिकृत टीम को मतदाता सूची से जुड़े रोज़मर्रा के काम मोबाइल और कंप्यूटर—दोनों पर व्यवस्थित करने में मदद करता है।</p>
+
+      <div class="mobileBenefitList">
+        <div class="mobileBenefit">
+          <span class="mobileBenefitIcon">🔎</span>
+          <div><b>तेज़ मतदाता खोज</b><p>नाम, EPIC, वार्ड, कॉलोनी और मकान से रिकॉर्ड तुरंत खोजें।</p></div>
+        </div>
+        <div class="mobileBenefit">
+          <span class="mobileBenefitIcon">🏠</span>
+          <div><b>घर और परिवार अनुसार व्यवस्था</b><p>एक मकान के मतदाताओं और स्थानीय family grouping को एक साथ देखें।</p></div>
+        </div>
+        <div class="mobileBenefit">
+          <span class="mobileBenefitIcon">🚶</span>
+          <div><b>फील्ड विज़िट का रिकॉर्ड</b><p>कौन-सा क्षेत्र देखा गया और कौन-सा बाकी है, टीम के काम को व्यवस्थित रखें।</p></div>
+        </div>
+        <div class="mobileBenefit">
+          <span class="mobileBenefitIcon">📊</span>
+          <div><b>स्लिप, रिपोर्ट और आँकड़े</b><p>वोटर स्लिप और पंचायत से जुड़ी operational जानकारी एक ही जगह देखें।</p></div>
+        </div>
+      </div>
+
+      <div class="mobilePremiumCta">
+        <a href="/demo/" class="mobilePremiumBtn">अपनी पंचायत का डेटा फ्री देखें <span>→</span></a>
+        <span class="mobilePremiumNote">खरीदने से पहले उपलब्ध डेटा देखें</span>
+      </div>
+    </div>
+
+    <div class="mobileDeviceStage" aria-label="PanchayatX mobile dashboard preview">
+      <div class="mobileGlow"></div>
+      <div class="mobileDevice">
+        <div class="mobileNotch"></div>
+        <div class="mobileScreenPremium">
+          <div class="mobileAppHeader">
+            <span class="mobileBrand">Panchayat<span>X</span></span>
+            <span class="mobileStatus">●</span>
+          </div>
+          <div class="mobileWelcome">
+            <small>उम्मीदवार डैशबोर्ड</small>
+            <strong>नमस्कार 👋</strong>
+            <span>अपनी पंचायत का काम आसानी से संभालें</span>
+          </div>
+          <div class="mobileQuickGrid">
+            <div class="mobileQuick"><i>🔎</i><b>मतदाता खोज</b><span>नाम, EPIC, मकान</span></div>
+            <div class="mobileQuick"><i>🏠</i><b>मकान अनुसार</b><span>परिवार grouping</span></div>
+            <div class="mobileQuick"><i>🚶</i><b>विज़िट ट्रैकिंग</b><span>फील्ड रिकॉर्ड</span></div>
+            <div class="mobileQuick"><i>📄</i><b>Voter Slips</b><span>PDF तैयारी</span></div>
+          </div>
+          <div class="mobileSummary">
+            <div><span>📊</span><p><b>पंचायत रिपोर्ट</b><small>वार्ड, घर और उपलब्ध डेटा का सार</small></p></div>
+            <span class="mobileArrow">›</span>
+          </div>
+          <div class="mobileBottomNav">
+            <span class="active">⌂<small>Home</small></span>
+            <span>⌕<small>Search</small></span>
+            <span>✓<small>Visit</small></span>
+            <span>▥<small>Stats</small></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 <section class="section" id="pricing"><span class="eyebrow">सरल पैकेज</span><h2>पहले अपनी पंचायत का डेटा फ्री देखें, पसंद आए तो फुल एक्सेस लें।</h2><div class="pricebox"><div><span class="pill">FULL ACCESS</span><div class="price">₹4,999 <small>उम्मीदवार / पंचायत पैकेज</small></div><p>फुल पैकेज और लागू एक्सेस अवधि की जानकारी एक्टिवेशन से पहले दिखाई जाती है। भुगतान सत्यापन के बाद फुल एक्सेस सक्रिय होता है।</p></div><div><a class="btn" href="/buy.html">PanchayatX लें →</a><p style="font-size:12px">Review our <a href="/refund.html" style="text-decoration:underline">Refund Policy</a> before purchase.</p></div></div></section>
 <section class="section" id="how"><span class="eyebrow">आसान शुरुआत</span><h2>सिर्फ 3 स्टेप में शुरू करें</h2><div class="steps"><div class="step"><div class="num">1</div><h3>अपनी पंचायत का डेटा फ्री देखें</h3><p class="lead">सैंपल रिकॉर्ड से Search, Filters और Workflow देखें।</p></div><div class="step"><div class="num">2</div><h3>अपनी जानकारी दें</h3><p class="lead">अकाउंट बनाने के लिए उम्मीदवार और पंचायत की आवश्यक जानकारी दें।</p></div><div class="step"><div class="num">3</div><h3>भुगतान व एक्टिवेशन</h3><p class="lead">भुगतान पूरा करें और सत्यापन के लिए Transaction Reference जमा करें।</p></div></div></section>
 <section class="cta"><div><h2>अपनी पंचायत का काम डिजिटल करने के लिए तैयार हैं?</h2><p>अपनी पंचायत का डेटा फ्री देखें और PanchayatX का workflow समझें।</p></div><div class="actions" style="margin:0"><a class="btn light" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" style="background:#ffb52e;color:#24143e;box-shadow:none" href="/buy.html">Get Full Access</a></div></section></main>
