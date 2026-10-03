@@ -1417,17 +1417,41 @@ async function startOnlineLifetimePayment(){
  }catch(err){alert(err.message||"Payment शुरू नहीं हो सका।")}
 }
 
+const FULL_ACCESS_UPI_ID="9782781476@ybl";
+const FULL_ACCESS_RECEIVER_PHONE="9782781476";
+
+function buildUpiPayQuery(){
+ const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||4999;
+ const note="Panchayat Digital Lifetime Full Access";
+ return new URLSearchParams({
+   pa:FULL_ACCESS_UPI_ID,
+   pn:"Panchayat Digital",
+   am:String(amount),
+   cu:"INR",
+   tn:note
+ }).toString();
+}
+
 function openPaymentApp(appName){
- const schemes={phonepe:"phonepe://",paytm:"paytmmp://"};
- const url=schemes[appName];
- if(!url)return;
+ const q=buildUpiPayQuery();
+ const urls={
+   phonepe:"phonepe://pay?"+q,
+   paytm:"paytmmp://pay?"+q,
+   upi:"upi://pay?"+q
+ };
+ const url=urls[appName]||urls.upi;
  window.location.href=url;
 }
 
 async function copyReceiverNumber(){
- const n="9782781476";
+ const n=FULL_ACCESS_RECEIVER_PHONE;
  try{await navigator.clipboard.writeText(n);alert("Payment number copy हो गया: "+n)}
  catch(_){prompt("इस नंबर को copy करें",n)}
+}
+async function copyUpiId(){
+ const id=FULL_ACCESS_UPI_ID;
+ try{await navigator.clipboard.writeText(id);alert("UPI ID copy हो गई: "+id)}
+ catch(_){prompt("इस UPI ID को copy करें",id)}
 }
 
 async function openManualPaymentDialog(){
@@ -1450,13 +1474,18 @@ async function openManualPaymentDialog(){
  }
  dlg.innerHTML=`<div style="padding:18px">
   <div style="font-size:20px;font-weight:900;color:#075b43">📱 Manual UPI Payment</div>
-  <div class="notice" style="margin-top:10px"><b>Pay ₹${amount.toLocaleString("en-IN")}</b><br>PhonePe / Paytm number:<br><span style="font-size:22px;font-weight:900;letter-spacing:.5px">9782781476</span></div>
-  <div class="grid2" style="margin-top:10px">
-   <button class="btn soft" onclick="copyReceiverNumber()">📋 Copy Number</button>
-   <button class="btn soft" onclick="openPaymentApp('phonepe')">Open PhonePe</button>
-   <button class="btn soft" onclick="openPaymentApp('paytm')">Open Paytm</button>
+  <div class="notice" style="margin-top:10px">
+   <b>Pay ₹${amount.toLocaleString("en-IN")}</b><br>
+   UPI ID:<br><span style="font-size:20px;font-weight:900;letter-spacing:.3px">${FULL_ACCESS_UPI_ID}</span><br>
+   <span class="muted">Phone: ${FULL_ACCESS_RECEIVER_PHONE}</span>
   </div>
-  <div class="muted" style="margin:9px 0 12px">App खुलने के बाद “To Mobile Number” में ऊपर वाला नंबर डालकर ₹${amount.toLocaleString("en-IN")} pay करें। Payment के बाद नीचे UTR / Reference भरें।</div>
+  <div class="grid2" style="margin-top:10px">
+   <button class="btn soft" onclick="openPaymentApp('phonepe')">📱 Pay with PhonePe</button>
+   <button class="btn soft" onclick="openPaymentApp('paytm')">📱 Pay with Paytm</button>
+   <button class="btn soft" onclick="openPaymentApp('upi')">💸 Other UPI App</button>
+   <button class="btn soft" onclick="copyUpiId()">📋 Copy UPI ID</button>
+  </div>
+  <div class="muted" style="margin:9px 0 12px">Payment button से ₹${amount.toLocaleString("en-IN")} और UPI ID automatically fill होंगे। Pay करने से पहले recipient details verify कर लें। Payment के बाद नीचे UTR / Reference भरें।</div>
   <label>Payment App</label>
   <select id="manualPayMethod"><option value="phonepe">PhonePe</option><option value="paytm">Paytm</option><option value="other_upi">Other UPI</option><option value="cash">Cash</option></select>
   <label>UTR / Transaction ID / Reference</label>
@@ -1494,7 +1523,8 @@ async function submitManualPayment(){
    payment_method:method,
    payment_reference:ref,
    payment_date:date,
-   receiver_phone:"9782781476",
+   receiver_phone:FULL_ACCESS_RECEIVER_PHONE,
+   receiver_upi_id:FULL_ACCESS_UPI_ID,
    proof_data_url:proof,
    status:"pending"
  };
