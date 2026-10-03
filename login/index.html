@@ -1180,6 +1180,13 @@ async function saveCandidateProfile(){
  msg.textContent="✓ Profile successfully updated.";
  setTimeout(()=>dashboard(),500);
 }
+function halfMaskNumber(value){
+ const s=String(value??"");
+ if(!s)return s;
+ if(s.length<=2)return "*"+s.slice(-1);
+ const hide=Math.max(1,Math.ceil(s.length/2));
+ return "*".repeat(hide)+s.slice(hide);
+}
 function dashboard(){
  document.querySelector("header").style.display="none";
  const c=candidate;
@@ -1194,13 +1201,6 @@ function dashboard(){
  const visited=statuses.filter(x=>x.contact_status==="met").length;
  const pending=voters.length-visited-contacted;
  const additions=additionRows.filter(x=>x.status!=="closed").length;
-function halfMaskNumber(value){
- const s=String(value??"");
- if(!s)return s;
- if(s.length<=2)return "*"+s.slice(-1);
- const hide=Math.max(1,Math.ceil(s.length/2));
- return "*".repeat(hide)+s.slice(hide);
-}
  const maskedDashboard=currentAccess.access_level!=="full";
  const maskStat=n=>maskedDashboard?halfMaskNumber(n):String(n);
  app.innerHTML=`
@@ -1580,7 +1580,7 @@ function renderDetailedStats(){
  const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
  const ages=a.map(x=>Number(x.age)).filter(Number.isFinite),avg=ages.length?(ages.reduce((x,y)=>x+y,0)/ages.length).toFixed(1):"-";
  const hs=new Set(a.map(v=>String(v.ward)+"|"+String(v.colony)+"|"+String(effectiveHouse(v)))).size,cs=new Set(a.map(v=>String(v.colony))).size;
- const stat=(n,label)=>`<div class="stat statLine"><b>${currentAccess.access_level==="full"?e(n):"****"}</b><span>-</span><strong>${label}</strong></div>`;
+ const stat=(n,label)=>`<div class="stat statLine"><b>${currentAccess.access_level==="full"?e(n):halfMaskNumber(n)}</b><span>-</span><strong>${label}</strong></div>`;
  box.innerHTML=`<div class="statsList detailedStatsList">
    ${stat(a.length,"कुल मतदाता")}
    ${stat(a.filter(isMale).length,"पुरुष")}
