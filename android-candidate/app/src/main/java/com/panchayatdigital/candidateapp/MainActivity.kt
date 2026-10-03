@@ -53,7 +53,13 @@ class MainActivity : AppCompatActivity() {
             allowContentAccess = true
             javaScriptCanOpenWindowsAutomatically = false
             setSupportMultipleWindows(false)
-            userAgentString = userAgentString + " PanchayatXAndroid/2.0"
+            useWideViewPort = false
+            loadWithOverviewMode = false
+            setSupportZoom(false)
+            builtInZoomControls = false
+            displayZoomControls = false
+            textZoom = 100
+            userAgentString = userAgentString + " PanchayatXAndroid/2.1"
         }
 
         web.addJavascriptInterface(DownloadBridge(), "AndroidDownloader")
@@ -122,7 +128,14 @@ class MainActivity : AppCompatActivity() {
                 host.endsWith(".panchayatx.com") ||
                 host == "panchayat-election-sable.vercel.app"
 
-            if (internal) return false
+            if (internal) {
+                val path = (uri.path ?: "/").lowercase()
+                if (path == "/" || path == "/index.html") {
+                    web.loadUrl(START_URL)
+                    return true
+                }
+                return false
+            }
             openExternal(uri)
             return true
         }
