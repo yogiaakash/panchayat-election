@@ -142,6 +142,40 @@
 .mobileBottomNav{margin-top:11px;padding:7px 3px 0;border-top:1px solid #e5ece8;display:grid;grid-template-columns:repeat(4,1fr);text-align:center;color:#89938f;font-size:12px}.mobileBottomNav span{display:flex;flex-direction:column;gap:1px}.mobileBottomNav small{font-size:6.5px}.mobileBottomNav .active{color:#087443;font-weight:800}
 @media(max-width:900px){.mobilePremiumInner{grid-template-columns:1fr;gap:38px;padding:58px 22px}.mobilePremiumCopy{max-width:none}.mobileDeviceStage{min-height:470px}.mobileBenefitList{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.mobilePremiumInner{padding:48px 18px}.mobilePremiumCopy h2{font-size:36px}.mobilePremiumLead{font-size:14px}.mobileBenefitList{grid-template-columns:1fr}.mobilePremiumCta{align-items:flex-start;flex-direction:column}.mobilePremiumBtn{width:100%;box-sizing:border-box}.mobileDeviceStage{min-height:425px}.mobileDevice{width:255px}}
+</style><style id="premium-pricing-section">
+.pricingPremium{padding-top:76px!important;padding-bottom:80px!important}
+.pricingHead{text-align:center;max-width:900px;margin:0 auto 34px}
+.pricingBadge{display:inline-flex;align-items:center;padding:8px 14px;border-radius:999px;background:#e8f5ed;border:1px solid #cfe6d8;color:#087443;font-size:13px;font-weight:800;margin-bottom:14px}
+.pricingHead h2{margin:0;color:#153d32;font-size:clamp(34px,4vw,48px);line-height:1.15;letter-spacing:-.8px}
+.pricingHead h2 em{font-style:normal;color:#f47b00}
+.pricingHead>p{max-width:760px;margin:14px auto 0;color:#6d7a75;font-size:15px;line-height:1.7}
+.pricingCardPremium{position:relative;overflow:hidden;max-width:1140px;margin:0 auto;display:grid;grid-template-columns:1.25fr .75fr;border-radius:28px;background:linear-gradient(135deg,#073e2b 0%,#07583d 58%,#087443 100%);box-shadow:0 24px 60px rgba(7,62,43,.16);color:#fff}
+.pricingCardPremium:before{content:"";position:absolute;width:360px;height:360px;border-radius:50%;right:-150px;top:-190px;background:rgba(255,166,24,.13)}
+.pricingCardPremium:after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;left:-130px;bottom:-165px;background:rgba(255,255,255,.05)}
+.pricingMain,.pricingAction{position:relative;z-index:1}
+.pricingMain{padding:42px 44px}
+.pricingLabel{display:inline-flex;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);font-size:12px;font-weight:900;letter-spacing:.3px}
+.pricingAmount{display:flex;align-items:flex-start;gap:4px;margin-top:18px;font-size:62px;line-height:1;font-weight:950;letter-spacing:-2px}
+.pricingAmount span{font-size:34px;margin-top:7px}
+.pricingPackage{margin-top:8px;font-size:14px;font-weight:800;color:#d7eee3}
+.pricingDesc{max-width:660px;margin:16px 0 22px;color:#d8e8e1!important;font-size:14px;line-height:1.65}
+.pricingBenefits{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.pricingBenefits>div{display:flex;gap:9px;align-items:flex-start;padding:13px;border-radius:14px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.10)}
+.pricingBenefits i{flex:0 0 24px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e8f5ed;color:#087443;font-size:12px;font-style:normal;font-weight:900}
+.pricingBenefits span{display:block}.pricingBenefits b{display:block;font-size:11.5px;color:#fff;margin-bottom:3px}.pricingBenefits small{display:block;font-size:9.5px;line-height:1.4;color:#bfd9cd}
+.pricingAction{margin:20px;padding:27px;border-radius:22px;background:#fff;color:#173d32;display:flex;flex-direction:column;justify-content:center;box-shadow:0 12px 30px rgba(2,38,25,.16)}
+.pricingSecure{display:inline-flex;width:max-content;padding:6px 10px;border-radius:999px;background:#e8f5ed;color:#087443;font-size:11px;font-weight:800}
+.pricingAction h3{font-size:25px;margin:13px 0 7px;color:#153d32}
+.pricingActionTop>p{margin:0 0 20px!important;color:#74827c!important;font-size:12.5px;line-height:1.55}
+.pricingBuyBtn,.pricingFreeBtn{display:flex;align-items:center;justify-content:center;text-decoration:none;border-radius:14px;font-weight:900;transition:.2s ease}
+.pricingBuyBtn{min-height:54px;padding:0 18px;background:linear-gradient(135deg,#ff930f,#f47b00);color:#fff;font-size:14px;box-shadow:0 11px 23px rgba(244,123,0,.24)}
+.pricingBuyBtn:hover{transform:translateY(-2px);box-shadow:0 15px 29px rgba(244,123,0,.30)}
+.pricingBuyBtn span{font-size:19px;margin-left:8px}
+.pricingFreeBtn{min-height:46px;margin-top:10px;border:1px solid #dce7df;background:#f9fcfa;color:#087443;font-size:12.5px}
+.pricingFreeBtn:hover{background:#edf7f1}
+.pricingPolicy{text-align:center;margin-top:13px;color:#8a9691;font-size:10.5px}.pricingPolicy a{color:#087443;font-weight:800}
+@media(max-width:900px){.pricingCardPremium{grid-template-columns:1fr}.pricingMain{padding:34px 30px 25px}.pricingAction{margin:0 25px 25px}.pricingBenefits{grid-template-columns:1fr 1fr}.pricingHead{text-align:left}.pricingHead>p{margin-left:0}}
+@media(max-width:620px){.pricingPremium{padding-top:54px!important;padding-bottom:58px!important}.pricingHead h2{font-size:32px}.pricingHead>p{font-size:14px}.pricingMain{padding:28px 20px 20px}.pricingAmount{font-size:54px}.pricingBenefits{grid-template-columns:1fr}.pricingAction{margin:0 16px 16px;padding:22px 18px}.pricingAction h3{font-size:22px}}
 </style></head><body>
 <script>if(location.hash&&(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1))||location.hash.includes("access_token="))){location.replace("./reset-password.html"+location.hash)}else if(new URLSearchParams(location.search).has("code")){location.replace("./reset-password.html"+location.search)}</script>
 <nav class="nav"><div class="navin"><a class="logo" href="/">Panchayat<b>X</b></a><div class="links"><a href="#features">फीचर्स</a><a href="#how">कैसे काम करता है</a><a href="#pricing">कीमत</a><a href="/about.html">हमारे बारे में</a><a href="/contact.html">संपर्क</a><a class="btn outline" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" href="/login/">लॉगिन</a></div></div></nav>
@@ -279,7 +313,43 @@
     </div>
   </div>
 </section>
-<section class="section" id="pricing"><span class="eyebrow">सरल पैकेज</span><h2>पहले अपनी पंचायत का डेटा फ्री देखें, पसंद आए तो फुल एक्सेस लें।</h2><div class="pricebox"><div><span class="pill">FULL ACCESS</span><div class="price">₹4,999 <small>उम्मीदवार / पंचायत पैकेज</small></div><p>फुल पैकेज और लागू एक्सेस अवधि की जानकारी एक्टिवेशन से पहले दिखाई जाती है। भुगतान सत्यापन के बाद फुल एक्सेस सक्रिय होता है।</p></div><div><a class="btn" href="/buy.html">PanchayatX लें →</a><p style="font-size:12px">Review our <a href="/refund.html" style="text-decoration:underline">Refund Policy</a> before purchase.</p></div></div></section>
+<section class="section pricingPremium" id="pricing">
+  <div class="pricingHead">
+    <span class="pricingBadge">सरल पैकेज • स्पष्ट कीमत</span>
+    <h2>पहले अपनी पंचायत का डेटा फ्री देखें,<br><em>फिर जरूरत हो तो फुल एक्सेस लें</em></h2>
+    <p>खरीदने से पहले उपलब्ध पंचायत डेटा और workflow देखें। Full Access लेने पर भुगतान सत्यापन के बाद निर्धारित account access सक्रिय किया जाता है।</p>
+  </div>
+
+  <div class="pricingCardPremium">
+    <div class="pricingMain">
+      <div class="pricingLabel">PanchayatX Full Access</div>
+      <div class="pricingAmount"><span>₹</span>4,999</div>
+      <div class="pricingPackage">उम्मीदवार / पंचायत पैकेज</div>
+      <p class="pricingDesc">एक ही जगह मतदाता खोज, house-wise work, voter slips, visit tracking, reports और अन्य उपलब्ध PanchayatX tools का access।</p>
+
+      <div class="pricingBenefits">
+        <div><i>✓</i><span><b>Assigned Panchayat Data</b><small>आपके account से जुड़ी पंचायत का उपलब्ध डेटा</small></span></div>
+        <div><i>✓</i><span><b>मोबाइल + वेब उपयोग</b><small>फोन और कंप्यूटर दोनों पर इस्तेमाल करें</small></span></div>
+        <div><i>✓</i><span><b>Verification के बाद Activation</b><small>भुगतान सत्यापन के बाद access सक्रिय होता है</small></span></div>
+      </div>
+    </div>
+
+    <div class="pricingAction">
+      <div class="pricingActionTop">
+        <span class="pricingSecure">✓ स्पष्ट कीमत</span>
+        <h3>फुल एक्सेस शुरू करें</h3>
+        <p>Package और लागू access details भुगतान से पहले दिखाई जाती हैं।</p>
+      </div>
+
+      <a class="pricingBuyBtn" href="/buy.html">फुल एक्सेस पाएं ₹4,999 <span>→</span></a>
+      <a class="pricingFreeBtn" href="/demo/">पहले पंचायत डेटा फ्री देखें</a>
+
+      <div class="pricingPolicy">
+        खरीदने से पहले हमारी <a href="/refund.html">Refund Policy</a> देखें।
+      </div>
+    </div>
+  </div>
+</section>
 <section class="section" id="how"><span class="eyebrow">आसान शुरुआत</span><h2>सिर्फ 3 स्टेप में शुरू करें</h2><div class="steps"><div class="step"><div class="num">1</div><h3>अपनी पंचायत का डेटा फ्री देखें</h3><p class="lead">सैंपल रिकॉर्ड से Search, Filters और Workflow देखें।</p></div><div class="step"><div class="num">2</div><h3>अपनी जानकारी दें</h3><p class="lead">अकाउंट बनाने के लिए उम्मीदवार और पंचायत की आवश्यक जानकारी दें।</p></div><div class="step"><div class="num">3</div><h3>भुगतान व एक्टिवेशन</h3><p class="lead">भुगतान पूरा करें और सत्यापन के लिए Transaction Reference जमा करें।</p></div></div></section>
 <section class="cta"><div><h2>अपनी पंचायत का काम डिजिटल करने के लिए तैयार हैं?</h2><p>अपनी पंचायत का डेटा फ्री देखें और PanchayatX का workflow समझें।</p></div><div class="actions" style="margin:0"><a class="btn light" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" style="background:#ffb52e;color:#24143e;box-shadow:none" href="/buy.html">Get Full Access</a></div></section></main>
 <footer class="footer"><div class="footerin"><div><b>PanchayatX</b><div class="small">Independent digital voter-list workflow software for authorised election teams.<br>Not an official government or Election Commission website.</div></div><div><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/refund.html">Refunds</a><a href="/delete-account.html">Delete Account</a><a href="/contact.html">Contact</a><div class="small">© 2026 PanchayatX. All rights reserved.</div></div></div></footer></body></html>
