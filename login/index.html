@@ -2200,7 +2200,7 @@ function voterPdfHeaderHtml(){
    <div class="gp">ग्राम पंचायत : ${e(h.gp)}</div>
    <div class="cand">${e(h.name)}</div>
    ${h.post?`<div class="candidatePost">${e(h.post)}</div>`:""}
-   <div class="area">पंचायत समिति : ${e(h.ps)} &nbsp; | &nbsp; जिला : ${e(h.district)}</div>
+   <div class="area">मतदाता सूची संदर्भ हेतु — कृपया विवरण सत्यापित करें।</div>
    <div class="civic">${e(h.message)}</div>
    ${h.number?`<div class="contactLine">संपर्क : ${e(h.number)}</div>`:""}
    <div class="title">मतदाता पर्ची</div>
@@ -2238,7 +2238,7 @@ async function makeWardGridPdf(list,filename,onProgress){
  const defaultMessage=h.message;
  const card=v=>`<div class="slip">
    <div class="candbox">
-    <div class="candtext"><div class="gp">ग्राम पंचायत : <strong>${e(gp)}</strong></div><div class="cname">${e(candName)}</div><div class="post">${e(post)}</div><div class="area">पंचायत समिति : ${e(ps)} | जिला : ${e(district)}</div><div class="msg">${e(defaultMessage)}</div>${mobile?`<div class="mobile">संपर्क : ${e(mobile)}</div>`:""}</div>
+    <div class="candtext"><div class="gp">ग्राम पंचायत : <strong>${e(gp)}</strong></div><div class="cname">${e(candName)}</div><div class="post">${e(post)}</div><div class="area">मतदाता सूची संदर्भ हेतु — कृपया विवरण सत्यापित करें।</div><div class="msg">${e(defaultMessage)}</div>${mobile?`<div class="mobile">संपर्क : ${e(mobile)}</div>`:""}</div>
     <div class="photo">${photo?`<img src="${e(photo)}" crossorigin="anonymous">`:"<div class='ph'>PHOTO</div>"}</div>
    </div>
    <div class="orange"><b>मतदाता पर्ची</b><span>मतदाता सूची संदर्भ</span></div>
