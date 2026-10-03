@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             builtInZoomControls = false
             displayZoomControls = false
             textZoom = 100
-            userAgentString = userAgentString + " PanchayatXAndroid/2.1"
+            userAgentString = userAgentString + " PanchayatXAndroid/2.2"
         }
 
         web.addJavascriptInterface(DownloadBridge(), "AndroidDownloader")
@@ -72,6 +72,11 @@ class MainActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 return handleNavigation(Uri.parse(url))
+            }
+
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+                injectMobileAuthLayout(view)
             }
         }
 
@@ -116,6 +121,39 @@ class MainActivity : AppCompatActivity() {
                 if (web.canGoBack()) web.goBack() else finish()
             }
         })
+    }
+
+    private fun injectMobileAuthLayout(view: WebView) {
+        val js = """
+            (function(){
+              try {
+                var vp=document.querySelector('meta[name="viewport"]');
+                if(vp) vp.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no');
+
+                if(!document.getElementById('px-android-mobile-css')){
+                  var style=document.createElement('style');
+                  style.id='px-android-mobile-css';
+                  style.textContent=[
+                    'body.authPage{min-height:100dvh!important;overflow-x:hidden!important;background:#fff!important}',
+                    'body.authPage header{height:58px!important;padding:0 16px!important;width:100%!important;box-sizing:border-box!important;box-shadow:0 1px 8px rgba(15,70,48,.06)!important}',
+                    'body.authPage .authHeaderRight,body.authPage .authHomeLink,body.authPage .authBackHome,body.authPage .authIntroPanel,body.authPage .signupIntroPanel{display:none!important}',
+                    'body.authPage .authBrand{pointer-events:none!important}',
+                    'body.authPage main#app{width:100%!important;max-width:none!important;min-height:calc(100dvh - 58px)!important;margin:0!important;padding:0!important;overflow-x:hidden!important}',
+                    'body.authPage .authShell,body.authPage .signupShell{display:block!important;width:100%!important;max-width:none!important;min-height:calc(100dvh - 58px)!important;margin:0!important}',
+                    'body.authPage .authLoginCard{width:100%!important;max-width:none!important;min-height:calc(100dvh - 58px)!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:28px 20px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;box-sizing:border-box!important}',
+                    'body.authPage .authLoginCard:before,body.authPage .signupPremiumCard:before{border-radius:0!important}',
+                    'body.authPage .signupPremiumCard{width:100%!important;max-width:none!important;min-height:calc(100dvh - 58px)!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:22px 16px 30px!important;box-sizing:border-box!important}',
+                    'body.authPage .signupFormGrid{grid-template-columns:1fr!important}',
+                    'body.authPage .signupField.signupFull{grid-column:auto!important}',
+                    'body.authPage .signupActions{grid-template-columns:1fr!important}',
+                    '@media(max-width:420px){body.authPage .authLoginCard{padding-left:18px!important;padding-right:18px!important}body.authPage .signupPremiumCard{padding-left:14px!important;padding-right:14px!important}}'
+                  ].join('');
+                  (document.head||document.documentElement).appendChild(style);
+                }
+              } catch(e) {}
+            })();
+        """.trimIndent()
+        view.evaluateJavascript(js, null)
     }
 
     private fun handleNavigation(uri: Uri): Boolean {
