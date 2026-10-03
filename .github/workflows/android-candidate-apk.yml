@@ -1,4 +1,4 @@
-name: Build Candidate Android APK
+name: Build PanchayatX Android APK
 
 on:
   workflow_dispatch:
@@ -30,12 +30,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace
-      - name: Upload test APK
+      - name: Build installable debug APK
+        run: |
+          gradle :app:assembleDebug --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/PanchayatX.apk
+      - name: Upload PanchayatX APK
         uses: actions/upload-artifact@v4
         with:
-          name: Panchayat-Digital-Candidate-Test-APK
-          path: android-candidate/app/build/outputs/apk/debug/app-debug.apk
+          name: PanchayatX-Android-APK
+          path: android-candidate/app/build/outputs/apk/debug/PanchayatX.apk
           if-no-files-found: error
           retention-days: 30

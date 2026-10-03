@@ -1,11 +1,16 @@
-# Panchayat Digital Candidate Android App
+# PanchayatX Candidate Android App
 
-V1 Android app shell for candidates. Super Admin remains web-only and the existing Supabase backend remains unchanged.
+Android APK shell for the PanchayatX candidate workspace.
 
-Current V1 uses the secured Candidate web dashboard inside an Android WebView, so the same login, panchayat_access authorization, voter search, Ward/Colony/House, A-Z and slip tools are available in one APK.
+The app opens the live secured PanchayatX candidate login:
+https://www.panchayatx.com/login/
 
-Security: no Supabase service-role or secret key is included in the Android source. Authorization remains enforced by Supabase RLS.
+V2 includes:
+- Candidate login and live PanchayatX dashboard
+- Photo/file upload support
+- Ward / House / Individual PDF downloads, including browser blob PDFs
+- WhatsApp, UPI, PhonePe, Paytm and other external-app links
+- Android back navigation
+- No Supabase service-role or secret key bundled in the APK
 
-Build: open the android-candidate folder in Android Studio and build an APK.
-
-Next: native/offline screens and portable-printer support.
+Most PanchayatX web updates appear in the APK without reinstalling it because the app uses the live website.
