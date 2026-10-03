@@ -966,7 +966,25 @@ async function load(userOverride=null){
      const pageSize=500;
      let expectedCount=0;
      for(let offset=0;;offset+=pageSize){
-       const {data:{session}}=await sb.auth.getSession(); if(!session?.access_token) throw new Error("Login session token missing"); const {data:payload,error:pageError}=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:session.access_token}});
+       let {data:{session}}=await sb.auth.getSession();
+       if(!session?.access_token){
+         const refreshed=await sb.auth.refreshSession();
+         session=refreshed?.data?.session||null;
+       }
+       if(!session?.access_token) throw new Error("Login session token missing");
+       let invokeResult=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:session.access_token}});
+       let payload=invokeResult.data;
+       let pageError=invokeResult.error;
+       const authFailed=pageError && (pageError?.context?.status===401 || /401|unauthorized|invalid session/i.test(String(pageError?.message||"")));
+       if(authFailed){
+         console.warn("Voter request session expired. Refreshing login session and retrying once…");
+         const refreshed=await sb.auth.refreshSession();
+         const freshSession=refreshed?.data?.session;
+         if(!freshSession?.access_token) throw pageError;
+         invokeResult=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:freshSession.access_token}});
+         payload=invokeResult.data;
+         pageError=invokeResult.error;
+       }
        if(pageError) throw pageError;
        if(payload?.error) throw new Error(payload.error);
        const rows=Array.isArray(payload?.voters)?payload.voters:[];
