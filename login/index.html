@@ -1380,41 +1380,10 @@ async function showUpgradePrompt(){
  dlg.innerHTML=`<div style="padding:18px">
   <div style="font-size:20px;font-weight:900;color:#075b43">🔓 Lifetime Full Access</div>
   <div class="muted" style="margin:5px 0 14px">एक बार का भुगतान: <b style="color:#17342c">₹${amount.toLocaleString("en-IN")}</b></div>
-  <button class="btn primary full" onclick="startOnlineLifetimePayment()">💳 Online Payment</button>
-  <button class="btn soft full" style="margin-top:9px" onclick="openManualPaymentDialog()">📱 PhonePe / Paytm / Manual UPI</button>
+  <button class="btn primary full" onclick="openManualPaymentDialog()">📱 Pay with PhonePe / Paytm</button>
   <button class="btn ghost full" style="margin-top:9px" onclick="fullAccessPayDlg.close()">बंद करें</button>
  </div>`;
  document.body.appendChild(dlg);dlg.showModal();
-}
-
-async function startOnlineLifetimePayment(){
- document.getElementById("fullAccessPayDlg")?.close();
- const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||4999;
- try{
-  if(!window.Razorpay){
-   await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://checkout.razorpay.com/v1/checkout.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Razorpay Checkout load नहीं हुआ"));document.head.appendChild(sc)});
-  }
-  const {data:{session}}=await sb.auth.getSession();
-  if(!session)throw new Error("Login session नहीं मिला");
-  const res=await fetch(SUPABASE_URL+"/functions/v1/create-lifetime-payment-order",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify({panchayat_id:currentAccess.panchayat_id})});
-  const order=await res.json();if(!res.ok)throw new Error(order.error||"Payment order नहीं बन सका");
-  const options={
-   key:order.key_id,amount:order.amount,currency:order.currency,name:"Panchayat Digital",description:"Lifetime Full Access",order_id:order.order_id,
-   prefill:{name:candidate?.candidate_name||candidate?.name||"",email:currentUser.email||"",contact:candidate?.mobile||""},
-   theme:{color:"#0b6b4f"},
-   handler:async function(resp){
-    try{
-     const {data:{session:sess}}=await sb.auth.getSession();
-     const vr=await fetch(SUPABASE_URL+"/functions/v1/verify-lifetime-payment",{method:"POST",headers:{Authorization:"Bearer "+sess.access_token,"Content-Type":"application/json"},body:JSON.stringify({...resp,panchayat_id:currentAccess.panchayat_id})});
-     const out=await vr.json();if(!vr.ok||!out.success)throw new Error(out.error||"Payment verification failed");
-     alert("🎉 Payment successful! Lifetime Full Access activate हो गया है।");
-     await load(currentUser);
-    }catch(err){alert("Payment हुआ हो सकता है, लेकिन verification पूरा नहीं हुआ: "+err.message+". कृपया payment ID सुरक्षित रखें और support से संपर्क करें।")}
-   },
-   modal:{ondismiss:function(){}}
-  };
-  const rz=new Razorpay(options);rz.on("payment.failed",function(r){alert("Payment failed: "+(r.error?.description||"कृपया दोबारा प्रयास करें।"))});rz.open();
- }catch(err){alert(err.message||"Payment शुरू नहीं हो सका।")}
 }
 
 const FULL_ACCESS_UPI_ID="9782781476@ybl";
@@ -1432,9 +1401,15 @@ function buildUpiPayQuery(){
  }).toString();
 }
 
-function openDirectUpiPayment(){
+function openDirectUpiPayment(appName){
  const q=buildUpiPayQuery();
- window.location.href="upi://pay?"+q;
+ const urls={
+   phonepe:"phonepe://pay?"+q,
+   paytm:"paytmmp://pay?"+q
+ };
+ const url=urls[appName];
+ if(!url)return;
+ window.location.href=url;
 }
 
 async function openManualPaymentDialog(){
@@ -1459,12 +1434,14 @@ async function openManualPaymentDialog(){
   <div style="font-size:20px;font-weight:900;color:#075b43">📱 UPI Payment</div>
   <div class="notice" style="margin-top:10px">
    <b>Lifetime Full Access — ₹${amount.toLocaleString("en-IN")}</b><br>
-   <span class="muted">नीचे Pay button दबाएँ। आपके phone का UPI app खुलेगा और payment details automatically fill होंगी।</span>
+   <span class="muted">नीचे PhonePe या Paytm चुनें। चुना हुआ payment app सीधे खुलेगा और payment details automatically fill होंगी।</span>
   </div>
-  <button class="btn primary full" style="margin-top:12px" onclick="openDirectUpiPayment()">💸 Pay ₹${amount.toLocaleString("en-IN")} via UPI</button>
-  <div class="muted" style="margin:9px 0 12px">PhonePe, Paytm, Google Pay या अन्य installed UPI app से payment करें। Payment app में recipient details verify करके payment complete करें। वापस आने के बाद नीचे UTR / Reference भरें।</div>
-  <label>Payment App</label>
-  <select id="manualPayMethod"><option value="phonepe">PhonePe</option><option value="paytm">Paytm</option><option value="other_upi">Other UPI</option><option value="cash">Cash</option></select>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px">
+   <button class="btn primary" onclick="document.getElementById('manualPayMethod').value='phonepe';openDirectUpiPayment('phonepe')">📱 PhonePe</button>
+   <button class="btn primary" onclick="document.getElementById('manualPayMethod').value='paytm';openDirectUpiPayment('paytm')">💳 Paytm</button>
+  </div>
+  <div class="muted" style="margin:9px 0 12px">Payment complete करने के बाद वापस आकर UTR / Reference और screenshot submit करें।</div>
+  <input id="manualPayMethod" type="hidden" value="phonepe">
   <label>UTR / Transaction ID / Reference</label>
   <input id="manualPayRef" placeholder="जैसे 432109876543" autocomplete="off">
   <label>Payment Date</label>
