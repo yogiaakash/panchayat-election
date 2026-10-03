@@ -176,6 +176,24 @@
 .pricingPolicy{text-align:center;margin-top:13px;color:#8a9691;font-size:10.5px}.pricingPolicy a{color:#087443;font-weight:800}
 @media(max-width:900px){.pricingCardPremium{grid-template-columns:1fr}.pricingMain{padding:34px 30px 25px}.pricingAction{margin:0 25px 25px}.pricingBenefits{grid-template-columns:1fr 1fr}.pricingHead{text-align:left}.pricingHead>p{margin-left:0}}
 @media(max-width:620px){.pricingPremium{padding-top:54px!important;padding-bottom:58px!important}.pricingHead h2{font-size:32px}.pricingHead>p{font-size:14px}.pricingMain{padding:28px 20px 20px}.pricingAmount{font-size:54px}.pricingBenefits{grid-template-columns:1fr}.pricingAction{margin:0 16px 16px;padding:22px 18px}.pricingAction h3{font-size:22px}}
+</style><style id="premium-how-section">
+.howPremium{padding-top:76px!important;padding-bottom:80px!important}
+.howHead{text-align:center;max-width:820px;margin:0 auto 34px}
+.howBadge{display:inline-flex;padding:8px 14px;border-radius:999px;background:#e8f5ed;border:1px solid #cfe6d8;color:#087443;font-size:13px;font-weight:800;margin-bottom:13px}
+.howHead h2{margin:0;color:#153d32;font-size:clamp(34px,4vw,46px);line-height:1.15;letter-spacing:-.7px}
+.howHead p{max-width:720px;margin:13px auto 0;color:#6c7974;font-size:15px;line-height:1.7}
+.howStepsPremium{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1150px;margin:0 auto}
+.howStepCard{position:relative;min-height:285px;padding:26px 24px 22px;border:1px solid #dce7df;border-radius:21px;background:#fff;box-shadow:0 9px 26px rgba(15,70,48,.055);display:flex;flex-direction:column;transition:.2s ease}
+.howStepCard:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(15,70,48,.10);border-color:#bfd7c7}
+.howStepCard.featured{background:linear-gradient(180deg,#f8fffb,#eff8f3);border-color:#b9d8c4}
+.howStepTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.howStepNum{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#087443;color:#fff;font-size:14px;font-weight:900;box-shadow:0 7px 16px rgba(8,116,67,.18)}
+.howStepIcon{width:43px;height:43px;border-radius:13px;background:#eaf5ef;display:grid;place-items:center;font-size:19px}
+.howStepCard h3{margin:0 0 10px;color:#173e32;font-size:21px;line-height:1.3}
+.howStepCard>p{margin:0;color:#687670;font-size:14px;line-height:1.65}
+.howStepResult{margin-top:auto;padding-top:16px;border-top:1px solid #edf2ee;color:#087443;font-size:11.5px;font-weight:800}
+@media(max-width:850px){.howStepsPremium{grid-template-columns:1fr}.howStepCard{min-height:0}.howHead{text-align:left}.howHead p{margin-left:0}}
+@media(max-width:620px){.howPremium{padding-top:54px!important;padding-bottom:58px!important}.howHead h2{font-size:32px}.howHead p{font-size:14px}.howStepCard{padding:21px 19px}}
 </style></head><body>
 <script>if(location.hash&&(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1))||location.hash.includes("access_token="))){location.replace("./reset-password.html"+location.hash)}else if(new URLSearchParams(location.search).has("code")){location.replace("./reset-password.html"+location.search)}</script>
 <nav class="nav"><div class="navin"><a class="logo" href="/">Panchayat<b>X</b></a><div class="links"><a href="#features">फीचर्स</a><a href="#how">कैसे काम करता है</a><a href="#pricing">कीमत</a><a href="/about.html">हमारे बारे में</a><a href="/contact.html">संपर्क</a><a class="btn outline" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" href="/login/">लॉगिन</a></div></div></nav>
@@ -350,6 +368,44 @@
     </div>
   </div>
 </section>
-<section class="section" id="how"><span class="eyebrow">आसान शुरुआत</span><h2>सिर्फ 3 स्टेप में शुरू करें</h2><div class="steps"><div class="step"><div class="num">1</div><h3>अपनी पंचायत का डेटा फ्री देखें</h3><p class="lead">सैंपल रिकॉर्ड से Search, Filters और Workflow देखें।</p></div><div class="step"><div class="num">2</div><h3>अपनी जानकारी दें</h3><p class="lead">अकाउंट बनाने के लिए उम्मीदवार और पंचायत की आवश्यक जानकारी दें।</p></div><div class="step"><div class="num">3</div><h3>भुगतान व एक्टिवेशन</h3><p class="lead">भुगतान पूरा करें और सत्यापन के लिए Transaction Reference जमा करें।</p></div></div></section>
+<section class="section howPremium" id="how">
+  <div class="howHead">
+    <span class="howBadge">आसान शुरुआत</span>
+    <h2>सिर्फ 3 आसान स्टेप में शुरू करें</h2>
+    <p>पहले अपना account बनाएं, फिर अपनी पंचायत का डेटा फ्री में देखें। पसंद आने पर एक बार payment करके Lifetime Full Access लें।</p>
+  </div>
+
+  <div class="howStepsPremium">
+    <article class="howStepCard">
+      <div class="howStepTop">
+        <span class="howStepNum">1</span>
+        <span class="howStepIcon">👤</span>
+      </div>
+      <h3>अपना अकाउंट बनाएं</h3>
+      <p>उम्मीदवार की जरूरी जानकारी भरें और अपनी पंचायत चुनें। इसके बाद आपका PanchayatX account तैयार किया जाता है।</p>
+      <div class="howStepResult">उम्मीदवार जानकारी + पंचायत चयन</div>
+    </article>
+
+    <article class="howStepCard featured">
+      <div class="howStepTop">
+        <span class="howStepNum">2</span>
+        <span class="howStepIcon">📱</span>
+      </div>
+      <h3>अपनी पंचायत का डेटा फ्री देखें</h3>
+      <p>अपनी पंचायत के उपलब्ध डेटा के साथ ऐप को समझें, Search, Filters और दूसरे tools को देखें और वास्तविक workflow का अनुभव लें।</p>
+      <div class="howStepResult">पहले देखें • समझें • इस्तेमाल करें</div>
+    </article>
+
+    <article class="howStepCard">
+      <div class="howStepTop">
+        <span class="howStepNum">3</span>
+        <span class="howStepIcon">✓</span>
+      </div>
+      <h3>एक बार भुगतान, Lifetime Access</h3>
+      <p>Full Access के लिए ₹4,999 का एक बार भुगतान करें। भुगतान सत्यापन के बाद आपके account पर Lifetime Full Access सक्रिय किया जाता है।</p>
+      <div class="howStepResult">₹4,999 • One-Time Payment • Lifetime Access</div>
+    </article>
+  </div>
+</section>
 <section class="cta"><div><h2>अपनी पंचायत का काम डिजिटल करने के लिए तैयार हैं?</h2><p>अपनी पंचायत का डेटा फ्री देखें और PanchayatX का workflow समझें।</p></div><div class="actions" style="margin:0"><a class="btn light" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" style="background:#ffb52e;color:#24143e;box-shadow:none" href="/buy.html">Get Full Access</a></div></section></main>
 <footer class="footer"><div class="footerin"><div><b>PanchayatX</b><div class="small">Independent digital voter-list workflow software for authorised election teams.<br>Not an official government or Election Commission website.</div></div><div><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/refund.html">Refunds</a><a href="/delete-account.html">Delete Account</a><a href="/contact.html">Contact</a><div class="small">© 2026 PanchayatX. All rights reserved.</div></div></div></footer></body></html>
