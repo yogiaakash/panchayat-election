@@ -1769,8 +1769,7 @@ function azPrintHtml(list,title){
    <tr><th>क्रम</th><th>नाम</th><th>English</th><th>पिता/पति</th><th>EPIC</th><th>Ward</th><th>House</th><th>Age</th></tr>
   </thead>
   <tbody>${list.map(v=>`<tr><td>${e(v.serial_no||"")}</td><td>${e(v.name||"")}</td><td>${e(v.en||azEnglishName(v))}</td><td>${e(v.relative_name||"")}</td><td>${e(v.epic||"")}</td><td>${e(v.ward||"")}</td><td>${e(effectiveHouse(v)||"")}</td><td>${e(v.age||"")}</td></tr>`).join("")}</tbody>
- </table><!-- deploy-trigger: 2026-10-03-price-test -->
-</body></html>`
+ </table></body></html>`
 }
 function openAZPrint(list,title){const w=open("","_blank");if(!w){alert("Popup blocked. Browser में popup allow करें।");return}w.document.write(azPrintHtml(list,title));w.document.close();setTimeout(()=>w.print(),350)}
 function generateAZPdfExact(mode){
