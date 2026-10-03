@@ -194,6 +194,44 @@
 .howStepResult{margin-top:auto;padding-top:16px;border-top:1px solid #edf2ee;color:#087443;font-size:11.5px;font-weight:800}
 @media(max-width:850px){.howStepsPremium{grid-template-columns:1fr}.howStepCard{min-height:0}.howHead{text-align:left}.howHead p{margin-left:0}}
 @media(max-width:620px){.howPremium{padding-top:54px!important;padding-bottom:58px!important}.howHead h2{font-size:32px}.howHead p{font-size:14px}.howStepCard{padding:21px 19px}}
+</style><style id="premium-cta-footer">
+.ctaPremium{position:relative;overflow:hidden;max-width:1180px;margin:24px auto 64px;border:1px solid #d6e7dc;border-radius:30px;background:linear-gradient(135deg,#fbfefc 0%,#f4faf6 56%,#eef8f1 100%);box-shadow:0 12px 32px rgba(17,61,45,.06)}
+.ctaPremiumInner{position:relative;z-index:4;display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:center;padding:56px 64px}
+.ctaPremiumCopy{max-width:680px}
+.ctaAccent{display:block;width:70px;height:5px;border-radius:999px;background:#0b7c4d;margin-bottom:20px}
+.ctaPremiumCopy h2{margin:0;color:#123d32;font-size:clamp(34px,3.6vw,50px);line-height:1.13;letter-spacing:-1px}
+.ctaPremiumCopy p{margin:17px 0 0;color:#6c7974;font-size:17px;line-height:1.65}
+.ctaPremiumActions{display:flex;flex-direction:column;gap:16px;align-items:stretch}
+.ctaPrimaryBtn,.ctaSecondaryBtn{display:grid;grid-template-columns:36px 1fr 24px;align-items:center;gap:12px;min-height:66px;padding:0 22px;border-radius:18px;text-decoration:none;font-size:16px;font-weight:900;box-shadow:0 14px 28px rgba(0,0,0,.11);transition:.2s ease}
+.ctaPrimaryBtn{color:#fff;background:linear-gradient(135deg,#ff9913,#ef6d00)}
+.ctaSecondaryBtn{color:#fff;background:linear-gradient(135deg,#0b8d55,#056c40)}
+.ctaPrimaryBtn:hover,.ctaSecondaryBtn:hover{transform:translateY(-2px);box-shadow:0 18px 32px rgba(0,0,0,.15)}
+.ctaBtnIcon{display:grid;place-items:center;width:34px;height:34px;border-right:1px solid rgba(255,255,255,.35);padding-right:10px;font-size:18px}
+.ctaPrimaryBtn b,.ctaSecondaryBtn b{font-size:22px;text-align:right}
+.ctaScenery{position:absolute;border-radius:50%;z-index:1;pointer-events:none}
+.ctaHillOne{width:520px;height:230px;right:-120px;bottom:-140px;background:#b9dfc5}
+.ctaHillTwo{width:420px;height:180px;left:-90px;bottom:-135px;background:#d8eddf}
+.ctaVillage{position:absolute;right:34px;bottom:18px;z-index:2;display:flex;gap:8px;align-items:end;color:#89bd99;opacity:.55;font-size:32px}
+.ctaVillage span:nth-child(2){font-size:25px}.ctaVillage span:nth-child(3){font-size:20px}.ctaVillage span:nth-child(4){font-size:42px}
+
+.footerPremium{position:relative;overflow:hidden;background:linear-gradient(135deg,#063a2c 0%,#004a37 52%,#003628 100%);color:#dce9e3}
+.footerPremiumInner{position:relative;z-index:3;max-width:1180px;margin:0 auto;padding:58px 26px 54px;display:grid;grid-template-columns:1fr 1px 1fr;gap:42px;align-items:center}
+.footerBrandRow{display:flex;align-items:center;gap:12px}.footerBrandRow b{font-size:25px;color:#fff}.footerLeaf{font-size:22px;color:#84d69f;transform:rotate(45deg)}
+.footerBrandBlock p{margin:12px 0 0;color:#b9cec5;font-size:13px;line-height:1.65;max-width:520px}
+.footerDivider{width:1px;height:96px;background:rgba(255,255,255,.2)}
+.footerLinksBlock{display:flex;flex-direction:column;gap:18px}.footerLinks{display:flex;flex-wrap:wrap;gap:18px}.footerLinks a{color:#fff;text-decoration:none;font-size:13px;transition:.2s ease}.footerLinks a:hover{color:#9be0b3}.footerCopyright{color:#9fb8ae;font-size:12px}
+.footerWave{position:absolute;left:-6%;width:112%;border-radius:50%;pointer-events:none}.footerWaveOne{height:180px;bottom:-115px;background:rgba(6,91,65,.55);transform:rotate(2deg)}.footerWaveTwo{height:150px;bottom:-110px;background:rgba(4,63,47,.7);transform:rotate(-3deg)}
+
+@media(max-width:900px){
+  .ctaPremium{margin:18px 18px 54px}.ctaPremiumInner{grid-template-columns:1fr;padding:44px 32px;gap:28px}.ctaPremiumActions{max-width:420px}
+  .footerPremiumInner{grid-template-columns:1fr;gap:24px}.footerDivider{width:100%;height:1px}
+}
+@media(max-width:600px){
+  .ctaPremium{border-radius:22px}.ctaPremiumInner{padding:34px 20px}.ctaPremiumCopy h2{font-size:32px}.ctaPremiumCopy p{font-size:14px}
+  .ctaPrimaryBtn,.ctaSecondaryBtn{min-height:58px;font-size:14px;padding:0 16px;grid-template-columns:30px 1fr 20px}
+  .ctaBtnIcon{width:28px;height:28px;font-size:15px}.ctaVillage{display:none}
+  .footerPremiumInner{padding:42px 20px}.footerLinks{gap:12px 16px}.footerBrandRow b{font-size:22px}
+}
 </style></head><body>
 <script>if(location.hash&&(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1))||location.hash.includes("access_token="))){location.replace("./reset-password.html"+location.hash)}else if(new URLSearchParams(location.search).has("code")){location.replace("./reset-password.html"+location.search)}</script>
 <nav class="nav"><div class="navin"><a class="logo" href="/">Panchayat<b>X</b></a><div class="links"><a href="#features">फीचर्स</a><a href="#how">कैसे काम करता है</a><a href="#pricing">कीमत</a><a href="/about.html">हमारे बारे में</a><a href="/contact.html">संपर्क</a><a class="btn outline" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" href="/login/">लॉगिन</a></div></div></nav>
@@ -407,5 +445,43 @@
     </article>
   </div>
 </section>
-<section class="cta"><div><h2>अपनी पंचायत का काम डिजिटल करने के लिए तैयार हैं?</h2><p>अपनी पंचायत का डेटा फ्री देखें और PanchayatX का workflow समझें।</p></div><div class="actions" style="margin:0"><a class="btn light" href="/demo/">पंचायत डेटा फ्री देखें</a><a class="btn" style="background:#ffb52e;color:#24143e;box-shadow:none" href="/buy.html">Get Full Access</a></div></section></main>
-<footer class="footer"><div class="footerin"><div><b>PanchayatX</b><div class="small">Independent digital voter-list workflow software for authorised election teams.<br>Not an official government or Election Commission website.</div></div><div><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/refund.html">Refunds</a><a href="/delete-account.html">Delete Account</a><a href="/contact.html">Contact</a><div class="small">© 2026 PanchayatX. All rights reserved.</div></div></div></footer></body></html>
+<section class="ctaPremium">
+  <div class="ctaScenery ctaHillOne"></div>
+  <div class="ctaScenery ctaHillTwo"></div>
+  <div class="ctaVillage" aria-hidden="true">
+    <span>⌂</span><span>⌂</span><span>⌂</span><span>♣</span>
+  </div>
+  <div class="ctaPremiumInner">
+    <div class="ctaPremiumCopy">
+      <span class="ctaAccent"></span>
+      <h2>अपनी पंचायत का काम डिजिटल करने के लिए तैयार हैं?</h2>
+      <p>अपनी पंचायत का डेटा फ्री देखें और PanchayatX का workflow समझें।</p>
+    </div>
+    <div class="ctaPremiumActions">
+      <a class="ctaPrimaryBtn" href="/demo/"><span class="ctaBtnIcon">◉</span><span>पंचायत डेटा फ्री देखें</span><b>→</b></a>
+      <a class="ctaSecondaryBtn" href="/buy.html"><span class="ctaBtnIcon">♛</span><span>Get Full Access</span><b>→</b></a>
+    </div>
+  </div>
+</section></main>
+<footer class="footerPremium">
+  <div class="footerWave footerWaveOne"></div>
+  <div class="footerWave footerWaveTwo"></div>
+  <div class="footerPremiumInner">
+    <div class="footerBrandBlock">
+      <div class="footerBrandRow"><span class="footerLeaf">◆</span><b>PanchayatX</b></div>
+      <p>Independent digital voter-list workflow software for authorised election teams.<br>Not an official government or Election Commission website.</p>
+    </div>
+    <div class="footerDivider"></div>
+    <div class="footerLinksBlock">
+      <nav class="footerLinks">
+        <a href="/about.html">About</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/refund.html">Refunds</a>
+        <a href="/delete-account.html">Delete Account</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+      <div class="footerCopyright">© 2026 PanchayatX. All rights reserved.</div>
+    </div>
+  </div>
+</footer></body></html>
