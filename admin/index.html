@@ -27,12 +27,117 @@ app.innerHTML=`<div id="adminShell"><div class="adminnav"><button id="anCreate" 
 <label style="display:flex;gap:9px;align-items:center;margin-top:12px"><input id=replaceExisting type=checkbox checked style="width:auto"> Replace existing voter list (पुराना voter data हटाकर नई list डालें)</label>
 <button style="margin-top:12px" onclick="importExcel()">Replace / Import Voters</button><p id=istatus></p></div>
 </section>
-<section id="apManage" class="adminpane"><div class=card><h2>Live Candidates</h2><div style="overflow:auto"><table><tr><th>Name</th><th>Panchayat</th><th>Payment</th><th>Status</th><th>Expiry</th><th>Manage</th></tr>${(c||[]).map(x=>`<tr><td><b>${esc(x.hindi_name||x.name)}</b><br><span class="muted">${esc(x.mobile||"")}</span></td><td>${esc(x.gram_panchayat)}</td><td>${esc(x.payment_status)}</td><td><span class="${x.active?"good":"bad"}">${x.active?"ACTIVE":"INACTIVE"}</span></td><td>${esc(x.subscription_expiry||"-")}</td><td style="min-width:250px"><button style="width:auto;padding:8px 10px;margin:2px" onclick=\'manageCandidate(${JSON.stringify(JSON.stringify(x))})\'>Edit / Status</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'photo\')">Photo</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'symbol\')">Symbol</button><button style="width:auto;padding:8px 10px;margin:2px" onclick="quickBrand(\'${x.id}\',\'banner\')">Banner</button><button style="width:auto;padding:8px 10px;margin:2px;background:#b42318" onclick='deleteCandidate(${JSON.stringify(JSON.stringify(x))})'>Delete Profile</button></td></tr>`).join("")}</table></div></div>
+<section id="apManage" class="adminpane">
+ <div class="card">
+  <div class="row" style="align-items:flex-end;gap:12px;flex-wrap:wrap">
+   <div style="flex:1;min-width:220px">
+    <h2 style="margin-bottom:5px">Candidate Users</h2>
+    <p class="muted" style="margin:0">Self-signup और existing candidate accounts की complete directory</p>
+   </div>
+   <div style="min-width:260px">
+    <label style="margin-top:0">Search Candidate</label>
+    <input id="candidateUserSearch" placeholder="Name / Mobile / Email / Panchayat" oninput="filterCandidateUsers()">
+   </div>
+  </div>
+  <div id="candidateUserSummary" class="notice" style="margin-top:14px">Loading candidate users…</div>
+  <div id="candidateUserList" style="overflow:auto;margin-top:12px">Loading…</div>
+ </div>
 </section>
 <section id="apRequests" class="adminpane"><div class="card"><h2>Pending Purchases</h2><div id="requestList">Loading…</div></div></section><section id="apTools" class="adminpane"><div class="card"><h2>Admin Tools</h2><p class="muted">Candidate management shortcuts</p><div class="grid"><button onclick="showAdminTab('manage')">Manage / Edit Candidate</button><button onclick="showAdminTab('voters')">Replace Voter List</button><button onclick="showAdminTab('create')">Create Candidate Login</button><button onclick="testLifetimeAccess()">🧪 Test Lifetime Access</button><button onclick="sb.auth.signOut().then(login)">Logout</button></div></div></section><button onclick="sb.auth.signOut().then(login)">Logout</button></div>`;
  initHierarchy();
 }
-function showAdminTab(k){["create","voters","manage","requests","tools"].forEach(x=>{document.getElementById("ap"+x[0].toUpperCase()+x.slice(1))?.classList.toggle("active",x===k);document.getElementById("an"+x[0].toUpperCase()+x.slice(1))?.classList.toggle("active",x===k)});if(k==="create")initHierarchy();if(k==="requests"){const b=document.getElementById("requestList");if(b)b.innerHTML="Loading purchase requests…";loadRequests()}}
+let adminCandidateUsers=[];
+function showAdminTab(k){
+ ["create","voters","manage","requests","tools"].forEach(x=>{
+   document.getElementById("ap"+x[0].toUpperCase()+x.slice(1))?.classList.toggle("active",x===k);
+   document.getElementById("an"+x[0].toUpperCase()+x.slice(1))?.classList.toggle("active",x===k)
+ });
+ if(k==="create")initHierarchy();
+ if(k==="manage")loadCandidateUsers();
+ if(k==="requests"){
+   const b=document.getElementById("requestList");
+   if(b)b.innerHTML="Loading purchase requests…";
+   loadRequests()
+ }
+}
+async function loadCandidateUsers(){
+ const box=document.getElementById("candidateUserList"),summary=document.getElementById("candidateUserSummary");
+ if(!box||!summary)return;
+ box.innerHTML="Loading candidate users…";
+ summary.textContent="Loading candidate users…";
+ const [{data:profiles,error:profileError},{data:accessRows,error:accessError}]=await Promise.all([
+   sb.from("candidate_profiles").select("*").order("created_at",{ascending:false}),
+   sb.from("panchayat_access").select("user_id,panchayat_id,access_level,status,expires_at,created_at").order("created_at",{ascending:false})
+ ]);
+ if(profileError||accessError){
+   const err=profileError||accessError;
+   box.innerHTML='<div class="bad">Candidate users load नहीं हुए: '+esc(err.message||err)+'</div>';
+   summary.textContent="Load failed";
+   return;
+ }
+ const accessByUser=new Map();
+ for(const row of (accessRows||[])){
+   if(!accessByUser.has(String(row.user_id))) accessByUser.set(String(row.user_id),row);
+ }
+ adminCandidateUsers=(profiles||[]).map(p=>({...p,_access:accessByUser.get(String(p.user_id))||null}));
+ renderCandidateUsers(adminCandidateUsers);
+}
+function filterCandidateUsers(){
+ const q=String(document.getElementById("candidateUserSearch")?.value||"").trim().toLowerCase();
+ if(!q){renderCandidateUsers(adminCandidateUsers);return}
+ const rows=adminCandidateUsers.filter(x=>[
+   x.candidate_name,x.candidate_name_hindi,x.mobile,x.whatsapp,x.email,
+   x.district,x.panchayat_samiti,x.gram_panchayat,
+   x._access?.access_level,x._access?.status
+ ].some(v=>String(v||"").toLowerCase().includes(q)));
+ renderCandidateUsers(rows);
+}
+function renderCandidateUsers(rows){
+ const box=document.getElementById("candidateUserList"),summary=document.getElementById("candidateUserSummary");
+ if(!box||!summary)return;
+ const total=adminCandidateUsers.length;
+ const full=adminCandidateUsers.filter(x=>["lifetime","paid","admin","full"].includes(String(x._access?.access_level||"").toLowerCase())&&String(x._access?.status||"active").toLowerCase()==="active").length;
+ const free=adminCandidateUsers.filter(x=>String(x._access?.access_level||"free").toLowerCase()==="free").length;
+ summary.innerHTML='<b>'+total+' Candidate Users</b> &nbsp; • &nbsp; Full Access: <b>'+full+'</b> &nbsp; • &nbsp; Free: <b>'+free+'</b>';
+ if(!rows.length){
+   box.innerHTML='<div class="muted" style="padding:18px 4px">No matching candidate users.</div>';
+   return;
+ }
+ box.innerHTML=`<table>
+  <tr>
+   <th>Candidate Name</th>
+   <th>Hindi Name</th>
+   <th>Mobile</th>
+   <th>WhatsApp</th>
+   <th>Email</th>
+   <th>District</th>
+   <th>Panchayat Samiti</th>
+   <th>Gram Panchayat</th>
+   <th>Access Level</th>
+   <th>Status</th>
+  </tr>
+  ${rows.map(x=>{
+    const a=x._access||{};
+    const level=String(a.access_level||"free").toUpperCase();
+    const status=String(a.status||"active").toUpperCase();
+    const levelClass=["LIFETIME","PAID","ADMIN","FULL"].includes(level)?"good":"";
+    const statusClass=status==="ACTIVE"?"good":"bad";
+    return `<tr>
+      <td><b>${esc(x.candidate_name||"-")}</b></td>
+      <td><b>${esc(x.candidate_name_hindi||"-")}</b></td>
+      <td>${esc(x.mobile||"-")}</td>
+      <td>${esc(x.whatsapp||"-")}</td>
+      <td>${esc(x.email||"-")}</td>
+      <td>${esc(x.district||"-")}</td>
+      <td>${esc(x.panchayat_samiti||"-")}</td>
+      <td><b>${esc(x.gram_panchayat||"-")}</b></td>
+      <td class="${levelClass}">${esc(level)}</td>
+      <td class="${statusClass}">${esc(status)}</td>
+    </tr>`;
+  }).join("")}
+ </table>`;
+}
+
 async function loadRequests(){
  const box=document.getElementById("requestList");if(!box)return;
  const [{data:purchase,error:purchaseError},{data:manual,error:manualError}]=await Promise.all([
