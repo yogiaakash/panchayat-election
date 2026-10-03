@@ -62,12 +62,24 @@
   border-radius:0!important;
   background:#f7f2e8!important;
 }
+.visual.heroPhoto:before,
+.visual.heroPhoto::before,
+.visual.heroPhoto:after,
+.visual.heroPhoto::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+}
 .heroPhotoImg{
+  position:relative!important;
+  z-index:5!important;
   width:100%!important;
   height:100%!important;
   display:block!important;
   object-fit:cover!important;
   object-position:center center!important;
+  opacity:1!important;
+  visibility:visible!important;
 }
 @media(max-width:1050px){
   .visual.heroPhoto{height:auto!important;min-height:0!important;margin:18px 0 0!important}
