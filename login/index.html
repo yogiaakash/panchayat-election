@@ -1432,26 +1432,9 @@ function buildUpiPayQuery(){
  }).toString();
 }
 
-function openPaymentApp(appName){
+function openDirectUpiPayment(){
  const q=buildUpiPayQuery();
- const urls={
-   phonepe:"phonepe://pay?"+q,
-   paytm:"paytmmp://pay?"+q,
-   upi:"upi://pay?"+q
- };
- const url=urls[appName]||urls.upi;
- window.location.href=url;
-}
-
-async function copyReceiverNumber(){
- const n=FULL_ACCESS_RECEIVER_PHONE;
- try{await navigator.clipboard.writeText(n);alert("Payment number copy हो गया: "+n)}
- catch(_){prompt("इस नंबर को copy करें",n)}
-}
-async function copyUpiId(){
- const id=FULL_ACCESS_UPI_ID;
- try{await navigator.clipboard.writeText(id);alert("UPI ID copy हो गई: "+id)}
- catch(_){prompt("इस UPI ID को copy करें",id)}
+ window.location.href="upi://pay?"+q;
 }
 
 async function openManualPaymentDialog(){
@@ -1473,19 +1456,13 @@ async function openManualPaymentDialog(){
   document.body.appendChild(dlg);dlg.showModal();return;
  }
  dlg.innerHTML=`<div style="padding:18px">
-  <div style="font-size:20px;font-weight:900;color:#075b43">📱 Manual UPI Payment</div>
+  <div style="font-size:20px;font-weight:900;color:#075b43">📱 UPI Payment</div>
   <div class="notice" style="margin-top:10px">
-   <b>Pay ₹${amount.toLocaleString("en-IN")}</b><br>
-   UPI ID:<br><span style="font-size:20px;font-weight:900;letter-spacing:.3px">${FULL_ACCESS_UPI_ID}</span><br>
-   <span class="muted">Phone: ${FULL_ACCESS_RECEIVER_PHONE}</span>
+   <b>Lifetime Full Access — ₹${amount.toLocaleString("en-IN")}</b><br>
+   <span class="muted">नीचे Pay button दबाएँ। आपके phone का UPI app खुलेगा और payment details automatically fill होंगी।</span>
   </div>
-  <div class="grid2" style="margin-top:10px">
-   <button class="btn soft" onclick="openPaymentApp('phonepe')">📱 Pay with PhonePe</button>
-   <button class="btn soft" onclick="openPaymentApp('paytm')">📱 Pay with Paytm</button>
-   <button class="btn soft" onclick="openPaymentApp('upi')">💸 Other UPI App</button>
-   <button class="btn soft" onclick="copyUpiId()">📋 Copy UPI ID</button>
-  </div>
-  <div class="muted" style="margin:9px 0 12px">Payment button से ₹${amount.toLocaleString("en-IN")} और UPI ID automatically fill होंगे। Pay करने से पहले recipient details verify कर लें। Payment के बाद नीचे UTR / Reference भरें।</div>
+  <button class="btn primary full" style="margin-top:12px" onclick="openDirectUpiPayment()">💸 Pay ₹${amount.toLocaleString("en-IN")} via UPI</button>
+  <div class="muted" style="margin:9px 0 12px">PhonePe, Paytm, Google Pay या अन्य installed UPI app से payment करें। Payment app में recipient details verify करके payment complete करें। वापस आने के बाद नीचे UTR / Reference भरें।</div>
   <label>Payment App</label>
   <select id="manualPayMethod"><option value="phonepe">PhonePe</option><option value="paytm">Paytm</option><option value="other_upi">Other UPI</option><option value="cash">Cash</option></select>
   <label>UTR / Transaction ID / Reference</label>
