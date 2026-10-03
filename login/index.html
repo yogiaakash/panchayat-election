@@ -1372,7 +1372,24 @@ async function showUpgradePrompt(){
  const {data:pay}=await sb.from("lifetime_payment_records").select("*").eq("user_id",currentUser.id).eq("panchayat_id",currentAccess.panchayat_id).eq("status","paid").limit(1).maybeSingle();
  if(pay){alert("आपके account में Lifetime Full Access पहले से active है।");return}
  const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||4999;
- if(!confirm("🔓 Lifetime Full Access\\n\\nएक बार का भुगतान: ₹"+amount.toLocaleString("en-IN")+"\\n\\nक्या आप payment के लिए आगे बढ़ना चाहते हैं?"))return;
+ let dlg=document.getElementById("fullAccessPayDlg");
+ if(dlg)dlg.remove();
+ dlg=document.createElement("dialog");
+ dlg.id="fullAccessPayDlg";
+ dlg.style.cssText="border:0;border-radius:18px;padding:0;max-width:420px;width:calc(100% - 28px);box-shadow:0 22px 70px #0003";
+ dlg.innerHTML=`<div style="padding:18px">
+  <div style="font-size:20px;font-weight:900;color:#075b43">🔓 Lifetime Full Access</div>
+  <div class="muted" style="margin:5px 0 14px">एक बार का भुगतान: <b style="color:#17342c">₹${amount.toLocaleString("en-IN")}</b></div>
+  <button class="btn primary full" onclick="startOnlineLifetimePayment()">💳 Online Payment</button>
+  <button class="btn soft full" style="margin-top:9px" onclick="openManualPaymentDialog()">📱 PhonePe / Paytm / Manual UPI</button>
+  <button class="btn ghost full" style="margin-top:9px" onclick="fullAccessPayDlg.close()">बंद करें</button>
+ </div>`;
+ document.body.appendChild(dlg);dlg.showModal();
+}
+
+async function startOnlineLifetimePayment(){
+ document.getElementById("fullAccessPayDlg")?.close();
+ const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||4999;
  try{
   if(!window.Razorpay){
    await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://checkout.razorpay.com/v1/checkout.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Razorpay Checkout load नहीं हुआ"));document.head.appendChild(sc)});
@@ -1383,7 +1400,7 @@ async function showUpgradePrompt(){
   const order=await res.json();if(!res.ok)throw new Error(order.error||"Payment order नहीं बन सका");
   const options={
    key:order.key_id,amount:order.amount,currency:order.currency,name:"Panchayat Digital",description:"Lifetime Full Access",order_id:order.order_id,
-   prefill:{name:candidate?.candidate_name||"",email:currentUser.email||"",contact:candidate?.mobile||""},
+   prefill:{name:candidate?.candidate_name||candidate?.name||"",email:currentUser.email||"",contact:candidate?.mobile||""},
    theme:{color:"#0b6b4f"},
    handler:async function(resp){
     try{
@@ -1391,7 +1408,7 @@ async function showUpgradePrompt(){
      const vr=await fetch(SUPABASE_URL+"/functions/v1/verify-lifetime-payment",{method:"POST",headers:{Authorization:"Bearer "+sess.access_token,"Content-Type":"application/json"},body:JSON.stringify({...resp,panchayat_id:currentAccess.panchayat_id})});
      const out=await vr.json();if(!vr.ok||!out.success)throw new Error(out.error||"Payment verification failed");
      alert("🎉 Payment successful! Lifetime Full Access activate हो गया है।");
-     await load();
+     await load(currentUser);
     }catch(err){alert("Payment हुआ हो सकता है, लेकिन verification पूरा नहीं हुआ: "+err.message+". कृपया payment ID सुरक्षित रखें और support से संपर्क करें।")}
    },
    modal:{ondismiss:function(){}}
@@ -1399,6 +1416,94 @@ async function showUpgradePrompt(){
   const rz=new Razorpay(options);rz.on("payment.failed",function(r){alert("Payment failed: "+(r.error?.description||"कृपया दोबारा प्रयास करें।"))});rz.open();
  }catch(err){alert(err.message||"Payment शुरू नहीं हो सका।")}
 }
+
+function openPaymentApp(appName){
+ const schemes={phonepe:"phonepe://",paytm:"paytmmp://"};
+ const url=schemes[appName];
+ if(!url)return;
+ window.location.href=url;
+}
+
+async function copyReceiverNumber(){
+ const n="9782781476";
+ try{await navigator.clipboard.writeText(n);alert("Payment number copy हो गया: "+n)}
+ catch(_){prompt("इस नंबर को copy करें",n)}
+}
+
+async function openManualPaymentDialog(){
+ document.getElementById("fullAccessPayDlg")?.close();
+ const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||4999;
+ const {data:pending}=await sb.from("manual_full_access_requests")
+   .select("id,status,created_at,payment_reference")
+   .eq("user_id",currentUser.id)
+   .eq("panchayat_id",currentAccess.panchayat_id)
+   .eq("status","pending")
+   .order("created_at",{ascending:false})
+   .limit(1)
+   .maybeSingle();
+ let dlg=document.getElementById("manualPayDlg");if(dlg)dlg.remove();
+ dlg=document.createElement("dialog");dlg.id="manualPayDlg";
+ dlg.style.cssText="border:0;border-radius:18px;padding:0;max-width:450px;width:calc(100% - 24px);box-shadow:0 22px 70px #0003";
+ if(pending){
+  dlg.innerHTML=`<div style="padding:18px"><div style="font-size:20px;font-weight:900;color:#075b43">🟡 Payment Verification Pending</div><p class="muted">आपका payment request पहले से submit है.</p><div class="notice"><b>UTR / Ref:</b> ${e(pending.payment_reference||"-")}<br><b>Status:</b> Pending Verification</div><button class="btn ghost full" style="margin-top:12px" onclick="manualPayDlg.close()">बंद करें</button></div>`;
+  document.body.appendChild(dlg);dlg.showModal();return;
+ }
+ dlg.innerHTML=`<div style="padding:18px">
+  <div style="font-size:20px;font-weight:900;color:#075b43">📱 Manual UPI Payment</div>
+  <div class="notice" style="margin-top:10px"><b>Pay ₹${amount.toLocaleString("en-IN")}</b><br>PhonePe / Paytm number:<br><span style="font-size:22px;font-weight:900;letter-spacing:.5px">9782781476</span></div>
+  <div class="grid2" style="margin-top:10px">
+   <button class="btn soft" onclick="copyReceiverNumber()">📋 Copy Number</button>
+   <button class="btn soft" onclick="openPaymentApp('phonepe')">Open PhonePe</button>
+   <button class="btn soft" onclick="openPaymentApp('paytm')">Open Paytm</button>
+  </div>
+  <div class="muted" style="margin:9px 0 12px">App खुलने के बाद “To Mobile Number” में ऊपर वाला नंबर डालकर ₹${amount.toLocaleString("en-IN")} pay करें। Payment के बाद नीचे UTR / Reference भरें।</div>
+  <label>Payment App</label>
+  <select id="manualPayMethod"><option value="phonepe">PhonePe</option><option value="paytm">Paytm</option><option value="other_upi">Other UPI</option><option value="cash">Cash</option></select>
+  <label>UTR / Transaction ID / Reference</label>
+  <input id="manualPayRef" placeholder="जैसे 432109876543" autocomplete="off">
+  <label>Payment Date</label>
+  <input id="manualPayDate" type="date" value="${new Date().toISOString().slice(0,10)}">
+  <label>Payment Screenshot</label>
+  <input id="manualPayProof" type="file" accept="image/*">
+  <div id="manualPayMsg" class="muted" style="margin-top:8px"></div>
+  <button class="btn primary full" style="margin-top:12px" onclick="submitManualPayment()">✅ I Have Paid — Submit for Verification</button>
+  <button class="btn ghost full" style="margin-top:8px" onclick="manualPayDlg.close()">बंद करें</button>
+ </div>`;
+ document.body.appendChild(dlg);dlg.showModal();
+}
+
+async function submitManualPayment(){
+ const msg=document.getElementById("manualPayMsg");
+ const ref=(document.getElementById("manualPayRef")?.value||"").trim();
+ const method=document.getElementById("manualPayMethod")?.value||"phonepe";
+ const date=document.getElementById("manualPayDate")?.value||new Date().toISOString().slice(0,10);
+ const proofFile=document.getElementById("manualPayProof")?.files?.[0];
+ if(!ref){msg.textContent="UTR / Transaction ID / Reference required है।";return}
+ if(!proofFile){msg.textContent="Payment screenshot attach करें।";return}
+ msg.textContent="Payment proof submit हो रहा है…";
+ let proof="";
+ try{proof=await compressSignupPhoto(proofFile)}catch(err){msg.textContent=err.message||"Screenshot process नहीं हो सकी";return}
+ const row={
+   user_id:currentUser.id,
+   panchayat_id:currentAccess.panchayat_id,
+   candidate_name:candidate?.hindi_name||candidate?.name||"",
+   gram_panchayat:candidate?.hindi_gram_panchayat||candidate?.gram_panchayat||"",
+   email:currentUser.email||"",
+   mobile:candidate?.mobile||"",
+   amount:4999,
+   payment_method:method,
+   payment_reference:ref,
+   payment_date:date,
+   receiver_phone:"9782781476",
+   proof_data_url:proof,
+   status:"pending"
+ };
+ const {error}=await sb.from("manual_full_access_requests").insert(row);
+ if(error){console.error(error);msg.textContent="Submit नहीं हुआ: "+error.message;return}
+ msg.textContent="✅ Payment request submit हो गया। Admin verification के बाद Full Access activate होगा।";
+ setTimeout(()=>{document.getElementById("manualPayDlg")?.close();alert("Payment submitted. Verification pending.")},700);
+}
+
 function showWorkspace(){
  document.getElementById("app")?.classList.add("moduleOpen");
  const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.setProperty("display","none","important");
