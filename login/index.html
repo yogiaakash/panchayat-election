@@ -370,6 +370,47 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 #tabSlip .slipPreview{border-radius:14px}
 #tabSlip .miniSlip{font-size:9px;line-height:1.35}
 
+/* Compact Visit Tracking filters */
+.visitFilterCard{padding:9px 10px!important}
+.visitFilterCard .title{margin-bottom:4px!important}
+.visitFilterCard>.muted{margin-bottom:4px!important}
+.visitFilterRow{
+ display:grid!important;
+ grid-template-columns:1fr 1fr!important;
+ gap:6px!important
+}
+.visitStatusRow{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) auto!important;
+ gap:7px!important;
+ align-items:end!important
+}
+.visitFilterCard label{
+ margin:4px 0 2px!important
+}
+.visitFilterCard select{
+ min-height:34px!important;
+ padding:6px 8px!important
+}
+.visitRemaining{
+ display:flex!important;
+ align-items:center!important;
+ gap:5px!important;
+ margin:0 0 6px!important;
+ font-size:9.8px!important;
+ white-space:nowrap!important
+}
+.visitRemaining input{
+ width:auto!important;
+ min-height:auto!important;
+ margin:0!important
+}
+@media(max-width:360px){
+ .visitFilterRow{gap:5px!important}
+ .visitStatusRow{grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important}
+ .visitRemaining{font-size:9px!important}
+}
+
 /* Visit + Supp-2 reports */
 #opsReports>.card,
 #opsReports .card{margin-bottom:12px}
@@ -2796,7 +2837,7 @@ function focusAddition(){openAdditionWorkspace()}
 function renderOpsReport(mode){
  const box=document.getElementById("opsReports");if(!box)return;box.classList.remove("hidden");const wards=smart(voters.map(v=>v.ward));
  if(mode==="visit"){
-  box.innerHTML=`<div class="card" style="margin:0"><div class="title">🚶 Visit Tracking — Family-wise Status Report</div><div class="muted">Ward और Colony के अनुसार House / Family contact status देखें। नीचे से केवल बाकी घर भी दिखा सकते हैं।</div><div class="grid2"><div><label>Ward</label><select id="vrWard" onchange="syncVisitColony()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option value="${e(w)}">${e(w)}</option>`).join("")}</select></div><div><label>Colony</label><select id="vrColony" onchange="renderVisitRows()"><option value="">सभी कॉलोनी</option></select></div></div><label>Status Filter</label><select id="vrStatus" onchange="renderVisitRows()"><option value="">सभी Status</option><option value="contacted">दूरभाष / अन्य माध्यम से संपर्क किया</option><option value="met">घर पर संपर्क / भेंट की</option><option value="pending">घर पर भेंट लंबित</option><option value="follow_up">मतदाता नहीं मिला</option><option value="NO_STATUS">अभी कोई status नहीं</option></select><label style="display:flex;align-items:center;gap:8px;font-weight:800"><input id="vrRemaining" type="checkbox" style="width:auto;margin:0" onchange="renderVisitRows()"> केवल बाकी घर दिखाएँ</label></div><div class="card visitSummaryCard"><div class="title">📊 संपर्क स्थिति सारांश</div><div class="grid2 visitSummaryGrid">
+  box.innerHTML=`<div class="card visitFilterCard" style="margin:0"><div class="title">🚶 Visit Tracking — Family-wise Status Report</div><div class="muted">Ward / Colony चुनें और contact status देखें।</div><div class="visitFilterRow"><div><label>Ward</label><select id="vrWard" onchange="syncVisitColony()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option value="${e(w)}">${e(w)}</option>`).join("")}</select></div><div><label>Colony</label><select id="vrColony" onchange="renderVisitRows()"><option value="">सभी कॉलोनी</option></select></div></div><div class="visitStatusRow"><div><label>Status</label><select id="vrStatus" onchange="renderVisitRows()"><option value="">सभी Status</option><option value="contacted">दूरभाष / अन्य माध्यम से संपर्क किया</option><option value="met">घर पर संपर्क / भेंट की</option><option value="pending">घर पर भेंट लंबित</option><option value="follow_up">मतदाता नहीं मिला</option><option value="NO_STATUS">अभी कोई status नहीं</option></select></div><label class="visitRemaining"><input id="vrRemaining" type="checkbox" onchange="renderVisitRows()"> केवल बाकी घर</label></div></div><div class="card visitSummaryCard"><div class="title">📊 संपर्क स्थिति सारांश</div><div class="grid2 visitSummaryGrid">
 <button class="stat visitStat" onclick="setVisitFilter('')"><b id="sumTotal">0</b><small>कुल मकान</small></button>
 <button class="stat visitStat" onclick="setVisitFilter('met')"><b id="sumVisited">0</b><small>घर पर भेंट की</small></button>
 <button class="stat visitStat" onclick="setVisitFilter('contacted')"><b id="sumPhone">0</b><small>दूरभाष / अन्य संपर्क</small></button>
