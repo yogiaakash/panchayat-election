@@ -1413,7 +1413,11 @@ async function load(userOverride=null){
  }
  if(!user){if(location.pathname.startsWith("/dashboard"))history.replaceState({},document.title,"/login/");loginView("Login session उपलब्ध नहीं है। कृपया Login करें।");return}
  currentUser=user;
- if(!location.pathname.startsWith("/dashboard")){
+ if(location.pathname.startsWith("/dashboard/") && location.pathname!=="/dashboard/"){
+   const legacy=location.pathname.replace(/^\/dashboard\/?/,"").replace(/\/$/,"");
+   const allowed=["search","voter-slip","visit","new-voter","stats","a-z"];
+   history.replaceState({},document.title,allowed.includes(legacy)?"/dashboard/?page="+encodeURIComponent(legacy):"/dashboard/");
+ }else if(!location.pathname.startsWith("/dashboard")){
    history.replaceState({},document.title,"/dashboard/");
  }
 
@@ -2282,13 +2286,14 @@ async function submitManualPayment(){
 
 function setDashboardRoute(route,replace=false){
  const clean=String(route||"").replace(/^\/+|\/+$/g,"");
- const url=clean?"/dashboard/"+clean:"/dashboard/";
- if(location.pathname!==url){
+ const url=clean?"/dashboard/?page="+encodeURIComponent(clean):"/dashboard/";
+ const current=location.pathname+location.search;
+ if(current!==url){
    history[replace?"replaceState":"pushState"]({},document.title,url);
  }
 }
 function restoreDashboardRoute(){
- const path=location.pathname.replace(/^\/dashboard\/?/,"").replace(/\/$/,"");
+ const path=String(new URLSearchParams(location.search).get("page")||"").trim();
  if(!path)return;
  if(path==="search"){openWorkspace("info",true);return}
  if(path==="voter-slip"){openWorkspace("slip",true);return}
@@ -3052,7 +3057,7 @@ if(initialSignupMode){
    }
  })();
 }else{
- const isDashboardRoute=location.pathname.startsWith("/dashboard");
+ const isDashboardRoute=location.pathname==="/dashboard"||location.pathname==="/dashboard/"||location.pathname.startsWith("/dashboard/");
  if(isDashboardRoute){
    document.body.classList.remove("authPage");
    document.querySelector("header").style.display="none";
