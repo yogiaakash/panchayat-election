@@ -2115,7 +2115,6 @@ async function showUpgradePrompt(){
   <div class="notice" style="margin:8px 0 14px"><b>Payable Amount: <span id="fullAccessCurrentPrice">₹${amount.toLocaleString("en-IN")}</span></b></div>
   <button class="btn primary full" onclick="startRazorpayCheckout()">💳 Pay Securely with Razorpay</button>
   <div class="muted" style="font-size:11px;margin-top:7px">Live secure payment • UPI, Cards, Netbanking और उपलब्ध payment methods.</div>
-  <button class="btn ghost full" style="margin-top:9px" onclick="openManualPaymentDialog()">📱 Manual PhonePe / Paytm</button>
   <button class="btn ghost full" style="margin-top:9px" onclick="fullAccessPayDlg.close()">बंद करें</button>
  </div>`;
  document.body.appendChild(dlg);dlg.showModal();
