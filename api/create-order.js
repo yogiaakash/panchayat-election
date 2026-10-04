@@ -1,3 +1,13 @@
+const COUPON_CODE = "PANCHAYATX2499";
+const COUPON_EXPIRES_AT = new Date("2026-10-11T10:40:00+05:30");
+
+function priceForPost(post, discounted) {
+  const p = String(post || "").trim();
+  if (p === "Ward Panch") return discounted ? 499 : 999;
+  if (p === "Panchayat Samiti Member") return discounted ? 4999 : 9999;
+  return discounted ? 2499 : 4999;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -25,21 +35,25 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Invalid or expired login session" });
     }
 
-    const amount = Number(req.body?.amount);
-    const currency = String(req.body?.currency || "INR").toUpperCase();
-    const receipt = String(req.body?.receipt || "panchayatx_" + Date.now()).slice(0, 40);
+    const user = await authCheck.json();
 
-    if (!Number.isInteger(amount) || amount < 100) {
-      return res.status(400).json({ error: "Amount must be at least 100 paise" });
-    }
+    const profileRes = await fetch(
+      supabaseUrl + "/rest/v1/candidate_profiles?select=election_post,panchayat_id,assigned_panchayat_ids&user_id=eq." +
+        encodeURIComponent(user.id) + "&limit=1",
+      { headers: { Authorization: auth, apikey: supabaseKey, Accept: "application/json" } }
+    );
 
-    if (currency !== "INR") {
-      return res.status(400).json({ error: "Only INR is supported" });
-    }
+    const profiles = await profileRes.json().catch(() => []);
+    const profile = Array.isArray(profiles) ? profiles[0] : null;
+    if (!profile) return res.status(403).json({ error: "Candidate profile not found" });
+
+    const coupon = String(req.body?.coupon_code || "").trim().toUpperCase();
+    const discounted = coupon === COUPON_CODE && Date.now() < COUPON_EXPIRES_AT.getTime();
+    const rupees = priceForPost(profile.election_post, discounted);
+    const amount = rupees * 100;
 
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
     if (!keyId || !keySecret) {
       return res.status(500).json({ error: "Razorpay server credentials are not configured" });
     }
@@ -54,9 +68,15 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         amount,
-        currency,
-        receipt,
-        notes: { source: "PanchayatX" }
+        currency: "INR",
+        receipt: String("pxt_" + user.id.replace(/-/g, "").slice(0, 8) + "_" + Date.now()).slice(0, 40),
+        notes: {
+          source: "PanchayatX",
+          user_id: user.id,
+          election_post: String(profile.election_post || ""),
+          coupon_applied: discounted ? "yes" : "no",
+          primary_panchayat_id: String(profile.panchayat_id || "")
+        }
       })
     });
 
@@ -71,7 +91,10 @@ export default async function handler(req, res) {
       order_id: data.id,
       amount: data.amount,
       currency: data.currency,
-      key_id: keyId
+      key_id: keyId,
+      rupees,
+      election_post: profile.election_post,
+      discounted
     });
   } catch (err) {
     console.error("create-order failed", err);
