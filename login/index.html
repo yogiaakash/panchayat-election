@@ -1479,10 +1479,11 @@ async function load(userOverride=null){
    // Load persistent voter mobile numbers BEFORE rendering the dashboard.
    // This guarantees logout/login and another browser restore the same data.
    try{
+     const scopePids=(Array.isArray(candidate.panchayat_ids)&&candidate.panchayat_ids.length)?candidate.panchayat_ids:[currentAccess.panchayat_id];
      const {data:mobileRows,error:mobileError}=await sb.from("voter_mobile_numbers")
        .select("id,user_id,panchayat_id,voter_id,mobile_number,created_at,updated_at")
        .eq("user_id",user.id)
-       .eq("panchayat_id",currentAccess.panchayat_id);
+       .in("panchayat_id",scopePids);
      if(mobileError) throw mobileError;
      voterMobileMap=new Map((mobileRows||[]).map(x=>[String(x.voter_id),x]));
      console.log("Persistent voter mobiles loaded:",voterMobileMap.size);
@@ -1498,15 +1499,16 @@ async function load(userOverride=null){
    dashboard();
 
    // Optional metadata can load after the dashboard is visible.
+   const metadataScopePids=(Array.isArray(candidate.panchayat_ids)&&candidate.panchayat_ids.length)?candidate.panchayat_ids:[currentAccess.panchayat_id];
    Promise.all([
      sb.from("panchayats").select("*").eq("id",currentAccess.panchayat_id).maybeSingle(),
      sb.from("candidate_profiles").select("*").eq("user_id",user.id).maybeSingle(),
-     sb.from("voter_contact_status").select("*").eq("panchayat_id",currentAccess.panchayat_id),
-     sb.from("voter_addition_requests").select("*").eq("panchayat_id",currentAccess.panchayat_id).order("created_at",{ascending:false}),
+     sb.from("voter_contact_status").select("*").in("panchayat_id",metadataScopePids),
+     sb.from("voter_addition_requests").select("*").in("panchayat_id",metadataScopePids).order("created_at",{ascending:false}),
      sb.from("candidate_share_settings").select("family_share_message").eq("user_id",user.id).eq("panchayat_id",currentAccess.panchayat_id).maybeSingle(),
-     sb.from("voter_house_overrides").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id),
-     sb.from("voter_mobile_numbers").select("*").eq("panchayat_id",currentAccess.panchayat_id).eq("user_id",user.id)
-   ]).then(async ([pr,prof,cs,ar,ho,vm,share])=>{
+     sb.from("voter_house_overrides").select("*").in("panchayat_id",metadataScopePids).eq("user_id",user.id),
+     sb.from("voter_mobile_numbers").select("*").in("panchayat_id",metadataScopePids).eq("user_id",user.id)
+   ]).then(async ([pr,prof,cs,ar,share,ho,vm])=>{
      const p=pr?.data;
      if(p){
        candidate.gram_panchayat=p.gram_panchayat||candidate.gram_panchayat;
