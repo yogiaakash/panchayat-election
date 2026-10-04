@@ -16,11 +16,11 @@
   ],
   "rewrites": [
     {
-      "source": "/dashboard",
+      "source": "/dashboard/:path*",
       "destination": "/login/index.html"
     },
     {
-      "source": "/dashboard/",
+      "source": "/dashboard",
       "destination": "/login/index.html"
     }
   ]
