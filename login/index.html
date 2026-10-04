@@ -1211,11 +1211,22 @@ async function createCandidateAccount(){
  }catch(err){msg.textContent=err.message||"Account create नहीं हो सका।"}
 }
 async function forgotPassword(){
- const email=document.getElementById("email")?.value.trim();
+ const input=document.getElementById("email");
  const msg=document.getElementById("msg");
+ const email=String(input?.value||"")
+   .replace(/[\u200B-\u200D\uFEFF]/g,"")
+   .replace(/\s+/g,"")
+   .trim()
+   .toLowerCase();
+ if(input)input.value=email;
  if(!email){msg.textContent="पहले अपना Email / Login ID डालें।";return}
+ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+   msg.textContent="कृपया सही Email address डालें।";
+   return;
+ }
  msg.textContent="Password reset email भेजा जा रहा है…";
- const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+ const redirectTo=window.location.origin+"/login/?recovery=1";
+ const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
  msg.textContent=error?error.message:"Password reset link आपके email पर भेज दिया गया है।";
 }
 function showRecoveryPasswordForm(){
@@ -1235,9 +1246,10 @@ async function updateRecoveryPassword(){
  msg.textContent="Password update हो रहा है…";
  const {error}=await sb.auth.updateUser({password:p});
  if(error){msg.textContent=error.message;return}
- history.replaceState({},document.title,window.location.pathname);
- msg.textContent="Password successfully update हो गया। Login किया जा रहा है…";
- setTimeout(()=>load(),500);
+ await sb.auth.signOut();
+ history.replaceState({},document.title,"/login/");
+ currentUser=null;currentAccess=null;candidate=null;voters=[];
+ loginView("Password successfully update हो गया। अब नए password से Login करें।");
 }
 function hasHindiText(value){
  return /[\u0900-\u097F]/.test(String(value||""));
@@ -2902,9 +2914,31 @@ sb.auth.onAuthStateChange((event,session)=>{
  if(event==="SIGNED_OUT"){currentUser=null;currentAccess=null}
 });
 // Keep Login and New Candidate creation on distinct URLs.
-const initialSignupMode=new URLSearchParams(location.search).get("signup")==="1";
+const loginParams=new URLSearchParams(location.search);
+const initialSignupMode=loginParams.get("signup")==="1";
+const initialRecoveryMode=loginParams.get("recovery")==="1" || /(?:^#|&)type=recovery(?:&|$)/.test(location.hash||"");
 if(initialSignupMode){
  signupView();
+}else if(initialRecoveryMode){
+ // Password-recovery links must never open the candidate dashboard automatically.
+ loginView("Password reset link verify हो रहा है…");
+ (async()=>{
+   try{
+     let {data:{session}}=await sb.auth.getSession();
+     if(!session){
+       await new Promise(resolve=>setTimeout(resolve,350));
+       ({data:{session}}=await sb.auth.getSession());
+     }
+     if(session){
+       showRecoveryPasswordForm();
+     }else{
+       loginView("Password reset link invalid या expired है। नया reset link भेजें।");
+     }
+   }catch(err){
+     console.error("Recovery session load failed:",err);
+     loginView("Password reset link verify नहीं हो सका। नया reset link भेजें।");
+   }
+ })();
 }else{
  // Always render something immediately; never leave the login page blank while
  // Supabase checks an existing session.
