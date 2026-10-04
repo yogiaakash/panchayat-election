@@ -712,7 +712,7 @@ body.androidApp.authPage .signupActions{grid-template-columns:1fr!important}
 <header><a class="brand authBrand" href="/" aria-label="PanchayatX Home"><span class="authBrandName">Panchayat<b>X</b></span><small>हर पंचायत, डिजिटल पंचायत</small></a><div class="authHeaderRight"><a class="authHomeLink" href="/">होम</a><button id="logout" class="btn ghost hidden">Logout</button></div></header>
 <main id="app"></main>
 <script>
-window.PANCHAYAT_FULL_ACCESS_PRICE=1;
+window.PANCHAYAT_FULL_ACCESS_PRICE=4999;window.PANCHAYAT_COUPON_PRICE=2499;window.PANCHAYAT_COUPON_CODE="PANCHAYATX2499";window.PANCHAYAT_APPLIED_COUPON="";
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
@@ -1711,10 +1711,32 @@ function dashboard(){
  <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
 }
+function currentFullAccessAmount(){
+ return String(window.PANCHAYAT_APPLIED_COUPON||"").toUpperCase()===String(window.PANCHAYAT_COUPON_CODE||"").toUpperCase()
+   ? Number(window.PANCHAYAT_COUPON_PRICE||2499)
+   : Number(window.PANCHAYAT_FULL_ACCESS_PRICE||4999);
+}
+function applyFullAccessCoupon(){
+ const input=(document.getElementById("fullAccessCoupon")?.value||"").trim().toUpperCase();
+ const msg=document.getElementById("fullAccessCouponMsg");
+ if(input===String(window.PANCHAYAT_COUPON_CODE||"").toUpperCase()){
+   window.PANCHAYAT_APPLIED_COUPON=window.PANCHAYAT_COUPON_CODE;
+   const price=currentFullAccessAmount();
+   const priceEl=document.getElementById("fullAccessCurrentPrice");
+   if(priceEl)priceEl.textContent="₹"+price.toLocaleString("en-IN");
+   if(msg){msg.textContent="✅ Coupon applied — अब payable ₹"+price.toLocaleString("en-IN");msg.style.color="#087443";}
+ }else{
+   window.PANCHAYAT_APPLIED_COUPON="";
+   const price=Number(window.PANCHAYAT_FULL_ACCESS_PRICE||4999);
+   const priceEl=document.getElementById("fullAccessCurrentPrice");
+   if(priceEl)priceEl.textContent="₹"+price.toLocaleString("en-IN");
+   if(msg){msg.textContent="Invalid coupon code";msg.style.color="#b42318";}
+ }
+}
 async function showUpgradePrompt(){
  const {data:pay}=await sb.from("lifetime_payment_records").select("*").eq("user_id",currentUser.id).eq("panchayat_id",currentAccess.panchayat_id).eq("status","paid").limit(1).maybeSingle();
  if(pay){alert("आपके account में Lifetime Full Access पहले से active है।");return}
- const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||1;
+ const amount=currentFullAccessAmount();
  let dlg=document.getElementById("fullAccessPayDlg");
  if(dlg)dlg.remove();
  dlg=document.createElement("dialog");
@@ -1722,7 +1744,13 @@ async function showUpgradePrompt(){
  dlg.style.cssText="border:0;border-radius:18px;padding:0;max-width:420px;width:calc(100% - 28px);box-shadow:0 22px 70px #0003";
  dlg.innerHTML=`<div style="padding:18px">
   <div style="font-size:20px;font-weight:900;color:#075b43">🔓 Lifetime Full Access</div>
-  <div class="muted" style="margin:5px 0 14px">एक बार का भुगतान: <b style="color:#17342c">₹${amount.toLocaleString("en-IN")}</b></div>
+  <div class="muted" style="margin:5px 0 8px">Regular Price: <b style="color:#17342c">₹4,999</b></div>
+  <div style="display:flex;gap:8px;margin:8px 0">
+    <input id="fullAccessCoupon" placeholder="Coupon code" style="flex:1;text-transform:uppercase">
+    <button class="btn ghost" style="width:auto;padding:9px 12px" onclick="applyFullAccessCoupon()">Apply</button>
+  </div>
+  <div id="fullAccessCouponMsg" class="muted" style="font-size:12px;margin-bottom:8px">Coupon <b>PANCHAYATX2499</b> लगाने पर special price ₹2,499</div>
+  <div class="notice" style="margin:8px 0 14px"><b>Payable Amount: <span id="fullAccessCurrentPrice">₹${amount.toLocaleString("en-IN")}</span></b></div>
   <button class="btn primary full" onclick="openManualPaymentDialog()">📱 Pay with PhonePe / Paytm</button>
   <button class="btn ghost full" style="margin-top:9px" onclick="fullAccessPayDlg.close()">बंद करें</button>
  </div>`;
@@ -1733,7 +1761,7 @@ const FULL_ACCESS_UPI_ID="9782781476@ybl";
 const FULL_ACCESS_RECEIVER_PHONE="9782781476";
 
 function buildUpiPayQuery(){
- const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||1;
+ const amount=currentFullAccessAmount();
  const note="Panchayat Digital Lifetime Full Access";
  return new URLSearchParams({
    pa:FULL_ACCESS_UPI_ID,
@@ -1757,7 +1785,7 @@ function openDirectUpiPayment(appName){
 
 async function openManualPaymentDialog(){
  document.getElementById("fullAccessPayDlg")?.close();
- const amount=window.PANCHAYAT_FULL_ACCESS_PRICE||1;
+ const amount=currentFullAccessAmount();
  const {data:pending}=await sb.from("manual_full_access_requests")
    .select("id,status,created_at,payment_reference")
    .eq("user_id",currentUser.id)
@@ -1777,6 +1805,7 @@ async function openManualPaymentDialog(){
   <div style="font-size:20px;font-weight:900;color:#075b43">📱 UPI Payment</div>
   <div class="notice" style="margin-top:10px">
    <b>Lifetime Full Access — ₹${amount.toLocaleString("en-IN")}</b><br>
+   ${window.PANCHAYAT_APPLIED_COUPON?`<span style="color:#087443;font-weight:800">Coupon: ${e(window.PANCHAYAT_APPLIED_COUPON)}</span><br>`:""}
    <span class="muted">नीचे PhonePe या Paytm चुनें। चुना हुआ payment app सीधे खुलेगा और payment details automatically fill होंगी।</span>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px">
@@ -1816,7 +1845,8 @@ async function submitManualPayment(){
    gram_panchayat:candidate?.hindi_gram_panchayat||candidate?.gram_panchayat||"",
    email:currentUser.email||"",
    mobile:candidate?.mobile||"",
-   amount:window.PANCHAYAT_FULL_ACCESS_PRICE||1,
+   amount:currentFullAccessAmount(),
+   promo_code:window.PANCHAYAT_APPLIED_COUPON||null,
    payment_method:method,
    payment_reference:ref,
    payment_date:date,
