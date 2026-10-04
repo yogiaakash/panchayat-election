@@ -744,6 +744,7 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
 const app=document.getElementById("app"), logout=document.getElementById("logout");
 const IS_ANDROID_APP=/PanchayatXAndroid/i.test(navigator.userAgent); if(IS_ANDROID_APP) document.body.classList.add("androidApp");
 let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,masterVoterCount=0,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map();
+let recoverySessionBackup=null;
 let psAllVoters=[],psAllContactRows=[],psAllAdditionRows=[],psAllHouseOverrideRows=[],psAllMobileRows=[],selectedPSPanchayatId="";
 let familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।",signupPanchayats=[]; let selectedSignupPanchayatId=null; const PER=40;
 
@@ -1246,27 +1247,77 @@ async function forgotPassword(){
  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
  msg.textContent=error?error.message:"Password reset link आपके email पर भेज दिया गया है।";
 }
-function showRecoveryPasswordForm(){
+function showRecoveryPasswordForm(session=null){
+ if(session?.access_token&&session?.refresh_token){
+   recoverySessionBackup={access_token:session.access_token,refresh_token:session.refresh_token};
+ }
  document.body.classList.add("authPage");
  document.querySelector("header").style.display="flex";
  logout.classList.add("hidden");
  app.innerHTML=`<div class="card login"><h2>🔐 नया Password बनाएं</h2><p class="muted">आपका password reset link valid है। नया password डालें।</p>
- <label>New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="कम से कम 6 characters">
+ <label>New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="कम से कम 8 characters">
+ <div class="muted" style="font-size:12px;margin-top:5px">कम से कम 8 characters रखें। Capital letter, number या special symbol जरूरी नहीं है।</div>
  <label>Confirm New Password</label><input id="newPassword2" type="password" autocomplete="new-password">
  <button class="btn primary full" style="margin-top:16px" onclick="updateRecoveryPassword()">Password Update करें</button>
  <p id="resetMsg" class="error"></p></div>`;
+}
+async function ensureRecoverySession(){
+ let {data:{session}}=await sb.auth.getSession();
+ if(session?.access_token)return session;
+
+ const params=new URLSearchParams(location.search);
+ const code=params.get("code");
+ if(code){
+   const exchanged=await sb.auth.exchangeCodeForSession(code);
+   if(exchanged?.error)throw exchanged.error;
+   session=exchanged?.data?.session||null;
+   if(session?.access_token){
+     recoverySessionBackup={access_token:session.access_token,refresh_token:session.refresh_token};
+     return session;
+   }
+ }
+
+ const hp=new URLSearchParams((location.hash||"").replace(/^#/,""));
+ const access=hp.get("access_token"),refresh=hp.get("refresh_token");
+ if(access&&refresh){
+   const restored=await sb.auth.setSession({access_token:access,refresh_token:refresh});
+   if(restored?.error)throw restored.error;
+   session=restored?.data?.session||null;
+   if(session?.access_token){
+     recoverySessionBackup={access_token:session.access_token,refresh_token:session.refresh_token};
+     return session;
+   }
+ }
+
+ if(recoverySessionBackup?.access_token&&recoverySessionBackup?.refresh_token){
+   const restored=await sb.auth.setSession(recoverySessionBackup);
+   if(!restored?.error&&restored?.data?.session)return restored.data.session;
+ }
+
+ return null;
 }
 async function updateRecoveryPassword(){
  const p=document.getElementById("newPassword").value,p2=document.getElementById("newPassword2").value,msg=document.getElementById("resetMsg");
  if(p.length<8){msg.textContent="Password कम से कम 8 characters का होना चाहिए।";return}
  if(p!==p2){msg.textContent="दोनों passwords समान नहीं हैं।";return}
  msg.textContent="Password update हो रहा है…";
- const {error}=await sb.auth.updateUser({password:p});
- if(error){msg.textContent=error.message;return}
- await sb.auth.signOut();
- history.replaceState({},document.title,"/login/");
- currentUser=null;currentAccess=null;candidate=null;voters=[];
- loginView("Password successfully update हो गया। अब नए password से Login करें।");
+ try{
+   const session=await ensureRecoverySession();
+   if(!session){
+     msg.textContent="Reset session expire हो गया है। कृपया नया password reset link भेजें।";
+     return;
+   }
+   const {error}=await sb.auth.updateUser({password:p});
+   if(error){msg.textContent=error.message;return}
+   await sb.auth.signOut();
+   recoverySessionBackup=null;
+   history.replaceState({},document.title,"/login/");
+   currentUser=null;currentAccess=null;candidate=null;voters=[];
+   loginView("Password successfully update हो गया। अब नए password से Login करें।");
+ }catch(err){
+   console.error("Password recovery update failed:",err);
+   msg.textContent=err?.message||"Password update नहीं हो सका। नया reset link भेजें।";
+ }
 }
 function hasHindiText(value){
  return /[\u0900-\u097F]/.test(String(value||""));
@@ -1344,7 +1395,7 @@ async function load(userOverride=null){
  const hash=window.location.hash||"";
  if(/(?:^#|&)type=recovery(?:&|$)/.test(hash)){
    const {data:{session}}=await sb.auth.getSession();
-   if(session){showRecoveryPasswordForm();return}
+   if(session){showRecoveryPasswordForm(session);return}
  }
  let user=userOverride;
  if(!user){
@@ -2935,7 +2986,7 @@ async function sendFamilyVoterSlips(){
  }catch(x){alert("WhatsApp message तैयार नहीं हो सकी: "+(x.message||x))}
 }
 sb.auth.onAuthStateChange((event,session)=>{
- if(event==="PASSWORD_RECOVERY"&&session){showRecoveryPasswordForm();return}
+ if(event==="PASSWORD_RECOVERY"&&session){showRecoveryPasswordForm(session);return}
  if(event==="SIGNED_OUT"){currentUser=null;currentAccess=null}
 });
 // Keep Login and New Candidate creation on distinct URLs.
@@ -2949,13 +3000,13 @@ if(initialSignupMode){
  loginView("Password reset link verify हो रहा है…");
  (async()=>{
    try{
-     let {data:{session}}=await sb.auth.getSession();
+     let session=await ensureRecoverySession();
      if(!session){
        await new Promise(resolve=>setTimeout(resolve,350));
-       ({data:{session}}=await sb.auth.getSession());
+       session=await ensureRecoverySession();
      }
      if(session){
-       showRecoveryPasswordForm();
+       showRecoveryPasswordForm(session);
      }else{
        loginView("Password reset link invalid या expired है। नया reset link भेजें।");
      }
