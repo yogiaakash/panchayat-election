@@ -3052,9 +3052,15 @@ if(initialSignupMode){
    }
  })();
 }else{
- // Always render something immediately; never leave the login page blank while
- // Supabase checks an existing session.
- loginView("Session check हो रहा है…");
+ const isDashboardRoute=location.pathname.startsWith("/dashboard");
+ if(isDashboardRoute){
+   document.body.classList.remove("authPage");
+   document.querySelector("header").style.display="none";
+   logout.classList.add("hidden");
+   app.innerHTML='<div style="min-height:100vh;background:#f3f7f4"></div>';
+ }else{
+   loginView();
+ }
  (async()=>{
   try{
     let {data:{session}}=await sb.auth.getSession();
@@ -3070,11 +3076,12 @@ if(initialSignupMode){
       sb.functions.setAuth(session.access_token);
       await load(session.user);
     }else{
-      if(location.pathname.startsWith("/dashboard"))history.replaceState({},document.title,"/login/");
+      if(isDashboardRoute)history.replaceState({},document.title,"/login/");
       loginView();
     }
   }catch(err){
     console.error("Initial session load failed:",err);
+    if(isDashboardRoute)history.replaceState({},document.title,"/login/");
     loginView("Login session load नहीं हो सका। कृपया फिर से Login करें।");
   }
  })();
