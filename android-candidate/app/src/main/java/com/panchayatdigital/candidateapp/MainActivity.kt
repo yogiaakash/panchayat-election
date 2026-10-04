@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             builtInZoomControls = false
             displayZoomControls = false
             textZoom = 100
-            userAgentString = userAgentString + " PanchayatXAndroid/2.3"
+            userAgentString = userAgentString + " PanchayatXAndroid/2.4"
         }
 
         web.addJavascriptInterface(DownloadBridge(), "AndroidDownloader")
