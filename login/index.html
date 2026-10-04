@@ -1858,7 +1858,7 @@ async function signIn(){
 }
 
 logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];currentUser=null;currentAccess=null;history.replaceState({},document.title,"/login/");loginView()};
-async function load(userOverride=null){
+async async function load(userOverride=null){
  const hash=window.location.hash||"";
  if(/(?:^#|&)type=recovery(?:&|$)/.test(hash)){
    const {data:{session}}=await sb.auth.getSession();
