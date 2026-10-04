@@ -4,6 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PanchayatX | Candidate Login</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 :root{--p:#176451;--p2:#0f4f40;--bg:#f3f7f5;--card:#fff;--text:#17342c;--muted:#687b75;--line:#d9e7e1;--mint:#eaf5f1}
@@ -1957,6 +1958,96 @@ function applyFullAccessCoupon(){
    if(msg){msg.textContent="Invalid coupon code";msg.style.color="#b42318";}
  }
 }
+async function startRazorpayCheckout(){
+ try{
+  if(!window.Razorpay){alert("Razorpay Checkout load नहीं हुआ। Page refresh करके फिर try करें।");return}
+  let {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token){
+    const refreshed=await sb.auth.refreshSession();
+    session=refreshed?.data?.session||null;
+  }
+  if(!session?.access_token){alert("Login session नहीं मिला। कृपया फिर login करें।");return}
+
+  const amountPaise=100;
+  const orderRes=await fetch("/api/create-order",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+session.access_token
+    },
+    body:JSON.stringify({
+      amount:amountPaise,
+      currency:"INR",
+      receipt:"pxt_"+Date.now()
+    })
+  });
+  const order=await orderRes.json().catch(()=>({}));
+  if(!orderRes.ok){
+    alert("Razorpay order create नहीं हुआ: "+(order.error||"Unknown error"));
+    return;
+  }
+
+  document.getElementById("fullAccessPayDlg")?.close();
+
+  const rz=new Razorpay({
+    key:order.key_id,
+    amount:order.amount,
+    currency:order.currency||"INR",
+    name:"PanchayatX",
+    description:"PanchayatX Razorpay Test Payment — ₹1",
+    order_id:order.order_id,
+    prefill:{
+      name:candidate?.hindi_name||candidate?.name||"",
+      email:currentUser?.email||"",
+      contact:candidate?.mobile||""
+    },
+    handler:async function(resp){
+      try{
+        let {data:{session:verifySession}}=await sb.auth.getSession();
+        if(!verifySession?.access_token){
+          const refreshed=await sb.auth.refreshSession();
+          verifySession=refreshed?.data?.session||null;
+        }
+        const vr=await fetch("/api/verify-payment",{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer "+(verifySession?.access_token||"")
+          },
+          body:JSON.stringify({
+            razorpay_payment_id:resp.razorpay_payment_id,
+            razorpay_order_id:resp.razorpay_order_id,
+            razorpay_signature:resp.razorpay_signature
+          })
+        });
+        const verified=await vr.json().catch(()=>({}));
+        if(!vr.ok||!verified?.verified){
+          alert("Payment हुआ लेकिन verification failed: "+(verified.error||"Unknown error"));
+          return;
+        }
+        alert("✅ Razorpay ₹1 TEST payment successfully verified.\n\nयह Test Mode है; production Full Access अभी activate नहीं किया गया.");
+      }catch(err){
+        alert("Payment verification error: "+(err?.message||err));
+      }
+    },
+    modal:{
+      ondismiss:function(){
+        console.log("Razorpay checkout cancelled by user");
+      }
+    }
+  });
+
+  rz.on("payment.failed",function(resp){
+    alert("Payment failed: "+(resp?.error?.description||"Please try again"));
+  });
+
+  rz.open();
+ }catch(err){
+  console.error("Razorpay checkout error",err);
+  alert("Razorpay payment शुरू नहीं हुआ: "+(err?.message||err));
+ }
+}
+
 async function showUpgradePrompt(){
  const {data:pay}=await sb.from("lifetime_payment_records").select("*").eq("user_id",currentUser.id).eq("panchayat_id",currentAccess.panchayat_id).eq("status","paid").limit(1).maybeSingle();
  if(pay){alert("आपके account में Lifetime Full Access पहले से active है।");return}
@@ -1984,7 +2075,9 @@ async function showUpgradePrompt(){
     <div id="fullAccessCouponMsg" class="muted" style="font-size:12px;margin-bottom:8px">Coupon <b>PANCHAYATX2499</b> लगाएँ और ₹4,999 की जगह सिर्फ ₹2,499 pay करें। Offer 11 Oct 2026, 10:40 AM IST तक valid है।</div>
   `}
   <div class="notice" style="margin:8px 0 14px"><b>Payable Amount: <span id="fullAccessCurrentPrice">₹${amount.toLocaleString("en-IN")}</span></b></div>
-  <button class="btn primary full" onclick="openManualPaymentDialog()">📱 Pay with PhonePe / Paytm</button>
+  <button class="btn primary full" onclick="startRazorpayCheckout()">🧪 Razorpay TEST ₹1</button>
+  <div class="muted" style="font-size:11px;margin-top:7px">Test Mode: real money charge नहीं होगा। Successful test production Full Access activate नहीं करेगा.</div>
+  <button class="btn ghost full" style="margin-top:9px" onclick="openManualPaymentDialog()">📱 Manual PhonePe / Paytm</button>
   <button class="btn ghost full" style="margin-top:9px" onclick="fullAccessPayDlg.close()">बंद करें</button>
  </div>`;
  document.body.appendChild(dlg);dlg.showModal();
