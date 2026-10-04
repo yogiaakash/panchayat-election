@@ -715,7 +715,14 @@ body.androidApp.authPage .signupActions{grid-template-columns:1fr!important}
 <script>
 window.PANCHAYAT_FULL_ACCESS_PRICE=4999;window.PANCHAYAT_WARD_PANCH_PRICE=499;window.PANCHAYAT_COUPON_PRICE=2499;window.PANCHAYAT_COUPON_CODE="PANCHAYATX2499";window.PANCHAYAT_COUPON_EXPIRES_AT="2026-10-11T10:40:00+05:30";window.PANCHAYAT_APPLIED_COUPON="";
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+ auth:{
+  persistSession:true,
+  autoRefreshToken:true,
+  detectSessionInUrl:true,
+  storage:window.localStorage
+ }
+});
 const app=document.getElementById("app"), logout=document.getElementById("logout");
 const IS_ANDROID_APP=/PanchayatXAndroid/i.test(navigator.userAgent); if(IS_ANDROID_APP) document.body.classList.add("androidApp");
 let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,masterVoterCount=0,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map();
@@ -1309,8 +1316,20 @@ async function load(userOverride=null){
    const {data:{session}}=await sb.auth.getSession();
    if(session){showRecoveryPasswordForm();return}
  }
- const user=userOverride;
- if(!user){loginView("Login session खो गया। कृपया फिर से Login करें।");return}
+ let user=userOverride;
+ if(!user){
+   let {data:{session}}=await sb.auth.getSession();
+   if(!session?.user){
+     try{
+       const refreshed=await sb.auth.refreshSession();
+       session=refreshed?.data?.session||null;
+     }catch(refreshErr){
+       console.warn("Session refresh failed:",refreshErr);
+     }
+   }
+   user=session?.user||null;
+ }
+ if(!user){loginView("Login session उपलब्ध नहीं है। कृपया Login करें।");return}
  currentUser=user;
 
  // Do not block login on any database/network request.
@@ -2799,7 +2818,15 @@ if(initialSignupMode){
  loginView("Session check हो रहा है…");
  (async()=>{
   try{
-    const {data:{session}}=await sb.auth.getSession();
+    let {data:{session}}=await sb.auth.getSession();
+    if(!session?.user){
+      try{
+        const refreshed=await sb.auth.refreshSession();
+        session=refreshed?.data?.session||null;
+      }catch(refreshErr){
+        console.warn("Initial session refresh failed:",refreshErr);
+      }
+    }
     if(session?.user){
       sb.functions.setAuth(session.access_token);
       await load(session.user);
