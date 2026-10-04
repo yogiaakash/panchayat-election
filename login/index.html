@@ -1020,7 +1020,7 @@ function signupView(){
       <div class="signupField"><label>Mobile *</label><input id="suMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर"></div>
       <div class="signupField"><label>WhatsApp Number</label><input id="suWhatsApp" type="tel" inputmode="numeric" maxlength="10" placeholder="WhatsApp नंबर"></div>
       <div class="signupField signupFull"><label>Email / Login ID *</label><input id="suEmail" type="email" autocomplete="username" placeholder="name@example.com"></div>
-      <div class="signupField"><label>Password *</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="कम से कम 6 characters"></div>
+      <div class="signupField"><label>Password *</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="कम से कम 8 characters"></div>
       <div class="signupField"><label>Confirm Password *</label><input id="suPassword2" type="password" autocomplete="new-password" placeholder="Password दोबारा डालें"></div>
     </div>
 
@@ -1258,7 +1258,7 @@ function showRecoveryPasswordForm(){
 }
 async function updateRecoveryPassword(){
  const p=document.getElementById("newPassword").value,p2=document.getElementById("newPassword2").value,msg=document.getElementById("resetMsg");
- if(p.length<6){msg.textContent="Password कम से कम 6 characters का होना चाहिए।";return}
+ if(p.length<8){msg.textContent="Password कम से कम 8 characters का होना चाहिए।";return}
  if(p!==p2){msg.textContent="दोनों passwords समान नहीं हैं।";return}
  msg.textContent="Password update हो रहा है…";
  const {error}=await sb.auth.updateUser({password:p});
