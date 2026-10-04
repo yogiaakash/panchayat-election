@@ -1413,7 +1413,7 @@ async function load(userOverride=null){
  }
  if(!user){if(location.pathname.startsWith("/dashboard"))history.replaceState({},document.title,"/login/");loginView("Login session उपलब्ध नहीं है। कृपया Login करें।");return}
  currentUser=user;
- if(location.pathname!=="/dashboard/"&&location.pathname!=="/dashboard"){
+ if(!location.pathname.startsWith("/dashboard")){
    history.replaceState({},document.title,"/dashboard/");
  }
 
@@ -2006,6 +2006,7 @@ function dashboard(){
  </div>
  <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
+ restoreDashboardRoute();
 }
 function isFullAccessCouponActive(){
  return Date.now()<new Date(window.PANCHAYAT_COUPON_EXPIRES_AT).getTime();
@@ -2279,6 +2280,29 @@ async function submitManualPayment(){
  setTimeout(()=>{document.getElementById("manualPayDlg")?.close();alert("Payment submitted. Verification pending.")},700);
 }
 
+function setDashboardRoute(route,replace=false){
+ const clean=String(route||"").replace(/^\/+|\/+$/g,"");
+ const url=clean?"/dashboard/"+clean:"/dashboard/";
+ if(location.pathname!==url){
+   history[replace?"replaceState":"pushState"]({},document.title,url);
+ }
+}
+function restoreDashboardRoute(){
+ const path=location.pathname.replace(/^\/dashboard\/?/,"").replace(/\/$/,"");
+ if(!path)return;
+ if(path==="search"){openWorkspace("info",true);return}
+ if(path==="voter-slip"){openWorkspace("slip",true);return}
+ if(path==="visit"){openVisitWorkspace(true);return}
+ if(path==="new-voter"){openAdditionWorkspace(true);return}
+ if(path==="stats"){openWorkspace("stats",true);return}
+ if(path==="a-z"){openAZWorkspace(true);return}
+ setDashboardRoute("",true);
+}
+window.addEventListener("popstate",()=>{
+ if(!currentUser)return;
+ dashboard();
+});
+
 function showWorkspace(){
  document.getElementById("app")?.classList.add("moduleOpen");
  const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.setProperty("display","none","important");
@@ -2306,7 +2330,8 @@ function setModuleVisibility(mode){
    if(mode==="az"){if(statsCard)statsCard.style.display="none";[azMain,azPdf,azList].forEach(x=>{if(x)x.style.display=""})}
  }
 }
-function scrollToHome(){
+function scrollToHome(fromRoute=false){
+ if(!fromRoute)setDashboardRoute("");
  document.getElementById("app")?.classList.remove("moduleOpen");
  const w=document.getElementById("workspaceAfterHome");if(w)w.style.display="none";
  const ops=document.getElementById("opsReports");if(ops){ops.classList.add("hidden");ops.innerHTML=""}
@@ -2314,21 +2339,28 @@ function scrollToHome(){
  const homeMain=document.querySelector("#demoHome .demoMain");if(homeMain)homeMain.style.setProperty("display","block","important");
  window.scrollTo({top:0,behavior:"smooth"});
 }
-function openWorkspace(k){
+function openWorkspace(k,fromRoute=false){
  if(!ensurePSPanchayatSelected())return;
+ if(!fromRoute){
+   const routes={info:"search",slip:"voter-slip",stats:"stats",az:"a-z"};
+   if(routes[k])setDashboardRoute(routes[k]);
+ }
  showWorkspace();setModuleVisibility(k);
  if(k==="stats")renderPanchayatStats();
 }
-function openVisitWorkspace(){
+function openVisitWorkspace(fromRoute=false){
  if(!ensurePSPanchayatSelected())return;
+ if(!fromRoute)setDashboardRoute("visit");
  showWorkspace();setModuleVisibility("ops");renderOpsReport("visit");
 }
-function openAdditionWorkspace(){
+function openAdditionWorkspace(fromRoute=false){
  if(!ensurePSPanchayatSelected())return;
+ if(!fromRoute)setDashboardRoute("new-voter");
  showWorkspace();setModuleVisibility("ops");renderOpsReport("supp2");
 }
-function openAZWorkspace(){
+function openAZWorkspace(fromRoute=false){
  if(!ensurePSPanchayatSelected())return;
+ if(!fromRoute)setDashboardRoute("a-z");
  showWorkspace();setModuleVisibility("az");initAZLetters();renderAZ();
 }
 function focusVisit(){openVisitWorkspace()}
