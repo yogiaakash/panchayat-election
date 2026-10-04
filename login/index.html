@@ -794,6 +794,7 @@ function latinize(v){
 }
 const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function loginView(msg=""){
+ document.title="PanchayatX | Candidate Login";
  document.body.classList.add("authPage");
  document.querySelector("header").style.display="flex";
  logout.classList.add("hidden");
@@ -1851,6 +1852,7 @@ function applyPSPanchayatScope(pid){
  dashboard();
 }
 function dashboard(){
+ document.title="PanchayatX | Candidate Dashboard";
  document.body.classList.remove("authPage");
  document.querySelector("header").style.display="none";
  app.classList.toggle("psMemberScope",isPanchayatSamitiMemberLogin());
@@ -2287,6 +2289,16 @@ async function submitManualPayment(){
 function setDashboardRoute(route,replace=false){
  const clean=String(route||"").replace(/^\/+|\/+$/g,"");
  const url=clean?"/dashboard/?page="+encodeURIComponent(clean):"/dashboard/";
+ const titles={
+   "":"PanchayatX | Candidate Dashboard",
+   "search":"PanchayatX | Voter Search",
+   "voter-slip":"PanchayatX | Voter Slip",
+   "visit":"PanchayatX | Visit Tracking",
+   "new-voter":"PanchayatX | New Voter Report",
+   "stats":"PanchayatX | Statistics",
+   "a-z":"PanchayatX | A-Z Voter List"
+ };
+ document.title=titles[clean]||"PanchayatX | Candidate Dashboard";
  const current=location.pathname+location.search;
  if(current!==url){
    history[replace?"replaceState":"pushState"]({},document.title,url);
@@ -2294,7 +2306,7 @@ function setDashboardRoute(route,replace=false){
 }
 function restoreDashboardRoute(){
  const path=String(new URLSearchParams(location.search).get("page")||"").trim();
- if(!path)return;
+ if(!path){document.title="PanchayatX | Candidate Dashboard";return;}
  if(path==="search"){openWorkspace("info",true);return}
  if(path==="voter-slip"){openWorkspace("slip",true);return}
  if(path==="visit"){openVisitWorkspace(true);return}
