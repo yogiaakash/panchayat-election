@@ -976,7 +976,14 @@ function signupView(){
     <div class="signupFormGrid">
       <div class="signupField"><label>District *</label><select id="suDistrict" onchange="signupFilterPS()"><option>Loading…</option></select></div>
       <div class="signupField"><label>Panchayat Samiti *</label><select id="suPS" onchange="signupFilterGP()" disabled><option>पहले जिला चुनें</option></select></div>
-      <div class="signupField signupFull"><label>Gram Panchayat *</label><select id="suGP" onchange="signupSelectGP()" disabled><option>पहले Panchayat Samiti चुनें</option></select></div>
+      <div id="suSingleGPWrap" class="signupField signupFull"><label>Gram Panchayat *</label><select id="suGP" onchange="signupSelectGP()" disabled><option>पहले Panchayat Samiti चुनें</option></select></div>
+      <div id="suMultiGPWrap" class="signupField signupFull" style="display:none">
+        <label>Gram Panchayats * <span class="muted">(2 या 3 चुनें)</span></label>
+        <div id="suMultiGPList" style="display:grid;gap:8px;padding:10px;border:1px solid #cddfd5;border-radius:12px;background:#fff">
+          <span class="muted">पहले Panchayat Samiti चुनें</span>
+        </div>
+        <div id="suMultiGPCount" class="hindiInputHint">0 selected • minimum 2, maximum 3</div>
+      </div>
       <div id="suWardWrap" class="signupField signupFull" style="display:none"><label>Ward Number *</label><select id="suWard" disabled><option value="">पहले Gram Panchayat चुनें</option></select><div class="hindiInputHint">Ward Panch account को केवल selected ward का voter data मिलेगा।</div></div>
     </div>
 
@@ -1010,7 +1017,7 @@ function signupView(){
 }
 async function signupFilterPS(){
  const d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS"),gp=document.getElementById("suGP");
- selectedSignupPanchayatId=null;resetSignupWard();
+ selectedSignupPanchayatId=null;window.signupCurrentGPOptions=[];resetSignupWard();
  ps.disabled=true;gp.disabled=true;
  ps.innerHTML='<option>Loading…</option>';gp.innerHTML='<option value="">पहले Panchayat Samiti चुनें</option>';
  if(!d){ps.innerHTML='<option value="">पहले जिला चुनें</option>';return}
@@ -1037,12 +1044,15 @@ async function signupFilterGP(){
   const {data,error}=await sb.rpc("get_signup_gram_panchayats",{p_district:d,p_panchayat_samiti:psv});
   if(error)throw error;
   const vals=data||[];
+  window.signupCurrentGPOptions=[];
   gp.innerHTML='<option value="">Gram Panchayat चुनें</option>';
   for(const x of vals){
    const hi=await hindiPlaceName(x.gram_panchayat);
+   window.signupCurrentGPOptions.push({id:String(x.id),name:String(x.gram_panchayat||""),hi:String(hi||x.gram_panchayat||"")});
    gp.insertAdjacentHTML("beforeend",'<option value="'+e(x.id)+'">'+e(hi)+'</option>');
   }
   gp.disabled=false;
+  await renderSignupMultiPanchayats();
  }catch(err){gp.innerHTML='<option value="">Load नहीं हुआ</option>';document.getElementById("signupMsg").textContent="Gram Panchayat load नहीं हुई: "+(err.message||err)}
 }
 function isSignupWardPanch(){
@@ -1052,8 +1062,37 @@ function resetSignupWard(){
  const ward=document.getElementById("suWard");
  if(ward){ward.disabled=true;ward.innerHTML='<option value="">पहले Gram Panchayat चुनें</option>'}
 }
+async function isSignupPanchayatSamitiMember(){
+ return String(document.getElementById("suPost")?.value||"").trim()==="Panchayat Samiti Member";
+}
+function selectedSignupMultiPanchayats(){
+ return [...document.querySelectorAll('#suMultiGPList input[type="checkbox"]:checked')].map(x=>x.value);
+}
+function updateSignupMultiGPCount(changed=null){
+ let selected=selectedSignupMultiPanchayats();
+ if(selected.length>3 && changed){
+   changed.checked=false;
+   selected=selectedSignupMultiPanchayats();
+ }
+ const el=document.getElementById("suMultiGPCount");
+ if(el)el.textContent=selected.length+" selected • minimum 2, maximum 3";
+}
 async function toggleSignupWardField(){
  const wrap=document.getElementById("suWardWrap"),ward=document.getElementById("suWard");
+ const singleWrap=document.getElementById("suSingleGPWrap");
+ const multiWrap=document.getElementById("suMultiGPWrap");
+ const isPS=isSignupPanchayatSamitiMember();
+ if(singleWrap)singleWrap.style.display=isPS?"none":"";
+ if(multiWrap)multiWrap.style.display=isPS?"":"none";
+
+ if(isPS){
+   selectedSignupPanchayatId=null;
+   resetSignupWard();
+   if(wrap)wrap.style.display="none";
+   await renderSignupMultiPanchayats();
+   return;
+ }
+
  if(!wrap||!ward)return;
  if(isSignupWardPanch()){
    wrap.style.display="";
@@ -1063,6 +1102,23 @@ async function toggleSignupWardField(){
    wrap.style.display="none";
    resetSignupWard();
  }
+}
+async function renderSignupMultiPanchayats(){
+ const list=document.getElementById("suMultiGPList");
+ if(!list)return;
+ if(!isSignupPanchayatSamitiMember()){
+   list.innerHTML='<span class="muted">Panchayat Samiti Member चुनने पर 2–3 Panchayats select करें।</span>';
+   updateSignupMultiGPCount();
+   return;
+ }
+ const opts=Array.isArray(window.signupCurrentGPOptions)?window.signupCurrentGPOptions:[];
+ if(!opts.length){
+   list.innerHTML='<span class="muted">पहले District और Panchayat Samiti चुनें।</span>';
+   updateSignupMultiGPCount();
+   return;
+ }
+ list.innerHTML=opts.map(x=>'<label style="display:flex;align-items:center;gap:9px;margin:0;padding:8px 9px;border:1px solid #e2ece6;border-radius:10px;cursor:pointer"><input type="checkbox" value="'+e(x.id)+'" onchange="updateSignupMultiGPCount(this)" style="width:auto;min-height:auto"><span>'+e(x.hi)+'</span></label>').join("");
+ updateSignupMultiGPCount();
 }
 async function loadSignupWards(){
  const ward=document.getElementById("suWard");
@@ -1112,10 +1168,12 @@ async function createCandidateAccount(){
  d=document.getElementById("suDistrict").value,ps=document.getElementById("suPS").value,gp=document.getElementById("suGP").value,mobile=document.getElementById("suMobile").value.replace(/\D/g,""),wa=document.getElementById("suWhatsApp").value.replace(/\D/g,""),
  email=document.getElementById("suEmail").value.trim(),pw=document.getElementById("suPassword").value,pw2=document.getElementById("suPassword2").value;
  let nameHi=document.getElementById("suNameHi").value.trim();
- const pId=selectedSignupPanchayatId;
+ const panchayatIds=post==="Panchayat Samiti Member"?selectedSignupMultiPanchayats():[];
+ const pId=post==="Panchayat Samiti Member"?(panchayatIds[0]||null):selectedSignupPanchayatId;
  const wardNo=post==="Ward Panch" ? String(document.getElementById("suWard")?.value||"").trim() : "";
  if(!name||!post||!pId||mobile.length!==10||!email||pw.length<6||pw!==pw2){msg.textContent="कृपया सभी required details सही भरें। Password कम से कम 6 characters का होना चाहिए।";return}
  if(post==="Ward Panch"&&!wardNo){msg.textContent="Ward Panch के लिए Ward Number चुनना आवश्यक है।";return}
+ if(post==="Panchayat Samiti Member"&&(panchayatIds.length<2||panchayatIds.length>3)){msg.textContent="Panchayat Samiti Member के लिए 2 या 3 Gram Panchayat चुनना आवश्यक है।";return}
  // Always persist the visible Hindi candidate name, never the raw English IME buffer.
  // If an older browser/input flow leaves English here, transliterate once before signup.
  if(!hasHindiText(nameHi)){
@@ -1132,7 +1190,7 @@ async function createCandidateAccount(){
  const file=document.getElementById("suPhoto")?.files?.[0];
  if(file){try{photo=await compressSignupPhoto(file)}catch(err){msg.textContent=err.message;return}}
  try{
-  const res=await fetch(SUPABASE_URL+"/functions/v1/candidate-self-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password:pw,candidate_name:name,candidate_name_hindi:nameHi,election_post:post,ward_no:wardNo||null,mobile,whatsapp:wa,panchayat_id:pId,photo_url:photo})});
+  const res=await fetch(SUPABASE_URL+"/functions/v1/candidate-self-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password:pw,candidate_name:name,candidate_name_hindi:nameHi,election_post:post,ward_no:wardNo||null,panchayat_ids:panchayatIds,mobile,whatsapp:wa,panchayat_id:pId,photo_url:photo})});
   const out=await res.json().catch(()=>({}));
   if(!res.ok||!out.success)throw new Error(out.error||"Account create नहीं हो सका");
   const {error:loginError}=await sb.auth.signInWithPassword({email,password:pw});
@@ -1203,7 +1261,7 @@ async function prepareCandidateHindiHeader(){
    }catch(_){}
  }
 }
-function refreshCandidateHeaderText(){
+async function refreshCandidateHeaderText(){
  if(!candidate)return;
  const nameEl=document.querySelector(".demoCandidateName");
  const gpEl=document.querySelector(".demoGp");
@@ -1211,7 +1269,14 @@ function refreshCandidateHeaderText(){
  const districtEl=document.querySelector(".demoDistrict");
  const wardEl=document.querySelector(".demoWard");
  if(nameEl) nameEl.textContent=candidate.hindi_name||candidate.name||"";
- if(gpEl) gpEl.textContent="ग्राम पंचायत : "+(candidate.hindi_gram_panchayat||candidate.gram_panchayat||"");
+ if(gpEl){
+   if(String(candidate.post||"")==="Panchayat Samiti Member"&&Array.isArray(candidate.gram_panchayats)&&candidate.gram_panchayats.length){
+     const names=await Promise.all(candidate.gram_panchayats.map(x=>hindiPlaceName(x).catch(()=>x)));
+     gpEl.textContent="ग्राम पंचायतें : "+names.join(", ");
+   }else{
+     gpEl.textContent="ग्राम पंचायत : "+(candidate.hindi_gram_panchayat||candidate.gram_panchayat||"");
+   }
+ }
  if(psEl) psEl.textContent="पंचायत समिति : "+(candidate.hindi_panchayat_samiti||candidate.panchayat_samiti||"");
  if(districtEl) districtEl.textContent="जिला : "+(candidate.hindi_district||candidate.district||"");
  if(wardEl) wardEl.textContent="वार्ड संख्या : "+String(Number(candidate.ward_no)||candidate.ward_no||"");
@@ -1267,6 +1332,8 @@ async function load(userOverride=null){
    hindi_name:meta.candidate_name_hindi||meta.candidate_name||"पंचायत कार्यक्षेत्र",
    post:meta.election_post||"",
    ward_no:meta.ward_no||"",
+   panchayat_ids:Array.isArray(meta.panchayat_ids)?meta.panchayat_ids:[],
+   gram_panchayats:Array.isArray(meta.gram_panchayats)?meta.gram_panchayats:[],
    active:true,
    gram_panchayat:meta.gram_panchayat||"",
    panchayat_samiti:meta.panchayat_samiti||"",
@@ -1354,6 +1421,8 @@ async function load(userOverride=null){
        expectedCount=Number(payload?.master_count||expectedCount||0);
        if(payload?.panchayat_id) currentAccess.panchayat_id=payload.panchayat_id;
        if(payload?.ward_no) candidate.ward_no=payload.ward_no;
+       if(Array.isArray(payload?.panchayat_ids)) candidate.panchayat_ids=payload.panchayat_ids;
+       if(Array.isArray(payload?.gram_panchayats)) candidate.gram_panchayats=payload.gram_panchayats;
        if(payload?.election_post) candidate.post=payload.election_post;
        if(typeof payload?.full_access==="boolean") currentAccess.access_level=payload.full_access?"full":"masked";
        console.log("Candidate voter page:",offset,"+",rows.length,"of",expectedCount);
@@ -1468,6 +1537,8 @@ async function load(userOverride=null){
        }
        candidate.post=profile.election_post||profile.post||candidate.post;
        candidate.ward_no=profile.ward_no||candidate.ward_no||"";
+       candidate.panchayat_ids=Array.isArray(profile.assigned_panchayat_ids)&&profile.assigned_panchayat_ids.length?profile.assigned_panchayat_ids:(candidate.panchayat_ids||[]);
+       candidate.gram_panchayats=Array.isArray(profile.assigned_gram_panchayats)&&profile.assigned_gram_panchayats.length?profile.assigned_gram_panchayats:(candidate.gram_panchayats||[]);
 
        // Profile loads after the first dashboard render; update the visible
        // candidate photo immediately instead of waiting for another login.
@@ -1482,7 +1553,7 @@ async function load(userOverride=null){
      candidate.hindi_panchayat_samiti=await hindiPlaceName(candidate.panchayat_samiti);
      candidate.hindi_district=await hindiPlaceName(candidate.district);
      await prepareCandidateHindiHeader();
-     refreshCandidateHeaderText();
+     await refreshCandidateHeaderText();
      const wardScoped=String(candidate.post||"")==="Ward Panch"&&String(candidate.ward_no||"").trim();
      const allowedVoterIds=wardScoped?new Set(voters.map(v=>String(v.id))):null;
      const scopedContacts=wardScoped?(cs?.data||[]).filter(x=>allowedVoterIds.has(String(x.voter_id))):(cs?.data||[]);
@@ -1547,6 +1618,7 @@ function openCandidateProfile(){
    <div><label>Panchayat Samiti</label><input value="${e(c.panchayat_samiti||"")}" readonly></div>
    <div><label>Gram Panchayat</label><input value="${e(c.gram_panchayat||"")}" readonly></div>
    ${String(c.post||"")==="Ward Panch"?`<div><label>Ward Number</label><input value="${e(String(Number(c.ward_no)||c.ward_no||""))}" readonly></div>`:""}
+   ${String(c.post||"")==="Panchayat Samiti Member"?`<div class="signupFull"><label>Assigned Gram Panchayats</label><input value="${e((c.gram_panchayats||[]).join(", "))}" readonly></div>`:""}
   </div>
   <div id="profileMsg" class="notice" style="margin-top:12px">आप अपना mobile/WhatsApp और profile photo update कर सकते हैं। Panchayat और election post account से जुड़े हैं।</div>
   <button class="btn primary full" style="margin-top:10px" onclick="saveCandidateProfile()">💾 Save Profile Changes</button>
@@ -1629,7 +1701,7 @@ function dashboard(){
     <div style="min-width:0;flex:1">
      <span class="demoCandidateName">${e(c.hindi_name||c.name||"")}</span>
      <span class="demoPost">${c.post?e(hindiPostName(c.post)):"अधिकृत पंचायत कार्यक्षेत्र"}</span>
-     <span class="demoGp">ग्राम पंचायत : ${e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
+     <span class="demoGp">${String(c.post||"")==="Panchayat Samiti Member"&&Array.isArray(c.gram_panchayats)&&c.gram_panchayats.length?"ग्राम पंचायतें : "+e(c.gram_panchayats.join(", ")):"ग्राम पंचायत : "+e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
      ${String(c.post||"")==="Ward Panch"?`<span class="demoSub demoWard">वार्ड संख्या : ${e(String(Number(c.ward_no)||c.ward_no||""))}</span>`:""}
      <span class="demoSub demoPs">पंचायत समिति : ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
      <span class="demoSub demoDistrict">जिला : ${e(c.hindi_district||c.district||"")}</span>
