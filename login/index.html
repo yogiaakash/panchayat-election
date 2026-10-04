@@ -707,6 +707,19 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 .miniSlip{min-height:112px;border:1px dashed #7f978b;background:#fff;padding:5px;font-size:7px;line-height:1.35}
 .miniSlip .mh{background:#087451;color:#fff;text-align:center;padding:3px;font-weight:900;margin:-5px -5px 4px}
 .miniSlip .orange{background:#e87516;color:#fff;padding:2px 3px;font-weight:900;margin:3px -2px}
+
+/* FINAL compact Visit filter override */
+@media(max-width:649px){
+ #opsReports .visitFilterCard{padding:7px 8px!important;margin:0!important}
+ #opsReports .visitFilterCard .title{font-size:15px!important;line-height:1.1!important;margin:0 0 5px!important}
+ #opsReports .visitFilterRow{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:5px!important}
+ #opsReports .visitFilterRow>div{min-width:0!important}
+ #opsReports .visitStatusRow{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important;align-items:end!important;margin-top:4px!important}
+ #opsReports .visitFilterCard label{font-size:9px!important;line-height:1!important;margin:0 0 2px!important}
+ #opsReports .visitFilterCard select{width:100%!important;min-width:0!important;min-height:32px!important;height:32px!important;padding:4px 7px!important;font-size:10.5px!important;border-radius:8px!important}
+ #opsReports .visitRemaining{margin:0 0 7px!important;font-size:9px!important;white-space:nowrap!important}
+ #opsReports .visitRemaining input{width:13px!important;height:13px!important;min-height:13px!important;padding:0!important}
+}
 </style>
 <style id="home-final-fix">
 /* FINAL HOME UI SAFETY OVERRIDES */
@@ -2837,7 +2850,7 @@ function focusAddition(){openAdditionWorkspace()}
 function renderOpsReport(mode){
  const box=document.getElementById("opsReports");if(!box)return;box.classList.remove("hidden");const wards=smart(voters.map(v=>v.ward));
  if(mode==="visit"){
-  box.innerHTML=`<div class="card visitFilterCard" style="margin:0"><div class="title">🚶 Visit Tracking — Family-wise Status Report</div><div class="muted">Ward / Colony चुनें और contact status देखें।</div><div class="visitFilterRow"><div><label>Ward</label><select id="vrWard" onchange="syncVisitColony()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option value="${e(w)}">${e(w)}</option>`).join("")}</select></div><div><label>Colony</label><select id="vrColony" onchange="renderVisitRows()"><option value="">सभी कॉलोनी</option></select></div></div><div class="visitStatusRow"><div><label>Status</label><select id="vrStatus" onchange="renderVisitRows()"><option value="">सभी Status</option><option value="contacted">दूरभाष / अन्य माध्यम से संपर्क किया</option><option value="met">घर पर संपर्क / भेंट की</option><option value="pending">घर पर भेंट लंबित</option><option value="follow_up">मतदाता नहीं मिला</option><option value="NO_STATUS">अभी कोई status नहीं</option></select></div><label class="visitRemaining"><input id="vrRemaining" type="checkbox" onchange="renderVisitRows()"> केवल बाकी घर</label></div></div><div class="card visitSummaryCard"><div class="title">📊 संपर्क स्थिति सारांश</div><div class="grid2 visitSummaryGrid">
+  box.innerHTML=`<div class="card visitFilterCard" style="margin:0;padding:7px 8px!important"><div class="title" style="font-size:15px!important;line-height:1.1!important;margin:0 0 5px!important">🚶 Visit Tracking</div><div class="visitFilterRow" style="display:grid!important;grid-template-columns:1fr 1fr!important;gap:5px!important"><div><label style="margin:0 0 2px!important">Ward</label><select id="vrWard" style="min-height:32px!important;padding:5px 7px!important" onchange="syncVisitColony()"><option value="">सभी वार्ड</option>${wards.map(w=>`<option value="${e(w)}">${e(w)}</option>`).join("")}</select></div><div><label style="margin:0 0 2px!important">Colony</label><select id="vrColony" style="min-height:32px!important;padding:5px 7px!important" onchange="renderVisitRows()"><option value="">सभी कॉलोनी</option></select></div></div><div class="visitStatusRow" style="display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important;align-items:end!important;margin-top:4px!important"><div><label style="margin:0 0 2px!important">Status</label><select id="vrStatus" style="min-height:32px!important;padding:5px 7px!important" onchange="renderVisitRows()"><option value="">सभी Status</option><option value="contacted">दूरभाष / अन्य माध्यम से संपर्क किया</option><option value="met">घर पर संपर्क / भेंट की</option><option value="pending">घर पर भेंट लंबित</option><option value="follow_up">मतदाता नहीं मिला</option><option value="NO_STATUS">अभी कोई status नहीं</option></select></div><label class="visitRemaining" style="display:flex!important;align-items:center!important;gap:4px!important;margin:0 0 7px!important;white-space:nowrap!important;font-size:9px!important"><input id="vrRemaining" type="checkbox" style="width:auto!important;min-height:auto!important;margin:0!important" onchange="renderVisitRows()"> बाकी घर</label></div></div><div class="card visitSummaryCard"><div class="title">📊 संपर्क स्थिति सारांश</div><div class="grid2 visitSummaryGrid">
 <button class="stat visitStat" onclick="setVisitFilter('')"><b id="sumTotal">0</b><small>कुल मकान</small></button>
 <button class="stat visitStat" onclick="setVisitFilter('met')"><b id="sumVisited">0</b><small>घर पर भेंट की</small></button>
 <button class="stat visitStat" onclick="setVisitFilter('contacted')"><b id="sumPhone">0</b><small>दूरभाष / अन्य संपर्क</small></button>
