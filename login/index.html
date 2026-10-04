@@ -1062,7 +1062,7 @@ function resetSignupWard(){
  const ward=document.getElementById("suWard");
  if(ward){ward.disabled=true;ward.innerHTML='<option value="">पहले Gram Panchayat चुनें</option>'}
 }
-async function isSignupPanchayatSamitiMember(){
+function isSignupPanchayatSamitiMember(){
  return String(document.getElementById("suPost")?.value||"").trim()==="Panchayat Samiti Member";
 }
 function selectedSignupMultiPanchayats(){
