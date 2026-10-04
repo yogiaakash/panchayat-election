@@ -248,6 +248,29 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
  line-height:1.45;
 }
 
+.wardPdfActionRow{
+ display:grid!important;
+ grid-template-columns:1.5fr .8fr 1fr!important;
+ gap:6px!important;
+ align-items:stretch!important
+}
+.wardPdfActionRow .btn{
+ width:100%!important;
+ min-width:0!important;
+ white-space:normal!important;
+ line-height:1.15!important
+}
+@media(max-width:420px){
+ .wardPdfActionRow{
+  grid-template-columns:1.45fr .8fr 1fr!important;
+  gap:5px!important
+ }
+ .wardPdfActionRow .btn{
+  font-size:9.5px!important;
+  padding:6px 5px!important;
+ }
+}
+
 /* Compact Ward-wise Voter Slip generator for mobile */
 #tabSlip>.card:first-child{
  padding:10px 11px!important;
@@ -2112,8 +2135,8 @@ function dashboard(){
   </select>
   <div class="muted" style="margin-top:5px">कॉलोनी/मकान विकल्प में एक ही परिवार के मतदाता साथ-साथ आएँगे। Slip का डिजाइन वही रहेगा।</div>
   <div id="slipCount" class="notice" style="margin-top:8px">पहले Ward चुनें</div>
-  <button id="generateWardBtn" class="btn green full" style="margin-top:10px" onclick="generateExactWardPdf()">📄 चुने हुए क्रम में Ward PDF बनाएं</button>
-  <div class="grid2" style="margin-top:8px">
+  <div class="wardPdfActionRow" style="margin-top:6px">
+   <button id="generateWardBtn" class="btn green" onclick="generateExactWardPdf()">📄 चुने हुए क्रम में Ward PDF बनाएं</button>
    <button class="btn soft" onclick="generateWardPdfByMode(&quot;serial&quot;)">🔢 क्रम संख्या</button>
    <button class="btn soft" onclick="generateWardPdfByMode(&quot;colony_house&quot;)">🏘️ कॉलोनी + मकान</button>
   </div>
