@@ -13,5 +13,15 @@
       "destination": "https://panchayatx.com/:path*",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/dashboard",
+      "destination": "/login/index.html"
+    },
+    {
+      "source": "/dashboard/",
+      "destination": "/login/index.html"
+    }
   ]
 }
