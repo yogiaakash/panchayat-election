@@ -2592,6 +2592,23 @@ async function startRazorpayCheckout(){
       contact:candidate?.mobile||""
     },
     notes:{purpose:"PanchayatX Lifetime Full Access"},
+    config:{
+      display:{
+        blocks:{
+          upi:{
+            name:"Pay with PhonePe / UPI",
+            instruments:[
+              {method:"upi"}
+            ]
+          }
+        },
+        sequence:["block.upi"],
+        preferences:{
+          show_default_blocks:true
+        }
+      }
+    },
+    theme:{color:"#087451"},
     handler:async function(resp){
       try{
         let {data:{session:verifySession}}=await sb.auth.getSession();
@@ -2670,8 +2687,8 @@ async function showUpgradePrompt(){
   })()}
 
   <div class="notice" style="margin:8px 0 14px"><b>Payable Amount: <span id="fullAccessCurrentPrice">₹${amount.toLocaleString("en-IN")}</span></b></div>
-  <button class="btn primary full" onclick="startRazorpayCheckout()">💳 Pay Securely with Razorpay</button>
-  <div class="muted" style="font-size:11px;margin-top:7px">Live secure payment • UPI, Cards, Netbanking और उपलब्ध payment methods.</div>
+  <button class="btn primary full" onclick="startRazorpayCheckout()">📱 Pay with PhonePe / UPI via Razorpay</button>
+  <div class="muted" style="font-size:11px;margin-top:7px">Razorpay secure payment • Mobile पर UPI/PhonePe पहले दिखेगा; Cards और Netbanking भी उपलब्ध रहेंगे.</div>
   <button class="btn ghost full" style="margin-top:9px" onclick="fullAccessPayDlg.close()">बंद करें</button>
  </div>`;
  document.body.appendChild(dlg);dlg.showModal();
