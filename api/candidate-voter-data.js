@@ -28,10 +28,25 @@ export default async function handler(req,res){
     // to a free browser session.
     let fullAccess=false;
     if(panchayatId && authUser?.id){
-      const payUrl=base+"/rest/v1/lifetime_payment_records?select=id&user_id=eq."+encodeURIComponent(authUser.id)+"&panchayat_id=eq."+encodeURIComponent(panchayatId)+"&status=eq.paid&limit=1";
-      const pr=await fetch(payUrl,{method:"GET",headers:{"Authorization":auth,"apikey":key,"Accept":"application/json"}});
-      if(pr.ok){
-        try{const pd=await pr.json();fullAccess=Array.isArray(pd)&&pd.length>0}catch{}
+      // Admin approval/payment is authoritative through panchayat_access.
+      const accessUrl=base+"/rest/v1/panchayat_access?select=access_level,status,expires_at&user_id=eq."+encodeURIComponent(authUser.id)+"&panchayat_id=eq."+encodeURIComponent(panchayatId)+"&status=eq.active&order=created_at.desc&limit=1";
+      const ar=await fetch(accessUrl,{method:"GET",headers:{"Authorization":auth,"apikey":key,"Accept":"application/json"}});
+      if(ar.ok){
+        try{
+          const ad=await ar.json();
+          const row=Array.isArray(ad)?ad[0]:null;
+          const level=String(row?.access_level||"free").trim().toLowerCase();
+          const expired=row?.expires_at && new Date(row.expires_at)<=new Date();
+          fullAccess=!expired && ["full","paid","lifetime","admin"].includes(level);
+        }catch{}
+      }
+      // Backward compatibility: a verified lifetime payment also grants full access.
+      if(!fullAccess){
+        const payUrl=base+"/rest/v1/lifetime_payment_records?select=id&user_id=eq."+encodeURIComponent(authUser.id)+"&panchayat_id=eq."+encodeURIComponent(panchayatId)+"&status=eq.paid&limit=1";
+        const pr=await fetch(payUrl,{method:"GET",headers:{"Authorization":auth,"apikey":key,"Accept":"application/json"}});
+        if(pr.ok){
+          try{const pd=await pr.json();fullAccess=Array.isArray(pd)&&pd.length>0}catch{}
+        }
       }
     }
 
