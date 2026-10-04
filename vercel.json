@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "host",
+          "value": "panchayat-election-sable.vercel.app"
+        }
+      ],
+      "destination": "https://panchayatx.com/:path*",
+      "permanent": true
+    }
+  ]
+}
