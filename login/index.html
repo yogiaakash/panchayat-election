@@ -707,6 +707,7 @@ body.androidApp.authPage .signupActions{grid-template-columns:1fr!important}
   body.androidApp.authPage .signupPremiumCard{padding-left:14px!important;padding-right:14px!important}
 }
 </style>
+<style id="ps-member-global-scope">#app.moduleOpen.psMemberScope #workspaceAfterHome{padding-top:238px!important}#app.psMemberScope .demoHead select#psGlobalPanchayat{margin:0!important}@media(max-width:360px){#app.moduleOpen.psMemberScope #workspaceAfterHome{padding-top:222px!important}}</style>
 </head>
 <body>
 <header><a class="brand authBrand" href="/" aria-label="PanchayatX Home"><span class="authBrandName">Panchayat<b>X</b></span><small>हर पंचायत, डिजिटल पंचायत</small></a><div class="authHeaderRight"><a class="authHomeLink" href="/">होम</a><button id="logout" class="btn ghost hidden">Logout</button></div></header>
@@ -1744,6 +1745,7 @@ function applyPSPanchayatScope(pid){
 function dashboard(){
  document.body.classList.remove("authPage");
  document.querySelector("header").style.display="none";
+ app.classList.toggle("psMemberScope",isPanchayatSamitiMemberLogin());
  const c=candidate;
  const total=voters.length;
  const totalMaster=(typeof masterVoterCount==="number"&&masterVoterCount)?masterVoterCount:voters.length;
@@ -1766,7 +1768,7 @@ function dashboard(){
     <div style="min-width:0;flex:1">
      <span class="demoCandidateName">${e(c.hindi_name||c.name||"")}</span>
      <span class="demoPost">${c.post?e(hindiPostName(c.post)):"अधिकृत पंचायत कार्यक्षेत्र"}</span>
-     <span class="demoGp">${String(c.post||"")==="Panchayat Samiti Member"&&Array.isArray(c.gram_panchayats)&&c.gram_panchayats.length?"ग्राम पंचायतें : "+e(c.gram_panchayats.join(", ")):"ग्राम पंचायत : "+e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
+     <span class="demoGp">${String(c.post||"")==="Panchayat Samiti Member"&&Array.isArray(c.gram_panchayats)&&c.gram_panchayats.length?"क्षेत्र : "+e(c.gram_panchayats.length)+" ग्राम पंचायतें":"ग्राम पंचायत : "+e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
      ${String(c.post||"")==="Ward Panch"?`<span class="demoSub demoWard">वार्ड संख्या : ${e(String(Number(c.ward_no)||c.ward_no||""))}</span>`:""}
      <span class="demoSub demoPs">पंचायत समिति : ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
      <span class="demoSub demoDistrict">जिला : ${e(c.hindi_district||c.district||"")}</span>
@@ -1775,8 +1777,8 @@ function dashboard(){
      <button class="demoLogout" onclick="logout.click()">Logout</button>
     </div>
    </div>
+   ${psGlobalSelectorHtml()}
   </div>
-  ${psGlobalSelectorHtml()}
   ${currentAccess.access_level!=="full"?`<div class="freeAccessBanner"><b>🔒 Masked Access</b><br>इस पंचायत का पूरा voter data उपलब्ध है, लेकिन नाम, संबंधी और Voter ID masked हैं।<br>Statistics भी masked हैं।<button class="btn primary full" onclick="showUpgradePrompt()">🔓 Full Data Unlock करें</button></div>`:""}
   <div class="demoMain">
    <div class="demoGrid2">
@@ -2108,16 +2110,20 @@ function scrollToHome(){
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function openWorkspace(k){
+ if(!ensurePSPanchayatSelected())return;
  showWorkspace();setModuleVisibility(k);
  if(k==="stats")renderPanchayatStats();
 }
 function openVisitWorkspace(){
+ if(!ensurePSPanchayatSelected())return;
  showWorkspace();setModuleVisibility("ops");renderOpsReport("visit");
 }
 function openAdditionWorkspace(){
+ if(!ensurePSPanchayatSelected())return;
  showWorkspace();setModuleVisibility("ops");renderOpsReport("supp2");
 }
 function openAZWorkspace(){
+ if(!ensurePSPanchayatSelected())return;
  showWorkspace();setModuleVisibility("az");initAZLetters();renderAZ();
 }
 function focusVisit(){openVisitWorkspace()}
@@ -2218,6 +2224,7 @@ function sortWardVoters(list,mode){
 }
 function generateWardPdfByMode(mode){const sel=document.getElementById("slipSortMode");if(sel)sel.value=mode;return generateExactWardPdf();}
 async function generateExactWardPdf(){
+ if(!ensurePSPanchayatSelected())return;
  const w=document.getElementById("slipWard")?.value;if(!w){alert("पहले Ward चुनें।");return}
  const raw=voters.filter(v=>String(v.ward)===String(w));if(!raw.length){alert("इस Ward में voter data नहीं मिला।");return}
  const mode=document.getElementById("slipSortMode")?.value||"serial";const list=sortWardVoters(raw,mode);const modeLabel=mode==="colony_house"?"कॉलोनी + मकान + क्रम संख्या":mode==="house"?"मकान + क्रम संख्या":"क्रम संख्या";
@@ -2227,6 +2234,7 @@ async function generateExactWardPdf(){
 }
 async function shareGeneratedWardPdf(){if(!generatedWardPdfFile){alert("पहले PDF Generate करें।");return}await sharePdfFile(generatedWardPdfFile,"Ward Voter Information Slips","मतदाता सूची संदर्भ हेतु Ward voter slips");}
 function renderPanchayatStats(){
+ if(isPanchayatSamitiMemberLogin()&&!selectedPSPanchayatId)return;
  const box=document.getElementById("pStats");if(!box)return;
  const isMale=x=>/पुरुष|पुरूष|male|^m$/i.test(x.gender||""),isFemale=x=>/स्त्री|महिला|female|^f$/i.test(x.gender||"");
  const male=voters.filter(isMale).length,female=voters.filter(isFemale).length;
