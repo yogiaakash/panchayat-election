@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>राजस्थान पंचायत चुनाव तिथि 2026 | PanchayatX</title>
+<meta name="description" content="राजस्थान पंचायत चुनाव 2026 की ग्राम पंचायत, पंचायत समिति और जिला परिषद मतदान तिथि देखें।">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--g:#087451;--g2:#055c43;--o:#f47b00;--bg:#f3f7f4;--ink:#173d32;--muted:#6c7e76;--line:#d8e6de}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif;color:var(--ink)}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--g2),#0a9464);color:#fff;border-bottom:4px solid #d8aa3d}
+.head{max-width:760px;margin:auto;padding:15px 16px;display:flex;align-items:center;gap:12px}.back{width:38px;height:38px;border-radius:12px;border:1px solid #ffffff55;background:#ffffff18;color:#fff;font-size:20px}.brand{font-weight:950;font-size:20px}.brand b{color:#ffd264}.sub{font-size:10px;opacity:.86;margin-top:2px}
+main{max-width:760px;margin:auto;padding:14px 12px 40px}.hero{background:linear-gradient(145deg,#075b43,#0a9364);color:#fff;border-radius:20px;padding:18px;box-shadow:0 12px 30px #06482f22}.hero h1{font-size:23px;margin:0 0 7px}.hero p{font-size:12px;line-height:1.55;margin:0;opacity:.93}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin-top:12px;box-shadow:0 7px 22px #17342c0d}.title{font-size:17px;font-weight:950;color:#064b38;margin-bottom:10px}
+.typeGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.typeBtn{border:1px solid #d6e4dd;border-radius:15px;background:#f8fbf9;color:#315648;padding:14px 8px;font-weight:900;line-height:1.35}.typeBtn.active{background:#e6f5ed;border-color:#0b8b60;color:#076247;box-shadow:inset 0 0 0 1px #0b8b60}
+label{display:block;font-size:11.5px;font-weight:850;color:#40574c;margin:11px 0 5px}select{width:100%;min-height:46px;border:1px solid #cddfd5;border-radius:12px;background:#fbfdfc;padding:10px 11px;font:inherit;color:#18392d}select:focus{outline:0;border-color:#0b8b60;box-shadow:0 0 0 3px #0b8b6017}select:disabled{background:#f1f4f2;color:#9aa59f}
+.loader{font-size:11px;color:var(--muted);margin-top:9px}.result{display:none}.result.show{display:block}.phaseTag{display:inline-flex;align-items:center;gap:6px;background:#fff3dd;color:#8c5200;border:1px solid #f3d39b;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:900}
+.place{margin-top:12px;padding:12px;border-radius:14px;background:#f6faf8;border:1px solid #dce9e2}.place b{display:block;font-size:16px;color:#084f3c}.place span{display:block;font-size:11px;color:#687b73;margin-top:4px;line-height:1.45}
+.dateHero{margin-top:12px;border-radius:17px;padding:16px;background:linear-gradient(135deg,#e9f7f0,#f8fcfa);border:1px solid #cfe8dc}.dateHero small{display:block;font-size:10.5px;color:#587269;font-weight:800}.dateHero strong{display:block;font-size:26px;color:#075d44;margin-top:3px}.dateHero span{display:block;font-size:11px;margin-top:4px;color:#52695f}
+.timeline{display:grid;gap:8px;margin-top:12px}.row{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start;border:1px solid #e1ece6;border-radius:13px;padding:10px;background:#fbfdfc}.ico{width:34px;height:34px;border-radius:11px;background:#e8f5ed;display:grid;place-items:center}.row b{display:block;font-size:12.5px}.row span{display:block;font-size:11px;color:#6a7b74;margin-top:3px}.warn{display:none;margin-top:12px;padding:11px 12px;border-radius:13px;background:#fff7e8;border:1px solid #eed5a4;color:#7a5a24;font-size:11px;line-height:1.5}.foot{font-size:10.5px;color:#74837c;line-height:1.55;margin-top:12px;padding:0 2px}
+@media(max-width:430px){.typeGrid{grid-template-columns:1fr}.hero h1{font-size:21px}.dateHero strong{font-size:23px}}
+</style>
+</head>
+<body>
+<header><div class="head"><button class="back" onclick="history.length>1?history.back():location.href='/'">‹</button><div><div class="brand">Panchayat<b>X</b></div><div class="sub">राजस्थान पंचायत चुनाव 2026</div></div></div></header>
+<main>
+ <section class="hero"><h1>🗓️ पंचायत चुनाव की तारीख जानें</h1><p>जिला, पंचायत समिति और ग्राम पंचायत चुनें। PanchayatX आपके क्षेत्र का चुनाव चरण और मतदान कार्यक्रम दिखाएगा।</p></section>
+
+ <section class="card">
+  <div class="title">किस चुनाव की तारीख देखनी है?</div>
+  <div class="typeGrid">
+   <button id="typeS" class="typeBtn active" onclick="setType('sarpanch')">🗳️ सरपंच / वार्ड पंच</button>
+   <button id="typeM" class="typeBtn" onclick="setType('member')">🏛️ जिला परिषद / पंचायत समिति सदस्य</button>
+  </div>
+ </section>
+
+ <section class="card">
+  <div class="title">अपना क्षेत्र चुनें</div>
+  <label>जिला</label><select id="district" onchange="loadPS()"><option>जिले लोड हो रहे हैं…</option></select>
+  <label>पंचायत समिति</label><select id="ps" onchange="loadGP()" disabled><option>पहले जिला चुनें</option></select>
+  <label>ग्राम पंचायत</label><select id="gp" onchange="renderResult()" disabled><option>पहले पंचायत समिति चुनें</option></select>
+  <div id="status" class="loader"></div>
+ </section>
+
+ <section id="result" class="card result">
+  <div><span id="phaseTag" class="phaseTag"></span></div>
+  <div class="place"><b id="gpName"></b><span id="placeMeta"></span></div>
+  <div class="dateHero"><small id="dateLabel"></small><strong id="mainDate"></strong><span id="dateSub"></span></div>
+  <div id="timeline" class="timeline"></div>
+  <div id="warn" class="warn"></div>
+ </section>
+ <div class="foot">नोट: यह जानकारी प्रकाशित राजस्थान पंचायत चुनाव कार्यक्रम के आधार पर दिखाई जाती है। राज्य निर्वाचन आयोग द्वारा किसी क्षेत्र के कार्यक्रम में संशोधन होने पर नवीनतम आधिकारिक आदेश मान्य होगा।</div>
+</main>
+<script>
+const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let electionType="sarpanch", currentGPs=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function norm(s){return String(s||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/PANCHAYAT SAMITI|PANCHAYAT|SAMITI|BLOCK|PS/g,"").replace(/[^A-Z0-9]/g,"")}
+function dnorm(s){return String(s||"").toUpperCase().replace(/DISTRICT/g,"").replace(/[^A-Z0-9]/g,"")}
+const DISTRICT_HI={
+AJMER:"अजमेर",ALWAR:"अलवर",BANSWARA:"बांसवाड़ा",BARMER:"बाड़मेर",BEAWAR:"ब्यावर",BHARATPUR:"भरतपुर",BHILWARA:"भीलवाड़ा",BIKANER:"बीकानेर",BUNDI:"बूंदी",CHITTORGARH:"चित्तौड़गढ़",CHURU:"चूरू",DAUSA:"दौसा",DHOLPUR:"धौलपुर","DIDWANAKUCHAMAN":"डीडवाना-कुचामन",DUNGARPUR:"डूंगरपुर",SRIGANGANAGAR:"श्रीगंगानगर",GANGANAGAR:"श्रीगंगानगर",HANUMANGARH:"हनुमानगढ़",JAIPUR:"जयपुर",JAISALMER:"जैसलमेर",JALORE:"जालौर",JHALAWAR:"झालावाड़",JHUNJHUNU:"झुंझुनूं",JODHPUR:"जोधपुर",PHALODI:"फलोदी",KARAULI:"करौली",KOTA:"कोटा",NAGAUR:"नागौर",PALI:"पाली",PRATAPGARH:"प्रतापगढ़",RAJSAMAND:"राजसमंद",SIROHI:"सिरोही",SIKAR:"सीकर",TONK:"टोंक",SAWAIMADHOPUR:"सवाईमाधोपुर",SALUMBAR:"सलूंबर","KOTPUTLIBEHROR":"कोटपूतली-बहरोड़",DEEG:"डीग",BALOTRA:"बालोतरा",BARAN:"बारां","KHAIRTHALTIJARA":"खैरथल-तिजारा",UDAIPUR:"उदयपुर"
+};
+const P={
+1:{
+AJMER:["SARWAR","KEKRI","SAWAR","PISANGAN","SRINAGAR","AJMER RURAL"],
+ALWAR:["RAMGARH","KATHUMAR","KHERLI SANKHAR","GOVINDGARH","MUBARIKPUR","RAINI"],
+BARMER:["BAYTU","ADEL","MANGTA","GADRAROAD","RAMSAR","CHOHTAN","LEELSAR","DHANAU","SEDWA","FAGLIA"],
+BHILWARA:["KOTRI","JAHAZPUR","KHAJURI","MANDALGARH","BIJOLIA","MANDAL","KAREDA","SUWANA","BANERA"],
+BIKANER:["NOKHA","PANCHU","JASRASAR","KHAJUWALA","PUGAL","CHHATARGARH","RUNIA"],
+DUNGARPUR:["SAGWARA","PADWA","GALIYAKOT","SIMALWARA","JHONTHRI","BHANDARI","CHIKHLI"],
+JAIPUR:["GOVINDGARH","CHOMU","KISHANGARH RENWAL","JOBNER","JHOTWARA","SAMBHAR LAKE","DUDU","MAUJAMABAD"],
+JAISALMER:["RAJMATHAI","PHALSOOND","SANKRA","BHANIYANA","KHUHDI","FATEHGARH","RAMGARH","JAISALMER","POKARAN","NACHNA","MOHANGARH"],
+JHALAWAR:["BHAWANIMANDI","DAG","AKLERA","MANOHARTHANA"],
+JODHPUR:["SHERGARH","CHABA","BALESAR","AGOLAI","CHAMU","SEKHALA"],
+PHALODI:["PHALODI","BAP","GHANTIYALI","LOHAWAT","DECHU","SETARAWA","PEELWA","AAU","BAPINI"],
+KOTA:["LADPURA","SANGOD","SULTANPUR","ITAWA"],
+NAGAUR:["NAGAUR","SHRI BALAJI ALAY","KHINWSAR","PANCHORI","JAYAL","DEH","MUNDWA"],
+PALI:["MARWAR JUNCTION","SOJAT","BAGDI","SUMERPUR","RANI"],
+RAJSAMAND:["KHAMNOR","DELWARA","AMET","CHARBHUJA","KUMBHALGARH"],
+SIROHI:["SHEOGANJ","KALANDRI","MANDAR","ABU ROAD"],
+UDAIPUR:["JHADOL","PHALASIA","OGNA","GIRWA","NAI","MAVLI","GHASA","VALLABHNAGAR","BHINDER","KURABAD"]
+},
+2:{
+AJMER:["AJMER RURAL","BADLYA","SILORA","ARAIN","BHINAY"],
+ALWAR:["UMRAIN","MALAKHERA","LAXMANGARH","RAJGARH","THANAGAZI"],
+BANSWARA:["GHATOL","GANODA","CHHOTI SARWAN","TALWARA"],
+BARMER:["SHEO","BHIYAD","BATADU","BARMER","BARMER RURAL","DUNGERON KA TALA","BISHALA"],
+BHILWARA:["RAIPUR","SAHADA","SHAHPURA","PHULIA KALAN","ASIND","SHAMBHUGARH","HURDA"],
+BIKANER:["HADAN","BITHNOK","BAJJU","KOLAYAT","BIKANER"],
+DAUSA:["MANOHPUR KHEDLA","MAHWA","MANDAWAR","BANDIKUI","BASWA","BAIJUPARA"],
+DUNGARPUR:["DUNGARPUR","PALDEWAL","BICHHIWARA","GAMRI AHARA","SABLA","ASPUR","DOVDA"],
+JAIPUR:["AMER","JALSU","RAMPURA DABRI","SHAHPURA","AMARSAR"],
+JALORE:["BHINMAL","JASWANTPURA","SAYLA","AHORE","BHADRAJUN","JALORE","UMMEDABAD"],
+JHALAWAR:["JHALRAPATAN","PIRAWA","BAKANI","KHANPUR"],
+JHUNJHUNU:["JHUNJHUNU","CHIRAWA","SURAJGARH","SINGHANA","PILANI","BUHANA"],
+JODHPUR:["OSIAN","SAMRAU","TINWARI","UMMEDNAGAR","BAORI","HATUNDI","BHOPALGARH","ASOP","PIPAR CITY","SALWA KHURD","MANDORE","LUNI","DHAVA","BILARA","KAPARDA","KERU","JHANWAR"],
+KARAULI:["NADOTI","MASALPUR","KARAULI"],
+KOTA:["KHAIRABAD","CHECHAT"],
+NAGAUR:["RIYAN BADI","MERTA CITY","MERTA ROAD GOTAN","BHERUNDA","DEGANA","MUNDWA"],
+PALI:["BALI","DESURI","PALI","ROHAT"],
+RAJSAMAND:["BHIM","DEOGARH","RAJSAMAND","RAILMAGRA"],
+SIROHI:["REODAR","BHAWARI","PINDWARA","SIROHI"],
+SIKAR:["PATAN","SRIMADHOPUR","AJITGARH","KHANDELA","PIPRALI","NEEM KA THANA"],
+"KOTPUTLIBEHROR":["NARAYANPUR","KOTPUTLI","BANSUR","PAOTA"],
+UDAIPUR:["GOGUNDA","SAYRA","BADGAON","KOTRA","DEVLA","SULAW"]
+},
+3:{
+BANSWARA:["BAGIDORA","GANGARTALAI","ANANDPURI","NAHARPURA"],
+BEAWAR:["NARBADKHERA","JAWAJA","JAITARAN","RAS"],
+BHARATPUR:["BAYANA","NADBAI","WAIR","BHUSAWAR"],
+BIKANER:["DUNGARGARH","RIDHI","LUNKARANSAR"],
+CHITTORGARH:["CHITTORGARH","BHADESAR","KAPASAN","RASHMI","BHUPALSAGAR"],
+CHURU:["BIDASAR","RAJGARH","CHANDGOTHI","SIDHMUKH","BHANIPURA","SARDARSHAHAR","SARDARSHAHAR EAST"],
+DAUSA:["LALSOT","SHIVSINGHPURA","RAMGARH PACHWARA","DAUSA","LAWAN","SIKANDRA","SIKRAI","NANGAL RAJAWATAN"],
+DHOLPUR:["DHOLPUR","BARI","SAIPAU"],
+"DIDWANAKUCHAMAN":["MAKRANA","PEELWA","NAWA","PARBATSAR","ITAWA BAMANIA"],
+SRIGANGANAGAR:["SRI VIJAYNAGAR","SURATGARH","RAJIYASAR"],
+GANGANAGAR:["SRI VIJAYNAGAR","SURATGARH","RAJIYASAR"],
+HANUMANGARH:["HANUMANGARH JUNCTION","PILIBANGA","NOHAR","PALLU","BHADRA","RAJPURA"],
+JAIPUR:["PHAGI","MADHORAJPURA","CHAKSU","KOTKHAWDA","SANGANER"],
+JALORE:["SANCHORE","CHITALWANA","BHADRUNA","SARWANA"],
+JHUNJHUNU:["NAWALGARH","GOTHRA","UDAIPURWATI","GUDHAGORJI"],
+KARAULI:["HINDAUN","SHRI MAHAVEERJI","SHERPUR SUROTH"],
+PRATAPGARH:["CHHOTI SADRI","DHAMOTTAR","DHARIYAWAD","DALOT"],
+SIKAR:["DHOD RURAL","DHOD","DANTA RAMGARH","PALSANA","KHACHARIYAWAS"],
+TONK:["PEEPLU","PACHEWAR","MALPURA","DEOLI","UNIARA"],
+SAWAIMADHOPUR:["BAMANWAS","MALARNA DUNGAR","BONLI","KHANDAR"],
+"KOTPUTLIBEHROR":["NEEMRANA","VIRATNAGAR","MAID KUNDLA","BEHROR"],
+DEEG:["KAMAN","PAHARI","BRIJ NAGAR"],
+BALOTRA:["SINDHARI","GIDA","KALYANPUR","GUDAMALANI","DHORIMANNA","SAMDRI"],
+BARAN:["NAHARGARH","KISHANGANJ","KELWARA","SHAHBAD","MANGROL","ANTA"],
+"KHAIRTHALTIJARA":["KISHANGARHBAS","TIJARA"],
+UDAIPUR:["KHERWARA","NAYAGAON","RISHABHDEO","KALYANPUR"]
+},
+4:{
+BANSWARA:["KUSHALGARH","SAJJANGARH","CHHOTI SARWA","CHHOTA DUNGRA","GARHI","SAREDI BADI","ARTHUNA","BANSWARA"],
+BEAWAR:["MASUDA","BADNOR","RAIPUR"],
+BHARATPUR:["SEWAR","UCHCHAIN","RUPBAS"],
+BUNDI:["BUNDI","KHATKAR","DABLANA","HINDOLI","NAINWA","LAKHERI","KESHORAIPATAN"],
+CHITTORGARH:["BEGUN","BHAINSRORGARH","GANGRAR","NIMBAHERA","DUNGLA","BARI SADRI"],
+CHURU:["SUJANGARH","TARANAGAR EAST","TARANAGAR WEST","RATANGARH","CHURU","CHURU NORTH"],
+DHOLPUR:["BASERI","SARMATHURA","RAJAKHERA"],
+"DIDWANAKUCHAMAN":["LADNUN","DIDWANA","MOLASAR","KUCHAMAN CITY"],
+SRIGANGANAGAR:["SRI GANGANAGAR NORTH","SRI GANGANAGAR SOUTH","SADULSHAHAR","ANOOPGARH","GHARSANA","RAISINGHNAGAR","PADAMPUR","SRI KARANPUR"],
+GANGANAGAR:["SRI GANGANAGAR NORTH","SRI GANGANAGAR SOUTH","SADULSHAHAR","ANOOPGARH","GHARSANA","RAISINGHNAGAR","PADAMPUR","SRI KARANPUR"],
+HANUMANGARH:["SANGARIA","RAWATSAR","TIBBI","HANUMANGARH TOWN"],
+JAIPUR:["BASSI","TUNGA","JAMWA RAMGARH","ANDHI"],
+JALORE:["RANIWARA","BAGODA","SARNAU"],
+JHUNJHUNU:["KHETRI","BABAI","MANDAWA","ALSISAR"],
+KARAULI:["MANDRAYAL","KURGAON","SAPOTRA","BALGHAT","TODABHIM"],
+PRATAPGARH:["PRATAPGARH","ARNOD","PEEPALKHOONT","SUHAGPURA"],
+SIKAR:["RAMGARH SHEKHAWATI","FATEHPUR","LAXMANGARH","NECHHWA","BALARA"],
+TONK:["NIWAI","TONK","MALPURA","TODARAISINGH"],
+SAWAIMADHOPUR:["SAWAI MADHOPUR","CHAUTH KA BARWARA","GANGAPUR CITY","WAZIRPUR"],
+SALUMBAR:["LASADIYA","JHALLARA","JAISAMAND","SEMARI","SARADA","SALUMBAR","GINGLA"],
+DEEG:["DEEG","KUMHER"],
+BALOTRA:["BALOTRA","PADRU","PAYLA KALAN","PATODI","SIWANA"],
+BARAN:["ATRU","CHHIPABAROD","CHHABRA","BARAN"],
+"KHAIRTHALTIJARA":["MUNDAWAR","KOTKASIM","TAPUKARA","TATARPUR"]
+}};
+const SCHEDULE={
+1:{notif:"08 अक्टूबर 2026",nomS:"24 अक्टूबर 2026 • सुबह 11 से दोपहर 3 बजे",pollS:"25 अक्टूबर 2026 • रविवार",up:"26 अक्टूबर 2026",nomM:"13 अक्टूबर 2026 • दोपहर 3 बजे तक",withdraw:"15 अक्टूबर 2026",pollM:"23 अक्टूबर 2026 • शुक्रवार"},
+2:{notif:"13 अक्टूबर 2026",nomS:"30 अक्टूबर 2026 • सुबह 11 से दोपहर 3 बजे",pollS:"31 अक्टूबर 2026 • शनिवार",up:"01 नवंबर 2026",nomM:"16 अक्टूबर 2026 • दोपहर 3 बजे तक",withdraw:"19 अक्टूबर 2026",pollM:"29 अक्टूबर 2026 • गुरुवार"},
+3:{notif:"19 अक्टूबर 2026",nomS:"05 नवंबर 2026 • सुबह 11 से दोपहर 3 बजे",pollS:"06 नवंबर 2026 • शुक्रवार",up:"07 नवंबर 2026",nomM:"23 अक्टूबर 2026 • दोपहर 3 बजे तक",withdraw:"26 अक्टूबर 2026",pollM:"04 नवंबर 2026 • बुधवार"},
+4:{notif:"31 अक्टूबर 2026",nomS:"15 नवंबर 2026 • सुबह 11 से दोपहर 3 बजे",pollS:"16 नवंबर 2026 • सोमवार",up:"17 नवंबर 2026",nomM:"04 नवंबर 2026 • दोपहर 3 बजे तक",withdraw:"06 नवंबर 2026",pollM:"14 नवंबर 2026 • शनिवार"}
+};
+function setType(t){electionType=t;$("typeS").classList.toggle("active",t==="sarpanch");$("typeM").classList.toggle("active",t==="member");renderResult()}
+function getPhase(d,ps){
+ const dk=dnorm(d), pk=norm(ps);
+ for(const phase of [1,2,3,4]){
+  const groups=P[phase]||{};
+  const key=Object.keys(groups).find(k=>dnorm(k)===dk);
+  if(!key)continue;
+  const arr=groups[key]||[];
+  const exact=arr.find(x=>norm(x)===pk);
+  if(exact)return phase;
+  const near=arr.find(x=>{const a=norm(x);return a.length>4&&pk.length>4&&(a.includes(pk)||pk.includes(a))});
+  if(near)return phase;
+ }
+ return 0;
+}
+async function init(){
+ try{
+  const {data,error}=await sb.rpc("get_signup_districts");if(error)throw error;
+  const ds=(data||[]).map(x=>x.district).filter(Boolean);
+  $("district").innerHTML='<option value="">जिला चुनें</option>'+ds.map(d=>'<option value="'+esc(d)+'">'+esc(DISTRICT_HI[dnorm(d)]||d)+'</option>').join("");
+  $("status").textContent="";
+ }catch(err){$("district").innerHTML='<option value="">जिला लोड नहीं हुआ</option>';$("status").textContent="डेटा लोड नहीं हुआ: "+(err.message||err)}
+}
+async function loadPS(){
+ const d=$("district").value;$("ps").disabled=true;$("gp").disabled=true;$("result").classList.remove("show");$("gp").innerHTML='<option>पहले पंचायत समिति चुनें</option>';
+ if(!d){$("ps").innerHTML='<option>पहले जिला चुनें</option>';return}
+ $("ps").innerHTML='<option>लोड हो रहा है…</option>';
+ try{
+  const {data,error}=await sb.rpc("get_signup_panchayat_samitis",{p_district:d});if(error)throw error;
+  const vals=(data||[]).map(x=>x.panchayat_samiti).filter(Boolean);
+  $("ps").innerHTML='<option value="">पंचायत समिति चुनें</option>'+vals.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");
+  $("ps").disabled=false;$("status").textContent="";
+ }catch(err){$("ps").innerHTML='<option>लोड नहीं हुआ</option>';$("status").textContent="पंचायत समिति लोड नहीं हुई: "+(err.message||err)}
+}
+async function loadGP(){
+ const d=$("district").value,p=$("ps").value;$("gp").disabled=true;$("result").classList.remove("show");
+ if(!d||!p){$("gp").innerHTML='<option>पहले पंचायत समिति चुनें</option>';return}
+ $("gp").innerHTML='<option>लोड हो रहा है…</option>';
+ try{
+  const {data,error}=await sb.rpc("get_signup_gram_panchayats",{p_district:d,p_panchayat_samiti:p});if(error)throw error;
+  currentGPs=data||[];
+  $("gp").innerHTML='<option value="">ग्राम पंचायत चुनें</option>'+currentGPs.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.gram_panchayat)+'</option>').join("");
+  $("gp").disabled=false;$("status").textContent="";
+ }catch(err){$("gp").innerHTML='<option>लोड नहीं हुआ</option>';$("status").textContent="ग्राम पंचायत लोड नहीं हुई: "+(err.message||err)}
+}
+function renderResult(){
+ const d=$("district").value,p=$("ps").value,gid=$("gp").value;
+ if(!d||!p||!gid){$("result").classList.remove("show");return}
+ const gp=currentGPs.find(x=>String(x.id)===String(gid));const phase=getPhase(d,p);
+ $("result").classList.add("show");$("gpName").textContent=(gp?.gram_panchayat||"ग्राम पंचायत");
+ $("placeMeta").textContent="पंचायत समिति: "+p+" • जिला: "+(DISTRICT_HI[dnorm(d)]||d);
+ const w=$("warn");
+ if(!phase){$("phaseTag").textContent="⚠️ चरण सत्यापन आवश्यक";$("mainDate").textContent="तारीख उपलब्ध नहीं";$("dateLabel").textContent="इस पंचायत समिति की phase mapping नहीं मिली";$("dateSub").textContent="कृपया नवीनतम SEC आदेश देखें।";$("timeline").innerHTML="";w.style.display="block";w.textContent="इस पंचायत समिति का नाम schedule mapping से match नहीं हुआ। PanchayatX admin इसे update कर सकता है।";return}
+ w.style.display="none";const s=SCHEDULE[phase];$("phaseTag").textContent="चरण "+phase+" • Phase "+phase;
+ if(electionType==="sarpanch"){
+  $("dateLabel").textContent="सरपंच / वार्ड पंच मतदान एवं मतगणना";$("mainDate").textContent=s.pollS;$("dateSub").textContent="मतदान के बाद उसी दिन मतगणना";
+  $("timeline").innerHTML=row("📢","अधिसूचना",s.notif)+row("📝","नामांकन, जांच व प्रतीक आवंटन",s.nomS)+row("🗳️","मतदान व मतगणना",s.pollS)+row("👤","उपसरपंच चुनाव",s.up);
+ }else{
+  $("dateLabel").textContent="जिला परिषद / पंचायत समिति सदस्य मतदान";$("mainDate").textContent=s.pollM;$("dateSub").textContent="मतदान समय: सुबह 7 बजे से शाम 6 बजे • परिणाम 20 नवंबर 2026";
+  $("timeline").innerHTML=row("📢","अधिसूचना",s.notif)+row("📝","नामांकन अंतिम तिथि",s.nomM)+row("🔁","नाम वापसी व प्रतीक आवंटन",s.withdraw)+row("🗳️","मतदान",s.pollM)+row("📊","मतगणना / परिणाम","20 नवंबर 2026");
+ }
+}
+function row(i,t,v){return '<div class="row"><div class="ico">'+i+'</div><div><b>'+esc(t)+'</b><span>'+esc(v)+'</span></div></div>'}
+init();
+</script>
+</body></html>
