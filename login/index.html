@@ -1172,6 +1172,31 @@ body.androidApp.authPage .signupActions{grid-template-columns:1fr!important}
   body.androidApp.authPage .authLoginCard{padding-left:18px!important;padding-right:18px!important}
   body.androidApp.authPage .signupPremiumCard{padding-left:14px!important;padding-right:14px!important}
 }
+
+/* FINAL login screen mobile fix */
+@media(max-width:560px){
+ body.authPage{overflow-x:hidden!important}
+ body.authPage header{height:58px!important;padding:0 12px!important}
+ body.authPage .authBrandName{font-size:23px!important}
+ body.authPage .authBrand>small{font-size:7px!important;margin-top:3px!important}
+ body.authPage .authHomeLink{padding:7px 8px!important;font-size:11px!important}
+ body.authPage main#app{min-height:calc(100vh - 58px)!important;padding:14px 10px 24px!important}
+ body.authPage .authShell{width:100%!important;max-width:430px!important;margin:0 auto!important}
+ body.authPage .authLoginCard{padding:20px 15px 18px!important;border-radius:16px!important}
+ body.authPage .authCardIcon{width:38px!important;height:38px!important;margin-bottom:8px!important;font-size:17px!important;border-radius:11px!important}
+ body.authPage .authCardKicker{font-size:9px!important}
+ body.authPage .authLoginCard h2{font-size:21px!important;margin-bottom:3px!important}
+ body.authPage .authLoginCard>.muted{font-size:11px!important;margin-bottom:12px!important}
+ body.authPage .authLoginCard label{margin:9px 0 4px!important;font-size:11px!important}
+ body.authPage .authInputWrap{min-height:42px!important;border-radius:10px!important}
+ body.authPage .authInputWrap>span{width:34px!important;font-size:11px!important}
+ body.authPage .authInputWrap input{font-size:13px!important;padding:9px 9px 9px 0!important}
+ body.authPage .authPrimaryBtn{min-height:42px!important;margin-top:12px!important;border-radius:10px!important;font-size:13px!important}
+ body.authPage .authSecondaryBtn,body.authPage .authCreateBtn{min-height:39px!important;border-radius:10px!important;font-size:11px!important}
+ body.authPage .authDivider{margin:10px 0 8px!important}
+ body.authPage .authMsg{font-size:10.5px!important;margin-top:7px!important}
+ body.authPage .authBackHome{font-size:10px!important;margin-top:7px!important}
+}
 </style>
 <style id="ps-member-global-scope">#app.moduleOpen.psMemberScope #workspaceAfterHome{padding-top:238px!important}#app.psMemberScope .demoHead select#psGlobalPanchayat{margin:0!important}@media(max-width:360px){#app.moduleOpen.psMemberScope #workspaceAfterHome{padding-top:222px!important}}</style>
 <!-- Meta Pixel Code -->
@@ -1261,7 +1286,10 @@ const e=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt
 function loginView(msg=""){
  document.title="PanchayatX | Candidate Login";
  document.body.classList.add("authPage");
- document.querySelector("header").style.display="flex";
+ app.classList.remove("moduleOpen","psMemberScope");
+ app.removeAttribute("style");
+ const siteHeader=document.querySelector("header");
+ if(siteHeader)siteHeader.style.display="flex";
  logout.classList.add("hidden");
  app.innerHTML=`<section class="authShell">
  <div class="authIntroPanel">
@@ -1292,6 +1320,8 @@ function loginView(msg=""){
    <a class="authBackHome" href="/">← PanchayatX Home पर जाएं</a>
  </div>
 </section>`;
+ const emailEl=document.getElementById("email"),passwordEl=document.getElementById("password");
+ [emailEl,passwordEl].forEach(el=>el&&el.addEventListener("keydown",ev=>{if(ev.key==="Enter")signIn()}));
 }
 let hindiRawName="";
 let hindiImeTimer=null;
