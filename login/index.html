@@ -717,7 +717,9 @@ const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHA
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const app=document.getElementById("app"), logout=document.getElementById("logout");
 const IS_ANDROID_APP=/PanchayatXAndroid/i.test(navigator.userAgent); if(IS_ANDROID_APP) document.body.classList.add("androidApp");
-let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,masterVoterCount=0,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map(),familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।",signupPanchayats=[]; let selectedSignupPanchayatId=null; const PER=40;
+let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,masterVoterCount=0,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map();
+let psAllVoters=[],psAllContactRows=[],psAllAdditionRows=[],psAllHouseOverrideRows=[],psAllMobileRows=[],selectedPSPanchayatId="";
+let familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।",signupPanchayats=[]; let selectedSignupPanchayatId=null; const PER=40;
 
 
 const HI_VOWELS={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ऋ":"ri","ए":"e","ऐ":"ai","ओ":"o","औ":"au"};
@@ -1677,6 +1679,41 @@ function halfMaskNumber(value){
  if(s.length<=2)return "*"+s.slice(-1);
  const hide=Math.max(1,Math.ceil(s.length/2));
  return "*".repeat(hide)+s.slice(hide);
+}
+function isPanchayatSamitiMemberLogin(){
+ return String(candidate?.post||"").trim()==="Panchayat Samiti Member";
+}
+function psPanchayatPairs(){
+ const ids=Array.isArray(candidate?.panchayat_ids)?candidate.panchayat_ids.map(String):[];
+ const names=Array.isArray(candidate?.gram_panchayats)?candidate.gram_panchayats.map(String):[];
+ return ids.map((id,i)=>({id,name:names[i]||("Panchayat "+(i+1))}));
+}
+function psGlobalSelectorHtml(){
+ if(!isPanchayatSamitiMemberLogin())return "";
+ const opts=psPanchayatPairs().map(x=>"<option value=\""+e(x.id)+"\" "+(String(selectedPSPanchayatId)===String(x.id)?"selected":"")+">"+e(x.name)+"</option>").join("");
+ return "<div style=\"margin:10px 12px 0;padding:12px;border-radius:14px;background:#fff;border:1px solid #d7e7de;box-shadow:0 3px 12px #174d3520\"><label style=\"display:block;margin:0 0 6px;font-size:12px;font-weight:900;color:#075b43\">🏘️ काम करने के लिए Gram Panchayat चुनें</label><select id=\"psGlobalPanchayat\" onchange=\"applyPSPanchayatScope(this.value)\" style=\"width:100%;min-height:46px;border:1px solid #bdd5c8;border-radius:12px;padding:9px 11px;background:#fff;font:inherit;font-weight:800;color:#173d32\"><option value=\"\">— Gram Panchayat चुनें —</option>"+opts+"</select><div style=\"margin-top:6px;font-size:10.5px;color:#6b7f74\">Search, Visit, Stats, Voter Slip, A–Z और बाकी सभी tools selected Panchayat पर ही चलेंगे।</div></div>";
+}
+function ensurePSPanchayatSelected(){
+ if(!isPanchayatSamitiMemberLogin())return true;
+ if(selectedPSPanchayatId)return true;
+ alert("पहले ऊपर से Gram Panchayat चुनें।");
+ document.getElementById("psGlobalPanchayat")?.focus();
+ document.getElementById("psGlobalPanchayat")?.scrollIntoView({behavior:"smooth",block:"center"});
+ return false;
+}
+function applyPSPanchayatScope(pid){
+ if(!isPanchayatSamitiMemberLogin())return;
+ selectedPSPanchayatId=String(pid||"");
+ if(!selectedPSPanchayatId){voters=[];contactMap=new Map();additionRows=[];houseOverrideMap=new Map();voterMobileMap=new Map();masterVoterCount=0;dashboard();return;}
+ voters=psAllVoters.filter(v=>String(v.panchayat_id)===selectedPSPanchayatId);
+ const voterIds=new Set(voters.map(v=>String(v.id)));
+ contactMap=new Map(psAllContactRows.filter(x=>voterIds.has(String(x.voter_id))).map(x=>[String(x.voter_id),x]));
+ additionRows=psAllAdditionRows.filter(x=>String(x.panchayat_id)===selectedPSPanchayatId);
+ houseOverrideMap=new Map(psAllHouseOverrideRows.filter(x=>String(x.panchayat_id)===selectedPSPanchayatId).map(x=>[String(x.voter_id),x]));
+ voterMobileMap=new Map(psAllMobileRows.filter(x=>String(x.panchayat_id)===selectedPSPanchayatId).map(x=>[String(x.voter_id),x]));
+ masterVoterCount=voters.length;
+ currentAccess.panchayat_id=selectedPSPanchayatId;
+ dashboard();
 }
 function dashboard(){
  document.body.classList.remove("authPage");
