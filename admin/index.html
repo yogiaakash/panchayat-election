@@ -113,6 +113,7 @@ function renderCandidateUsers(rows){
    <th>District</th>
    <th>Panchayat Samiti</th>
    <th>Gram Panchayat</th>
+   <th>Ward</th>
    <th>Access Level</th>
    <th>Status</th>
   </tr>
@@ -131,6 +132,7 @@ function renderCandidateUsers(rows){
       <td>${esc(x.district||"-")}</td>
       <td>${esc(x.panchayat_samiti||"-")}</td>
       <td><b>${esc(x.gram_panchayat||"-")}</b></td>
+      <td>${String(x.election_post||"")==="Ward Panch"?("Ward "+esc(String(Number(x.ward_no)||x.ward_no||"-"))):"-"}</td>
       <td class="${levelClass}">${esc(level)}</td>
       <td class="${statusClass}">${esc(status)}</td>
     </tr>`;
