@@ -523,6 +523,25 @@ main#app{max-width:470px!important;margin:0 auto!important;padding:0 0 78px!impo
  #demoHome .demoSub{font-size:9px!important;line-height:1.25!important}
 }
 
+/* Compact candidate header on inner dashboard pages */
+.moduleOpen #demoHome .demoHead{padding:7px 9px 8px!important;border-bottom-width:3px!important}
+.moduleOpen #demoHome .demoHeadRow{grid-template-columns:44px minmax(0,1fr)!important;gap:8px!important;padding-right:48px!important;min-height:48px!important}
+.moduleOpen #demoHome .demoAvatar{width:44px!important;height:44px!important;border-width:2px!important}
+.moduleOpen #demoHome .demoCandidateName{font-size:16px!important;line-height:1.05!important}
+.moduleOpen #demoHome .demoPost{font-size:9px!important;margin-top:2px!important;padding:2px 6px!important}
+.moduleOpen #demoHome .demoGp{font-size:10px!important;margin-top:2px!important;line-height:1.1!important}
+.moduleOpen #demoHome .demoSub{display:none!important}
+.moduleOpen #demoHome .demoLogout{top:7px!important;right:7px!important;padding:4px 6px!important;font-size:8px!important}
+.moduleOpen #workspaceAfterHome{padding-top:88px!important}
+@media(max-width:360px){
+ .moduleOpen #demoHome .demoHead{padding:6px 8px 7px!important}
+ .moduleOpen #demoHome .demoHeadRow{grid-template-columns:40px minmax(0,1fr)!important;gap:7px!important;min-height:44px!important}
+ .moduleOpen #demoHome .demoAvatar{width:40px!important;height:40px!important}
+ .moduleOpen #demoHome .demoCandidateName{font-size:15px!important}
+ .moduleOpen #demoHome .demoGp{font-size:9.5px!important}
+ .moduleOpen #workspaceAfterHome{padding-top:80px!important}
+}
+
 /* Keep Home feature grid hidden while any module is open; header remains fixed. */
 .moduleOpen #demoHome .demoMain{display:none!important}
 .moduleOpen #demoHome{height:auto!important;min-height:0!important;overflow:visible!important}
