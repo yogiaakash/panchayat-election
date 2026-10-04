@@ -131,7 +131,7 @@ function renderCandidateUsers(rows){
       <td>${esc(x.email||"-")}</td>
       <td>${esc(x.district||"-")}</td>
       <td>${esc(x.panchayat_samiti||"-")}</td>
-      <td><b>${esc(x.gram_panchayat||"-")}</b></td>
+      <td><b>${String(x.election_post||"")==="Panchayat Samiti Member"&&Array.isArray(x.assigned_gram_panchayats)&&x.assigned_gram_panchayats.length?esc(x.assigned_gram_panchayats.join(", ")):esc(x.gram_panchayat||"-")}</b></td>
       <td>${String(x.election_post||"")==="Ward Panch"?("Ward "+esc(String(Number(x.ward_no)||x.ward_no||"-"))):"-"}</td>
       <td class="${levelClass}">${esc(level)}</td>
       <td class="${statusClass}">${esc(status)}</td>
