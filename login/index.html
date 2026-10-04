@@ -1382,6 +1382,7 @@ async function signIn(){
   if(error){msg.textContent=error.message;return}
   if(!data?.session){msg.textContent="Login session नहीं मिला।";return}
   sb.functions.setAuth(data.session.access_token);
+  history.replaceState({},document.title,"/dashboard/");
   msg.textContent="Login successful… Panchayat access check हो रहा है।";
   await load(data.user);
  }catch(err){
@@ -1390,7 +1391,7 @@ async function signIn(){
  }
 }
 
-logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];loginView()};
+logout.onclick=async()=>{await sb.auth.signOut();candidate=null;voters=[];currentUser=null;currentAccess=null;history.replaceState({},document.title,"/login/");loginView()};
 async function load(userOverride=null){
  const hash=window.location.hash||"";
  if(/(?:^#|&)type=recovery(?:&|$)/.test(hash)){
@@ -1410,8 +1411,11 @@ async function load(userOverride=null){
    }
    user=session?.user||null;
  }
- if(!user){loginView("Login session उपलब्ध नहीं है। कृपया Login करें।");return}
+ if(!user){if(location.pathname.startsWith("/dashboard"))history.replaceState({},document.title,"/login/");loginView("Login session उपलब्ध नहीं है। कृपया Login करें।");return}
  currentUser=user;
+ if(location.pathname!=="/dashboard/"&&location.pathname!=="/dashboard"){
+   history.replaceState({},document.title,"/dashboard/");
+ }
 
  // Do not block login on any database/network request.
  const meta=user.user_metadata||{};
@@ -3034,6 +3038,7 @@ if(initialSignupMode){
       sb.functions.setAuth(session.access_token);
       await load(session.user);
     }else{
+      if(location.pathname.startsWith("/dashboard"))history.replaceState({},document.title,"/login/");
       loginView();
     }
   }catch(err){
