@@ -107,6 +107,78 @@ main#app{max-width:470px;margin:0 auto;padding:0 0 78px;min-height:100vh;backgro
 @media(max-width:649px){.exactSearchGrid2{grid-template-columns:1fr 1fr}.exactFamilyBtns{grid-template-columns:1fr 1fr}}
 /* Candidate header stability fix */
 
+/* Compact voter-search card for mobile */
+#tabInfo .exactSearchCard{
+ padding:10px 11px!important;
+ margin-bottom:8px!important;
+ border-radius:14px!important
+}
+#tabInfo .exactSearchTitle{
+ font-size:17px!important;
+ line-height:1.15!important;
+ margin-bottom:6px!important
+}
+#tabInfo .exactSearchCard label{
+ margin:6px 0 3px!important;
+ font-size:11px!important;
+ line-height:1.15!important
+}
+#tabInfo .exactSearchCard input,
+#tabInfo .exactSearchCard select{
+ min-height:38px!important;
+ padding:8px 10px!important;
+ border-radius:9px!important;
+ font-size:12.5px!important
+}
+#tabInfo .exactHint{
+ padding:3px 0 5px!important;
+ font-size:10px!important;
+ line-height:1.2!important
+}
+#tabInfo .exactSearchGrid2{
+ gap:7px!important
+}
+#tabInfo .exactSearchCard .btn{
+ min-height:36px!important;
+ padding:8px 10px!important;
+ margin-top:6px!important;
+ border-radius:9px!important;
+ font-size:11px!important
+}
+@media(max-width:420px){
+ #tabInfo .exactSearchCard{
+  padding:9px 10px!important;
+  margin:0 0 7px!important
+ }
+ #tabInfo .exactSearchTitle{
+  font-size:16px!important;
+  margin-bottom:5px!important
+ }
+ #tabInfo .exactSearchCard label{
+  margin:5px 0 2px!important;
+  font-size:10.5px!important
+ }
+ #tabInfo .exactSearchCard input,
+ #tabInfo .exactSearchCard select{
+  min-height:36px!important;
+  padding:7px 9px!important;
+  font-size:12px!important
+ }
+ #tabInfo .exactHint{
+  font-size:9.5px!important;
+  padding:2px 0 4px!important
+ }
+ #tabInfo .exactSearchGrid2{
+  gap:6px!important
+ }
+ #tabInfo .exactSearchCard .btn{
+  min-height:34px!important;
+  padding:7px 9px!important;
+  margin-top:5px!important;
+  font-size:10.5px!important
+ }
+}
+
 /* Professional voter-search hierarchy */
 .houseDlg{width:min(430px,94vw);border:0;border-radius:18px;padding:16px;color:#173b2f}.houseDlg::backdrop{background:#10281f88}.houseDlg h3{margin:0 0 12px;color:#063f31}.houseDlg select{width:100%;min-height:44px;border:1px solid #cddfd5;border-radius:12px;padding:10px;background:#fff}.houseFamilyPreview .member{padding:9px 10px;margin-top:6px;border:1px solid #e2ece6;border-radius:11px;background:#fff}
 
