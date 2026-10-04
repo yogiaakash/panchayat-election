@@ -9,7 +9,7 @@ on:
       - ".github/workflows/android-candidate-apk.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -41,3 +41,15 @@ jobs:
           path: android-candidate/app/build/outputs/apk/debug/PanchayatX.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish latest PanchayatX APK release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: panchayatx-android-latest
+          name: PanchayatX Android APK
+          body: |
+            Latest installable PanchayatX Android APK.
+            Opens the live PanchayatX candidate login and dashboard.
+          files: android-candidate/app/build/outputs/apk/debug/PanchayatX.apk
+          overwrite_files: true
+          make_latest: true
