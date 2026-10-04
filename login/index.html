@@ -1497,6 +1497,17 @@ async function load(userOverride=null){
    // Prepare Hindi candidate / Panchayat header before the first dashboard render.
    await prepareCandidateHindiHeader();
 
+   if(isPanchayatSamitiMemberLogin()){
+     psAllVoters=[...voters];
+     psAllMobileRows=[...voterMobileMap.values()];
+     voters=[];
+     voterMobileMap=new Map();
+     masterVoterCount=0;
+     selectedPSPanchayatId="";
+   }else{
+     psAllVoters=[];psAllMobileRows=[];selectedPSPanchayatId="";
+   }
+
    // Render only after persistent mobile numbers and Hindi header fields are ready.
    dashboard();
 
@@ -1561,13 +1572,28 @@ async function load(userOverride=null){
      const wardScoped=String(candidate.post||"")==="Ward Panch"&&String(candidate.ward_no||"").trim();
      const allowedVoterIds=wardScoped?new Set(voters.map(v=>String(v.id))):null;
      const scopedContacts=wardScoped?(cs?.data||[]).filter(x=>allowedVoterIds.has(String(x.voter_id))):(cs?.data||[]);
-     contactMap=new Map(scopedContacts.map(x=>[String(x.voter_id),x]));
-     additionRows=wardScoped?(ar?.data||[]).filter(x=>String(x.ward||"").trim()===String(candidate.ward_no||"").trim()):(ar?.data||[]);
-     houseOverrideMap=new Map((ho?.data||[]).map(x=>[String(x.voter_id),x]));
-     if(!vm?.error && Array.isArray(vm?.data)){
-       voterMobileMap=new Map(vm.data.map(x=>[String(x.voter_id),x]));
+     if(isPanchayatSamitiMemberLogin()){
+       psAllContactRows=cs?.data||[];
+       psAllAdditionRows=ar?.data||[];
+       psAllHouseOverrideRows=ho?.data||[];
+       psAllMobileRows=vm?.data||psAllMobileRows||[];
+       if(selectedPSPanchayatId){
+         const selectedIds=new Set(psAllVoters.filter(v=>String(v.panchayat_id)===selectedPSPanchayatId).map(v=>String(v.id)));
+         contactMap=new Map(psAllContactRows.filter(x=>selectedIds.has(String(x.voter_id))).map(x=>[String(x.voter_id),x]));
+         additionRows=psAllAdditionRows.filter(x=>String(x.panchayat_id)===selectedPSPanchayatId);
+         houseOverrideMap=new Map(psAllHouseOverrideRows.filter(x=>String(x.panchayat_id)===selectedPSPanchayatId).map(x=>[String(x.voter_id),x]));
+         voterMobileMap=new Map(psAllMobileRows.filter(x=>String(x.panchayat_id)===selectedPSPanchayatId).map(x=>[String(x.voter_id),x]));
+         renderRows();
+       }
+     }else{
+       contactMap=new Map(scopedContacts.map(x=>[String(x.voter_id),x]));
+       additionRows=wardScoped?(ar?.data||[]).filter(x=>String(x.ward||"").trim()===String(candidate.ward_no||"").trim()):(ar?.data||[]);
+       houseOverrideMap=new Map((ho?.data||[]).map(x=>[String(x.voter_id),x]));
+       if(!vm?.error && Array.isArray(vm?.data)){
+         voterMobileMap=new Map(vm.data.map(x=>[String(x.voter_id),x]));
+       }
+       renderRows();
      }
-     renderRows();
    }).catch(e=>console.warn("Optional data refresh skipped:",e));
  })();
 }
@@ -1750,6 +1776,7 @@ function dashboard(){
     </div>
    </div>
   </div>
+  ${psGlobalSelectorHtml()}
   ${currentAccess.access_level!=="full"?`<div class="freeAccessBanner"><b>🔒 Masked Access</b><br>इस पंचायत का पूरा voter data उपलब्ध है, लेकिन नाम, संबंधी और Voter ID masked हैं।<br>Statistics भी masked हैं।<button class="btn primary full" onclick="showUpgradePrompt()">🔓 Full Data Unlock करें</button></div>`:""}
   <div class="demoMain">
    <div class="demoGrid2">
