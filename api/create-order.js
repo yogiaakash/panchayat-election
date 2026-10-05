@@ -1,4 +1,4 @@
-const COUPON_CODE = "PANCHAYATX2499";
+const COUPON_CODE = "PANCHAYATX";
 const COUPON_EXPIRES_AT = new Date("2026-10-11T10:40:00+05:30");
 
 function priceForPost(post, discounted) {
