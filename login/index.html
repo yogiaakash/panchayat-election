@@ -2338,11 +2338,33 @@ function isGlobalPanchayatLogin(){
 }
 function globalPanchayatSelectorHtml(){
  if(!isGlobalPanchayatLogin())return "";
- const opts=(globalPanchayatOptions||[]).map(x=>{
-   const label=[x.district,x.panchayat_samiti,x.gram_panchayat].filter(Boolean).join(" → ");
-   return "<option value=\""+e(x.id)+"\" "+(String(currentAccess?.panchayat_id||"")===String(x.id)?"selected":"")+">"+e(label||x.gram_panchayat||x.id)+"</option>";
- }).join("");
- return "<div style=\"margin:10px 12px 0;padding:12px;border-radius:14px;background:#fff;border:1px solid #d7e7de;box-shadow:0 3px 12px #174d3520\"><label style=\"display:block;margin:0 0 6px;font-size:12px;font-weight:900;color:#075b43\">🌐 Full Access — Panchayat बदलें</label><select id=\"globalPanchayatSelect\" onchange=\"applyGlobalPanchayatScope(this.value)\" style=\"width:100%;min-height:46px;border:1px solid #bdd5c8;border-radius:12px;padding:9px 11px;background:#fff;font:inherit;font-weight:800;color:#173d32\">"+opts+"</select><div style=\"margin-top:6px;font-size:10.5px;color:#6b7f74\">इस account को सभी उपलब्ध Panchayat का full data access है। चुनी हुई Panchayat पर सभी tools चलेंगे।</div></div>";
+ const rows=globalPanchayatOptions||[];
+ const selected=rows.find(x=>String(x.id)===String(currentAccess?.panchayat_id||selectedGlobalPanchayatId||""))||rows[0]||{};
+ const selectedDistrict=String(selected.district||"");
+ const selectedSamiti=String(selected.panchayat_samiti||"");
+ const districts=[...new Set(rows.map(x=>String(x.district||"")).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"hi"));
+ const samitis=[...new Set(rows.filter(x=>String(x.district||"")===selectedDistrict).map(x=>String(x.panchayat_samiti||"")).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"hi"));
+ const panchayats=rows.filter(x=>String(x.district||"")===selectedDistrict&&String(x.panchayat_samiti||"")===selectedSamiti);
+ const districtOpts=districts.map(x=>"<option value=\""+e(x)+"\" "+(x===selectedDistrict?"selected":"")+">"+e(x)+"</option>").join("");
+ const samitiOpts=samitis.map(x=>"<option value=\""+e(x)+"\" "+(x===selectedSamiti?"selected":"")+">"+e(x)+"</option>").join("");
+ const panchayatOpts=panchayats.map(x=>"<option value=\""+e(x.id)+"\" "+(String(x.id)===String(selected.id)?"selected":"")+">"+e(x.gram_panchayat||x.id)+"</option>").join("");
+ return "<div style=\"margin:10px 12px 0;padding:12px;border-radius:14px;background:#fff;border:1px solid #d7e7de;box-shadow:0 3px 12px #174d3520\"><label style=\"display:block;margin:0 0 7px;font-size:12px;font-weight:900;color:#075b43\">🌐 Full Access — Panchayat बदलें</label><div style=\"display:grid;gap:7px\"><select id=\"globalDistrictSelect\" onchange=\"globalDistrictChanged(this.value)\" style=\"width:100%;min-height:42px;border:1px solid #bdd5c8;border-radius:10px;padding:8px 10px;background:#fff;font:inherit;font-weight:800;color:#173d32\">"+districtOpts+"</select><select id=\"globalSamitiSelect\" onchange=\"globalSamitiChanged(this.value)\" style=\"width:100%;min-height:42px;border:1px solid #bdd5c8;border-radius:10px;padding:8px 10px;background:#fff;font:inherit;font-weight:800;color:#173d32\">"+samitiOpts+"</select><select id=\"globalPanchayatSelect\" onchange=\"applyGlobalPanchayatScope(this.value)\" style=\"width:100%;min-height:42px;border:1px solid #bdd5c8;border-radius:10px;padding:8px 10px;background:#fff;font:inherit;font-weight:800;color:#173d32\">"+panchayatOpts+"</select></div><div style=\"margin-top:6px;font-size:10.5px;color:#6b7f74\">पहले जिला, फिर पंचायत समिति, फिर ग्राम पंचायत चुनें। सभी tools चुनी हुई Panchayat पर चलेंगे।</div></div>";
+}
+function globalDistrictChanged(district){
+ const rows=(globalPanchayatOptions||[]).filter(x=>String(x.district||"")===String(district||""));
+ const samitis=[...new Set(rows.map(x=>String(x.panchayat_samiti||"")).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"hi"));
+ const samitiSel=document.getElementById("globalSamitiSelect");
+ const panchayatSel=document.getElementById("globalPanchayatSelect");
+ if(!samitiSel||!panchayatSel)return;
+ samitiSel.innerHTML=samitis.map((x,i)=>"<option value=\""+e(x)+"\" "+(i===0?"selected":"")+">"+e(x)+"</option>").join("");
+ globalSamitiChanged(samitis[0]||"");
+}
+function globalSamitiChanged(samiti){
+ const district=String(document.getElementById("globalDistrictSelect")?.value||"");
+ const rows=(globalPanchayatOptions||[]).filter(x=>String(x.district||"")===district&&String(x.panchayat_samiti||"")===String(samiti||""));
+ const panchayatSel=document.getElementById("globalPanchayatSelect");
+ if(!panchayatSel)return;
+ panchayatSel.innerHTML=rows.map((x,i)=>"<option value=\""+e(x.id)+"\" "+(i===0?"selected":"")+">"+e(x.gram_panchayat||x.id)+"</option>").join("");
 }
 async function applyGlobalPanchayatScope(pid){
  if(!isGlobalPanchayatLogin()||!pid)return;
