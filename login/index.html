@@ -1910,7 +1910,10 @@ async function load(userOverride=null){
  }
  if(!user){if(location.pathname.startsWith("/dashboard"))history.replaceState({},document.title,"/login/");loginView("Login session उपलब्ध नहीं है। कृपया Login करें।");return}
  currentUser=user;
- try{selectedGlobalPanchayatId=localStorage.getItem("px_global_panchayat_"+user.id)||selectedGlobalPanchayatId||""}catch(_){}
+ globalPanchayatAccess=false;
+ globalPanchayatOptions=[];
+ selectedGlobalPanchayatId="";
+ try{selectedGlobalPanchayatId=localStorage.getItem("px_global_panchayat_"+user.id)||""}catch(_){}
  if(location.pathname.startsWith("/dashboard/") && location.pathname!=="/dashboard/"){
    const legacy=location.pathname.replace(/^\/dashboard\/?/,"").replace(/\/$/,"");
    const allowed=["search","voter-slip","visit","new-voter","stats","a-z"];
