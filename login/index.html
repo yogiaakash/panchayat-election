@@ -1236,6 +1236,7 @@ const IS_ANDROID_APP=/PanchayatXAndroid/i.test(navigator.userAgent); if(IS_ANDRO
 let candidate=null,voters=[],page=1,currentUser=null,currentAccess=null,masterVoterCount=0,contactMap=new Map(),additionRows=[],houseOverrideMap=new Map(),voterMobileMap=new Map();
 let recoverySessionBackup=null;
 let psAllVoters=[],psAllContactRows=[],psAllAdditionRows=[],psAllHouseOverrideRows=[],psAllMobileRows=[],selectedPSPanchayatId="";
+let globalPanchayatAccess=false,globalPanchayatOptions=[],selectedGlobalPanchayatId="";
 let familyShareMessage="नमस्ते, आपके परिवार की मतदाता पर्चियां संलग्न हैं। कृपया अपनी जानकारी जांच लें।",signupPanchayats=[]; let selectedSignupPanchayatId=null; const PER=40;
 
 
@@ -1909,6 +1910,7 @@ async function load(userOverride=null){
  }
  if(!user){if(location.pathname.startsWith("/dashboard"))history.replaceState({},document.title,"/login/");loginView("Login session उपलब्ध नहीं है। कृपया Login करें।");return}
  currentUser=user;
+ try{selectedGlobalPanchayatId=localStorage.getItem("px_global_panchayat_"+user.id)||selectedGlobalPanchayatId||""}catch(_){}
  if(location.pathname.startsWith("/dashboard/") && location.pathname!=="/dashboard/"){
    const legacy=location.pathname.replace(/^\/dashboard\/?/,"").replace(/\/$/,"");
    const allowed=["search","voter-slip","visit","new-voter","stats","a-z"];
@@ -2008,7 +2010,7 @@ async function load(userOverride=null){
          session=refreshed?.data?.session||null;
        }
        if(!session?.access_token) throw new Error("Login session token missing");
-       let invokeResult=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:session.access_token}});
+       let invokeResult=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:session.access_token,panchayat_id:selectedGlobalPanchayatId||undefined}});
        let payload=invokeResult.data;
        let pageError=invokeResult.error;
        const authFailed=pageError && (pageError?.context?.status===401 || /401|unauthorized|invalid session/i.test(String(pageError?.message||"")));
@@ -2017,7 +2019,7 @@ async function load(userOverride=null){
          const refreshed=await sb.auth.refreshSession();
          const freshSession=refreshed?.data?.session;
          if(!freshSession?.access_token) throw pageError;
-         invokeResult=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:freshSession.access_token}});
+         invokeResult=await sb.functions.invoke("candidate-voter-data",{body:{offset,limit:pageSize,access_token:freshSession.access_token,panchayat_id:selectedGlobalPanchayatId||undefined}});
          payload=invokeResult.data;
          pageError=invokeResult.error;
        }
@@ -2027,6 +2029,18 @@ async function load(userOverride=null){
        all.push(...rows);
        expectedCount=Number(payload?.master_count||expectedCount||0);
        if(payload?.panchayat_id) currentAccess.panchayat_id=payload.panchayat_id;
+       if(payload?.global_panchayat_access===true){
+         globalPanchayatAccess=true;
+         if(Array.isArray(payload?.panchayat_options)) globalPanchayatOptions=payload.panchayat_options;
+         selectedGlobalPanchayatId=String(payload?.panchayat_id||selectedGlobalPanchayatId||"");
+         try{if(selectedGlobalPanchayatId)localStorage.setItem("px_global_panchayat_"+user.id,selectedGlobalPanchayatId)}catch(_){}
+         const selected=payload?.selected_panchayat||globalPanchayatOptions.find(x=>String(x.id)===selectedGlobalPanchayatId);
+         if(selected){
+           candidate.gram_panchayat=selected.gram_panchayat||candidate.gram_panchayat;
+           candidate.panchayat_samiti=selected.panchayat_samiti||candidate.panchayat_samiti;
+           candidate.district=selected.district||candidate.district;
+         }
+       }
        if(payload?.ward_no) candidate.ward_no=payload.ward_no;
        if(Array.isArray(payload?.panchayat_ids)) candidate.panchayat_ids=payload.panchayat_ids;
        if(Array.isArray(payload?.gram_panchayats)) candidate.gram_panchayats=payload.gram_panchayats;
@@ -2159,6 +2173,14 @@ async function load(userOverride=null){
        candidate.ward_no=profile.ward_no||candidate.ward_no||"";
        candidate.panchayat_ids=Array.isArray(profile.assigned_panchayat_ids)&&profile.assigned_panchayat_ids.length?profile.assigned_panchayat_ids:(candidate.panchayat_ids||[]);
        candidate.gram_panchayats=Array.isArray(profile.assigned_gram_panchayats)&&profile.assigned_gram_panchayats.length?profile.assigned_gram_panchayats:(candidate.gram_panchayats||[]);
+       if(isGlobalPanchayatLogin()){
+         const selected=globalPanchayatOptions.find(x=>String(x.id)===String(currentAccess.panchayat_id));
+         if(selected){
+           candidate.gram_panchayat=selected.gram_panchayat||candidate.gram_panchayat;
+           candidate.panchayat_samiti=selected.panchayat_samiti||candidate.panchayat_samiti;
+           candidate.district=selected.district||candidate.district;
+         }
+       }
 
        // Profile loads after the first dashboard render; update the visible
        // candidate photo immediately instead of waiting for another login.
@@ -2311,6 +2333,24 @@ function halfMaskNumber(value){
  const hide=Math.max(1,Math.ceil(s.length/2));
  return "*".repeat(hide)+s.slice(hide);
 }
+function isGlobalPanchayatLogin(){
+ return globalPanchayatAccess===true;
+}
+function globalPanchayatSelectorHtml(){
+ if(!isGlobalPanchayatLogin())return "";
+ const opts=(globalPanchayatOptions||[]).map(x=>{
+   const label=[x.district,x.panchayat_samiti,x.gram_panchayat].filter(Boolean).join(" → ");
+   return "<option value=\""+e(x.id)+"\" "+(String(currentAccess?.panchayat_id||"")===String(x.id)?"selected":"")+">"+e(label||x.gram_panchayat||x.id)+"</option>";
+ }).join("");
+ return "<div style=\"margin:10px 12px 0;padding:12px;border-radius:14px;background:#fff;border:1px solid #d7e7de;box-shadow:0 3px 12px #174d3520\"><label style=\"display:block;margin:0 0 6px;font-size:12px;font-weight:900;color:#075b43\">🌐 Full Access — Panchayat बदलें</label><select id=\"globalPanchayatSelect\" onchange=\"applyGlobalPanchayatScope(this.value)\" style=\"width:100%;min-height:46px;border:1px solid #bdd5c8;border-radius:12px;padding:9px 11px;background:#fff;font:inherit;font-weight:800;color:#173d32\">"+opts+"</select><div style=\"margin-top:6px;font-size:10.5px;color:#6b7f74\">इस account को सभी उपलब्ध Panchayat का full data access है। चुनी हुई Panchayat पर सभी tools चलेंगे।</div></div>";
+}
+async function applyGlobalPanchayatScope(pid){
+ if(!isGlobalPanchayatLogin()||!pid)return;
+ selectedGlobalPanchayatId=String(pid);
+ try{localStorage.setItem("px_global_panchayat_"+currentUser.id,selectedGlobalPanchayatId)}catch(_){}
+ app.innerHTML='<div style="padding:40px 18px;text-align:center;font-weight:800;color:#075b43">Panchayat data load हो रहा है…</div>';
+ await load(currentUser);
+}
 function isPanchayatSamitiMemberLogin(){
  return String(candidate?.post||"").trim()==="Panchayat Samiti Member";
 }
@@ -2350,7 +2390,7 @@ function dashboard(){
  document.title="PanchayatX | Candidate Dashboard";
  document.body.classList.remove("authPage");
  document.querySelector("header").style.display="none";
- app.classList.toggle("psMemberScope",isPanchayatSamitiMemberLogin());
+ app.classList.toggle("psMemberScope",isPanchayatSamitiMemberLogin()||isGlobalPanchayatLogin());
  const c=candidate;
  const total=voters.length;
  const totalMaster=(typeof masterVoterCount==="number"&&masterVoterCount)?masterVoterCount:voters.length;
@@ -2373,7 +2413,7 @@ function dashboard(){
     <div style="min-width:0;flex:1">
      <span class="demoCandidateName">${e(c.hindi_name||c.name||"")}</span>
      <span class="demoPost">${c.post?e(hindiPostName(c.post)):"अधिकृत पंचायत कार्यक्षेत्र"}</span>
-     <span class="demoGp">${String(c.post||"")==="Panchayat Samiti Member"&&Array.isArray(c.gram_panchayats)&&c.gram_panchayats.length?"क्षेत्र : "+e(c.gram_panchayats.length)+" ग्राम पंचायतें":"ग्राम पंचायत : "+e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
+     <span class="demoGp">${isGlobalPanchayatLogin()?"ग्राम पंचायत : "+e(c.hindi_gram_panchayat||c.gram_panchayat||""):String(c.post||"")==="Panchayat Samiti Member"&&Array.isArray(c.gram_panchayats)&&c.gram_panchayats.length?"क्षेत्र : "+e(c.gram_panchayats.length)+" ग्राम पंचायतें":"ग्राम पंचायत : "+e(c.hindi_gram_panchayat||c.gram_panchayat||"")}</span>
      ${String(c.post||"")==="Ward Panch"?`<span class="demoSub demoWard">वार्ड संख्या : ${e(String(Number(c.ward_no)||c.ward_no||""))}</span>`:""}
      <span class="demoSub demoPs">पंचायत समिति : ${e(c.hindi_panchayat_samiti||c.panchayat_samiti||"")}</span>
      <span class="demoSub demoDistrict">जिला : ${e(c.hindi_district||c.district||"")}</span>
@@ -2382,7 +2422,7 @@ function dashboard(){
      <button class="demoLogout" onclick="logout.click()">Logout</button>
     </div>
    </div>
-   ${psGlobalSelectorHtml()}
+   ${isGlobalPanchayatLogin()?globalPanchayatSelectorHtml():psGlobalSelectorHtml()}
   </div>
   ${currentAccess.access_level!=="full"?`<div class="freeAccessBanner"><b>🔒 Masked Access</b><br>इस पंचायत का पूरा voter data उपलब्ध है, लेकिन नाम, संबंधी और Voter ID masked हैं।<br>Statistics भी masked हैं।<button class="btn primary full" onclick="showUpgradePrompt()">🔓 Full Data Unlock करें</button></div>`:""}
   <div class="demoMain">
