@@ -1223,7 +1223,7 @@ src="https://www.facebook.com/tr?id=2507596392964982&ev=PageView&noscript=1"
 <header><a class="brand authBrand" href="/" aria-label="PanchayatX Home"><span class="authBrandName">Panchayat<b>X</b></span><small>हर पंचायत, डिजिटल पंचायत</small></a><div class="authHeaderRight"><a class="authHomeLink" href="/">होम</a><button id="logout" class="btn ghost hidden">Logout</button></div></header>
 <main id="app"></main>
 <script>
-window.PANCHAYAT_SARPANCH_REGULAR_PRICE=4999;window.PANCHAYAT_SARPANCH_DISCOUNT_PRICE=999;window.PANCHAYAT_WARD_PANCH_REGULAR_PRICE=999;window.PANCHAYAT_WARD_PANCH_DISCOUNT_PRICE=499;window.PANCHAYAT_SAMITI_REGULAR_PRICE=9999;window.PANCHAYAT_SAMITI_DISCOUNT_PRICE=999;window.PANCHAYAT_COUPON_CODE="PANCHAYATX";window.PANCHAYAT_COUPON_EXPIRES_AT="2026-10-11T10:40:00+05:30";window.PANCHAYAT_APPLIED_COUPON="";
+window.PANCHAYAT_SARPANCH_REGULAR_PRICE=4999;window.PANCHAYAT_SARPANCH_DISCOUNT_PRICE=999;window.PANCHAYAT_WARD_PANCH_REGULAR_PRICE=999;window.PANCHAYAT_WARD_PANCH_DISCOUNT_PRICE=199;window.PANCHAYAT_SAMITI_REGULAR_PRICE=9999;window.PANCHAYAT_SAMITI_DISCOUNT_PRICE=999;window.PANCHAYAT_COUPON_CODE="PANCHAYATX";window.PANCHAYAT_COUPON_EXPIRES_AT="2026-10-11T10:40:00+05:30";window.PANCHAYAT_APPLIED_COUPON="";
 const SUPABASE_URL="https://ieoltipygxawhsvlxnsj.supabase.co", SUPABASE_PUBLISHABLE_KEY="sb_publishable_AzM0AxHgmX2a6-9On5jgNg_7SuasTXH";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
  auth:{
@@ -2586,7 +2586,7 @@ function isPanchayatSamitiMemberAccount(){
  return String(candidate?.post||"").trim()==="Panchayat Samiti Member";
 }
 function fullAccessPricing(){
- if(isWardPanchAccount()) return {label:"Ward Panch",regular:Number(window.PANCHAYAT_WARD_PANCH_REGULAR_PRICE||999),discount:Number(window.PANCHAYAT_WARD_PANCH_DISCOUNT_PRICE||499)};
+ if(isWardPanchAccount()) return {label:"Ward Panch",regular:Number(window.PANCHAYAT_WARD_PANCH_REGULAR_PRICE||999),discount:Number(window.PANCHAYAT_WARD_PANCH_DISCOUNT_PRICE||199)};
  if(isPanchayatSamitiMemberAccount()) return {label:"Panchayat Samiti Member",regular:Number(window.PANCHAYAT_SAMITI_REGULAR_PRICE||9999),discount:Number(window.PANCHAYAT_SAMITI_DISCOUNT_PRICE||999)};
  return {label:"Sarpanch",regular:Number(window.PANCHAYAT_SARPANCH_REGULAR_PRICE||4999),discount:Number(window.PANCHAYAT_SARPANCH_DISCOUNT_PRICE||999)};
 }
