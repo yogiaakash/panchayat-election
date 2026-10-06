@@ -1,4 +1,4 @@
-// PanchayatX v2.6 native-shell build
+// PanchayatX v2.7 safe-area build
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -10,8 +10,8 @@ android {
         applicationId = "com.panchayatdigital.candidateapp"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "2.6"
+        versionCode = 9
+        versionName = "2.7"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
