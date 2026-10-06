@@ -3,7 +3,7 @@ const COUPON_EXPIRES_AT = new Date("2026-10-11T10:40:00+05:30");
 
 function priceForPost(post, discounted) {
   const p = String(post || "").trim();
-  if (p === "Ward Panch") return discounted ? 499 : 999;
+  if (p === "Ward Panch") return discounted ? 199 : 999;
   if (p === "Panchayat Samiti Member") return discounted ? 999 : 9999;
   return discounted ? 999 : 4999;
 }
