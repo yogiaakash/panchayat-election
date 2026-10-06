@@ -1299,6 +1299,41 @@ main#app{background:linear-gradient(180deg,#f5f9f6 0%,#f9fbfa 100%)!important;bo
 }
 </style>
 
+
+<style id="module-gap-fix">
+/* Inner pages: remove the large blank gap below candidate header */
+.moduleOpen #demoHome{
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+}
+.moduleOpen #demoHome .demoHead{
+  position:sticky!important;
+  top:0!important;
+  left:auto!important;
+  transform:none!important;
+  width:100%!important;
+  max-width:none!important;
+  z-index:60!important;
+}
+.moduleOpen #demoHome .demoMain,
+.moduleOpen #demoHome .freeAccessBanner{
+  display:none!important;
+}
+.moduleOpen #workspaceAfterHome{
+  padding-top:6px!important;
+  margin-top:0!important;
+}
+.moduleOpen #workspaceAfterHome>.card:first-child,
+.moduleOpen #workspaceAfterHome>.tabpane:first-of-type,
+.moduleOpen #workspaceAfterHome .exactSearchCard:first-child{
+  margin-top:0!important;
+}
+@media(max-width:360px){
+  .moduleOpen #workspaceAfterHome{padding-top:5px!important}
+}
+</style>
+
 </head>
 <body>
 <noscript><img height="1" width="1" style="display:none"
