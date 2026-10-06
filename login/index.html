@@ -2591,7 +2591,7 @@ function fullAccessPricing(){
  return {label:"Sarpanch",regular:Number(window.PANCHAYAT_SARPANCH_REGULAR_PRICE||4999),discount:Number(window.PANCHAYAT_SARPANCH_DISCOUNT_PRICE||999)};
 }
 function currentPackageDiscountPercent(){
- const p=currentPackagePrice();
+ const p=fullAccessPricing();
  return Math.round((1-(p.discount/p.regular))*100);
 }
 function currentFullAccessAmount(){
@@ -2614,7 +2614,7 @@ function applyFullAccessCoupon(){
    const priceEl=document.getElementById("fullAccessCurrentPrice");
    if(priceEl)priceEl.textContent="₹"+price.toLocaleString("en-IN");
    const packagePriceEl=document.getElementById("fullAccessPackagePrice");
-   if(packagePriceEl)packagePriceEl.innerHTML="₹"+price.toLocaleString("en-IN")+' <span class="muted" style="font-size:14px;font-weight:500">after "+currentPackageDiscountPercent()+"% discount</span>';
+   if(packagePriceEl)packagePriceEl.innerHTML="₹"+price.toLocaleString("en-IN")+' <span class="muted" style="font-size:14px;font-weight:500">after '+currentPackageDiscountPercent()+'% discount</span>';
    if(msg){msg.textContent="✅ Coupon applied — "+currentPackageDiscountPercent()+"% discount के बाद payable ₹"+price.toLocaleString("en-IN");msg.style.color="#087443";}
  }else{
    window.PANCHAYAT_APPLIED_COUPON="";
