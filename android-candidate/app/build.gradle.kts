@@ -1,3 +1,4 @@
+// PanchayatX v2.6 native-shell build
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
