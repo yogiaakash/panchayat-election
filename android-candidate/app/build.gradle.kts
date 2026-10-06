@@ -9,8 +9,8 @@ android {
         applicationId = "com.panchayatdigital.candidateapp"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "2.4"
+        versionCode = 7
+        versionName = "2.5"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -21,4 +21,5 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.razorpay:checkout:1.6.41")
 }
