@@ -1334,6 +1334,251 @@ main#app{background:linear-gradient(180deg,#f5f9f6 0%,#f9fbfa 100%)!important;bo
 }
 </style>
 
+
+<style id="premium-dashboard-v2">
+/* Premium PanchayatX theme — visual only; data/options/functions unchanged */
+:root{
+  --px-deep:#0b2f28;
+  --px-emerald:#0b7d59;
+  --px-emerald2:#10a06e;
+  --px-gold:#d7b15b;
+  --px-cream:#fbfaf6;
+  --px-card:#ffffff;
+  --px-line:#e5ebe7;
+  --px-ink:#173c31;
+  --px-muted:#73817a;
+}
+
+body{
+  background:
+    radial-gradient(circle at 20% -10%,rgba(15,160,110,.10),transparent 28%),
+    linear-gradient(180deg,#edf5f1 0%,#f7faf8 45%,#eef5f1 100%)!important;
+}
+main#app{
+  background:linear-gradient(180deg,#f8fbf9 0%,#f5f9f7 100%)!important;
+  box-shadow:0 20px 60px rgba(7,54,42,.16)!important;
+}
+
+/* Header */
+#demoHome .demoHead{
+  position:relative!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 88% 18%,rgba(215,177,91,.18),transparent 24%),
+    linear-gradient(135deg,#0a3f34 0%,#0b6a4d 50%,#0d8b61 100%)!important;
+  border-bottom:1px solid rgba(215,177,91,.85)!important;
+  padding:16px 14px 17px!important;
+  box-shadow:0 12px 28px rgba(7,54,42,.18)!important;
+}
+#demoHome .demoHead:before{
+  content:"";
+  position:absolute;
+  width:180px;height:180px;border-radius:50%;
+  right:-75px;top:-85px;
+  background:rgba(255,255,255,.06);
+  pointer-events:none;
+}
+#demoHome .demoHead:after{
+  content:"";
+  position:absolute;
+  width:120px;height:120px;border-radius:50%;
+  right:38px;bottom:-92px;
+  background:rgba(215,177,91,.08);
+  pointer-events:none;
+}
+#demoHome .demoHeadRow{position:relative;z-index:1!important}
+#demoHome .demoAvatar{
+  border:3px solid #e2bd63!important;
+  background:#fff!important;
+  box-shadow:0 7px 18px rgba(0,0,0,.22),0 0 0 3px rgba(255,255,255,.10)!important;
+}
+#demoHome .demoCandidateName{
+  font-size:21px!important;
+  letter-spacing:-.25px!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.18)!important;
+}
+#demoHome .demoPost{
+  background:rgba(255,255,255,.10)!important;
+  border:1px solid rgba(235,210,146,.55)!important;
+  color:#ffe7a8!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.07)!important;
+}
+#demoHome .demoGp{color:#fff!important}
+#demoHome .demoSub{color:#e2f3eb!important;opacity:.93!important}
+#demoHome .demoLogout{
+  border:1px solid rgba(255,255,255,.38)!important;
+  background:rgba(255,255,255,.11)!important;
+  color:#fff!important;
+  border-radius:999px!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.10)!important;
+}
+
+/* Access card */
+.freeAccessBanner{
+  margin:14px 12px 4px!important;
+  padding:16px!important;
+  border-radius:20px!important;
+  border:1px solid #ead8ad!important;
+  background:
+    radial-gradient(circle at 92% 10%,rgba(215,177,91,.12),transparent 25%),
+    linear-gradient(135deg,#fffdf8,#fff8e8)!important;
+  color:#5b4b2a!important;
+  box-shadow:0 10px 26px rgba(108,82,23,.08)!important;
+  line-height:1.55!important;
+}
+.freeAccessBanner>b{
+  color:#174f40!important;
+  font-size:17px!important;
+  letter-spacing:-.1px!important;
+}
+.freeAccessBanner .btn{
+  margin-top:11px!important;
+  min-height:46px!important;
+  border-radius:14px!important;
+  background:linear-gradient(135deg,#0e9a6a,#087451)!important;
+  box-shadow:0 9px 20px rgba(8,116,81,.23)!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  font-weight:900!important;
+}
+
+/* Main home area */
+#demoHome .demoMain{padding:13px 12px 18px!important}
+#demoHome .demoGrid2{gap:11px!important}
+
+#demoHome .demoFeature{
+  min-height:112px!important;
+  border-radius:22px!important;
+  border:1px solid var(--px-line)!important;
+  background:
+    linear-gradient(180deg,#ffffff 0%,#fbfdfc 100%)!important;
+  color:var(--px-ink)!important;
+  box-shadow:
+    0 8px 24px rgba(18,61,48,.07),
+    inset 0 1px 0 rgba(255,255,255,.9)!important;
+  padding:15px 10px!important;
+  font-size:12px!important;
+  line-height:1.3!important;
+  position:relative!important;
+  overflow:hidden!important;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease!important;
+}
+#demoHome .demoFeature:before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,#0b7d59,#d7b15b);
+  opacity:.8;
+}
+#demoHome .demoFeature:hover,
+#demoHome .demoFeature:active{
+  transform:translateY(-2px)!important;
+  border-color:#cddfd6!important;
+  box-shadow:0 14px 28px rgba(18,61,48,.11)!important;
+}
+#demoHome .demoFeature span{
+  width:50px!important;height:50px!important;line-height:50px!important;
+  margin:1px auto 10px!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,#e7f5ee,#f8fbfa)!important;
+  border:1px solid #d7e8df!important;
+  box-shadow:0 5px 12px rgba(8,116,81,.07),inset 0 1px #fff!important;
+  font-size:24px!important;
+}
+
+/* Panchayat information */
+#demoHome .demoInfoCard{
+  margin-top:14px!important;
+  padding:15px!important;
+  border-radius:22px!important;
+  border:1px solid #e0e9e4!important;
+  background:linear-gradient(180deg,#fff 0%,#fbfdfc 100%)!important;
+  box-shadow:0 10px 26px rgba(18,61,48,.07)!important;
+}
+#demoHome .demoTitle{
+  font-size:17px!important;
+  color:#075a43!important;
+  letter-spacing:-.15px!important;
+  margin-bottom:5px!important;
+}
+#demoHome .demoInfoLead{
+  color:#78867f!important;
+  font-size:11px!important;
+  margin:0 0 12px!important;
+}
+#demoHome .demoInfoList{gap:9px!important}
+#demoHome .demoInfoRow{
+  border:1px solid #e4ece7!important;
+  background:linear-gradient(180deg,#fbfdfc,#f6faf8)!important;
+  border-radius:15px!important;
+  padding:11px 12px!important;
+  box-shadow:0 2px 7px rgba(18,61,48,.025)!important;
+}
+#demoHome .demoInfoRow b{color:#087451!important}
+#demoHome .demoInfoRow small{color:#7b8982!important}
+
+/* Inner cards inherit premium treatment */
+#workspaceAfterHome .card,
+#opsReports>.card,
+#opsReports .card,
+#tabStats>.card,
+#tabSlip>.card,
+.exactSearchCard,
+.exactVoterCard{
+  border-color:#e0e9e4!important;
+  border-radius:18px!important;
+  box-shadow:0 8px 22px rgba(18,61,48,.06)!important;
+  background:#fff!important;
+}
+#workspaceAfterHome input,
+#workspaceAfterHome select,
+#workspaceAfterHome textarea{
+  border-color:#d7e5de!important;
+  background:#fcfefd!important;
+}
+#workspaceAfterHome .primary,
+#opsReports .primary{
+  background:linear-gradient(135deg,#0e9365,#087451)!important;
+  box-shadow:0 6px 14px rgba(8,116,81,.18)!important;
+}
+
+/* Bottom navigation */
+.demoBottomNav{
+  padding:8px 8px 9px!important;
+  background:rgba(255,255,255,.96)!important;
+  border-top:1px solid #dce8e1!important;
+  box-shadow:0 -8px 26px rgba(18,61,48,.10)!important;
+  backdrop-filter:blur(16px)!important;
+  -webkit-backdrop-filter:blur(16px)!important;
+}
+.demoBottomNav button{
+  border-radius:14px!important;
+  color:#74817b!important;
+  padding:5px 2px!important;
+}
+.demoBottomNav button.active{
+  background:linear-gradient(180deg,#edf8f2,#e7f4ed)!important;
+  color:#087451!important;
+  box-shadow:inset 0 0 0 1px #dcece3!important;
+}
+.demoBottomNav button b{font-size:20px!important}
+
+/* Keep compact inner-header behaviour */
+.moduleOpen #demoHome .demoHead{
+  border-bottom-color:#d7b15b!important;
+}
+.moduleOpen #workspaceAfterHome{
+  padding-top:5px!important;
+  margin-top:0!important;
+}
+
+@media(max-width:420px){
+  #demoHome .demoHead{padding:14px 12px 15px!important}
+  #demoHome .demoCandidateName{font-size:20px!important}
+  #demoHome .demoFeature{min-height:106px!important;border-radius:19px!important}
+  #demoHome .demoFeature span{width:47px!important;height:47px!important;line-height:47px!important}
+}
+</style>
+
 </head>
 <body>
 <noscript><img height="1" width="1" style="display:none"
