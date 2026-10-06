@@ -1579,6 +1579,174 @@ main#app{
 }
 </style>
 
+
+<style id="native-app-shell-v3">
+/* Native-style PanchayatX shell. Visual-only; all data/actions remain unchanged. */
+html,body{overscroll-behavior-y:none}
+body{background:#eef4f1!important}
+main#app{
+  max-width:470px!important;
+  min-height:100dvh!important;
+  background:#f6f8f7!important;
+  padding-bottom:78px!important;
+  box-shadow:0 0 42px rgba(12,61,47,.14)!important
+}
+
+/* App bar */
+#demoHome .demoHead{
+  position:relative!important;
+  overflow:hidden!important;
+  padding:12px 14px 13px!important;
+  background:linear-gradient(135deg,#083d32 0%,#076248 54%,#0a8d63 100%)!important;
+  border:0!important;
+  border-bottom:1px solid rgba(224,189,100,.72)!important;
+  box-shadow:0 5px 18px rgba(7,54,42,.16)!important
+}
+#demoHome .demoHead:before{
+  content:"";position:absolute;right:-55px;top:-75px;width:180px;height:180px;border-radius:50%;
+  background:rgba(255,255,255,.055);pointer-events:none
+}
+#demoHome .demoHeadRow{
+  position:relative;z-index:1;
+  display:grid!important;grid-template-columns:54px minmax(0,1fr) auto!important;
+  gap:10px!important;align-items:center!important;padding-right:0!important;min-height:58px!important
+}
+#demoHome .demoAvatar{
+  width:54px!important;height:54px!important;border-radius:50%!important;
+  border:2.5px solid #e1ba5d!important;background:#fff!important;
+  box-shadow:0 4px 12px rgba(0,0,0,.22),0 0 0 2px rgba(255,255,255,.10)!important
+}
+#demoHome .demoCandidateName{
+  font-size:18px!important;line-height:1.08!important;font-weight:900!important;
+  color:#fff!important;letter-spacing:-.15px!important;white-space:nowrap!important;
+  overflow:hidden!important;text-overflow:ellipsis!important
+}
+#demoHome .demoPost{
+  display:inline-flex!important;width:max-content!important;
+  margin-top:3px!important;padding:2px 7px!important;border-radius:999px!important;
+  font-size:9.5px!important;line-height:1.25!important;font-weight:800!important;
+  color:#ffe9ad!important;background:rgba(255,255,255,.09)!important;border:1px solid rgba(231,201,124,.45)!important
+}
+#demoHome .demoGp{font-size:11px!important;line-height:1.2!important;margin-top:4px!important;color:#fff!important;font-weight:800!important}
+#demoHome .demoSub{display:inline!important;font-size:8.8px!important;line-height:1.25!important;color:#d9eee5!important;opacity:.95!important;margin-right:5px!important}
+#demoHome .demoSub.demoDistrict:before{content:"• ";opacity:.65}
+#demoHome .demoLogout{
+  position:static!important;align-self:start!important;margin-top:1px!important;
+  min-width:46px!important;padding:5px 8px!important;border-radius:999px!important;
+  background:rgba(255,255,255,.11)!important;border:1px solid rgba(255,255,255,.36)!important;
+  color:#fff!important;font-size:8.5px!important;font-weight:800!important;line-height:1!important
+}
+
+/* Compact access banner */
+.freeAccessBanner{
+  margin:10px 12px 0!important;padding:12px 13px!important;border-radius:16px!important;
+  border:1px solid #ead9ad!important;background:linear-gradient(135deg,#fffdf8 0%,#fff8e9 100%)!important;
+  color:#665735!important;font-size:11.5px!important;line-height:1.42!important;
+  box-shadow:0 5px 16px rgba(102,75,20,.06)!important
+}
+.freeAccessBanner>b{display:block!important;margin-bottom:3px!important;color:#174f40!important;font-size:14px!important}
+.freeAccessBanner .btn{
+  width:100%!important;min-height:39px!important;margin-top:8px!important;padding:8px 12px!important;
+  border-radius:11px!important;background:linear-gradient(135deg,#0a9466,#087451)!important;
+  box-shadow:0 6px 14px rgba(8,116,81,.18)!important;font-size:12px!important;font-weight:900!important
+}
+
+/* Home actions */
+#demoHome .demoMain{padding:11px 12px 15px!important}
+#demoHome .demoGrid2{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important}
+#demoHome .demoFeature{
+  position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  min-height:94px!important;padding:11px 8px!important;border-radius:17px!important;
+  border:1px solid #dfe8e3!important;background:#fff!important;color:#183d32!important;
+  box-shadow:0 4px 13px rgba(18,61,48,.045)!important;
+  font-family:inherit!important;text-align:center!important;appearance:none!important;-webkit-appearance:none!important
+}
+#demoHome .demoFeature:active{transform:scale(.985)!important;background:#f9fcfa!important}
+#demoHome .demoFeature:before{display:none!important}
+#demoHome .demoFeature .featureIcon{
+  width:42px!important;height:42px!important;display:grid!important;place-items:center!important;
+  margin:0 auto 7px!important;border-radius:13px!important;background:#ebf6f1!important;
+  border:1px solid #d9eae2!important;color:#087451!important;box-shadow:none!important;
+  font-size:15px!important;font-weight:900!important;line-height:1!important
+}
+#demoHome .demoFeature .featureIcon svg{
+  width:22px!important;height:22px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important
+}
+#demoHome .demoFeature .featureIconText{font-size:13px!important;letter-spacing:-.4px!important}
+#demoHome .demoFeature strong{font-size:11px!important;line-height:1.23!important;font-weight:800!important;color:#1a4034!important;max-width:150px!important}
+
+/* Summary card */
+#demoHome .demoInfoCard{
+  margin-top:11px!important;padding:13px!important;border-radius:17px!important;
+  border:1px solid #e0e9e4!important;background:#fff!important;
+  box-shadow:0 5px 16px rgba(18,61,48,.045)!important
+}
+#demoHome .demoTitle{font-size:15px!important;margin-bottom:3px!important;color:#075943!important}
+#demoHome .demoInfoLead{font-size:10px!important;margin:0 0 9px!important;color:#7b8982!important}
+#demoHome .demoInfoList{gap:7px!important}
+#demoHome .demoInfoRow{
+  padding:9px 10px!important;border-radius:12px!important;border:1px solid #e7ede9!important;
+  background:#fafcfb!important;box-shadow:none!important
+}
+#demoHome .demoInfoRow b,#demoHome .demoInfoRow span{font-size:13px!important}
+#demoHome .demoInfoRow small{font-size:9.5px!important;margin-top:2px!important}
+
+/* Inner module shell */
+.moduleOpen #demoHome .demoHead{
+  position:sticky!important;top:0!important;left:auto!important;transform:none!important;
+  width:100%!important;max-width:none!important;padding:8px 10px 9px!important;z-index:60!important
+}
+.moduleOpen #demoHome .demoHeadRow{
+  grid-template-columns:42px minmax(0,1fr) auto!important;gap:8px!important;min-height:44px!important
+}
+.moduleOpen #demoHome .demoAvatar{width:42px!important;height:42px!important}
+.moduleOpen #demoHome .demoCandidateName{font-size:15px!important}
+.moduleOpen #demoHome .demoPost{font-size:8px!important;padding:1px 5px!important;margin-top:2px!important}
+.moduleOpen #demoHome .demoGp{font-size:9px!important;margin-top:2px!important}
+.moduleOpen #demoHome .demoSub{display:none!important}
+.moduleOpen #demoHome .demoMain,.moduleOpen #demoHome .freeAccessBanner{display:none!important}
+.moduleOpen #workspaceAfterHome{padding:5px 9px 12px!important;margin:0!important}
+#workspaceAfterHome .card,.exactSearchCard,.exactVoterCard,#opsReports>.card,#opsReports .card,#tabStats>.card,#tabSlip>.card{
+  border-radius:16px!important;border-color:#e0e8e4!important;box-shadow:0 4px 14px rgba(18,61,48,.045)!important
+}
+
+/* Native bottom navigation */
+.demoBottomNav{
+  position:fixed!important;left:50%!important;bottom:0!important;transform:translateX(-50%)!important;
+  width:100%!important;max-width:470px!important;height:64px!important;padding:5px 7px 7px!important;
+  display:grid!important;grid-template-columns:repeat(4,1fr)!important;align-items:stretch!important;
+  background:rgba(255,255,255,.98)!important;border-top:1px solid #dde7e2!important;
+  box-shadow:0 -5px 18px rgba(15,61,47,.08)!important;z-index:100!important
+}
+.demoBottomNav button{
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;
+  min-width:0!important;padding:3px 2px!important;border:0!important;border-radius:12px!important;
+  background:transparent!important;color:#7b8781!important;font-family:inherit!important;font-size:9px!important;font-weight:700!important
+}
+.demoBottomNav button b{display:grid!important;place-items:center!important;width:27px!important;height:27px!important;margin:0!important}
+.demoBottomNav button b svg{
+  width:20px!important;height:20px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important
+}
+.demoBottomNav button.active{
+  color:#087451!important;background:#edf7f2!important;box-shadow:inset 0 0 0 1px #e0eee7!important
+}
+.demoBottomNav button span{display:block!important;line-height:1!important}
+
+/* Dialog polish */
+dialog{border-radius:20px!important;box-shadow:0 20px 60px rgba(8,45,35,.22)!important}
+
+@media(max-width:370px){
+  #demoHome .demoHead{padding:10px 10px 11px!important}
+  #demoHome .demoHeadRow{grid-template-columns:50px minmax(0,1fr) auto!important;gap:8px!important}
+  #demoHome .demoAvatar{width:50px!important;height:50px!important}
+  #demoHome .demoCandidateName{font-size:17px!important}
+  #demoHome .demoFeature{min-height:90px!important}
+  #demoHome .demoFeature strong{font-size:10.5px!important}
+}
+</style>
+
 </head>
 <body>
 <noscript><img height="1" width="1" style="display:none"
@@ -2818,13 +2986,12 @@ function dashboard(){
   ${currentAccess.access_level!=="full"?`<div class="freeAccessBanner"><b>🔒 Masked Access</b><br>इस पंचायत का पूरा voter data उपलब्ध है, लेकिन नाम, संबंधी और Voter ID masked हैं।<br>Statistics भी masked हैं।<button class="btn primary full" onclick="showUpgradePrompt()">🔓 Full Data Unlock करें</button></div>`:""}
   <div class="demoMain">
    <div class="demoGrid2">
-    <button class="demoFeature" onclick="openWorkspace('info')"><span>🔎</span>मतदाता खोज</button>
-    <button class="demoFeature" onclick="openWorkspace('slip')"><span>📄</span>Ward-wise Voter Slip PDF</button>
-    <button class="demoFeature" onclick="openVisitWorkspace()"><span>🚶</span>Visit Tracking</button>
-    <button class="demoFeature" onclick="openAdditionWorkspace()"><span>🆕</span>New Voter (Supp-2) Report</button>
-    <button class="demoFeature" onclick="openWorkspace('stats')"><span>📊</span>${String(c.post||"")==="Ward Panch"?"Ward Statistics":"Panchayat Statistics"}</button>
-    <button class="demoFeature" onclick="openAZWorkspace()"><span>🔤</span>A–Z Voter List</button>
-    
+    <button class="demoFeature" onclick="openWorkspace('info')"><span class="featureIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path></svg></span><strong>मतदाता खोज</strong></button>
+    <button class="demoFeature" onclick="openWorkspace('slip')"><span class="featureIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"></path><path d="M15 3v4h4M9 11h6M9 15h6"></path></svg></span><strong>Ward-wise Voter Slip PDF</strong></button>
+    <button class="demoFeature" onclick="openVisitWorkspace()"><span class="featureIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM10 9l4 1 2 4-2 1-2-3-1 4 4 4-2 1-4-4-2 3-2-1 3-5 1-5z"></path></svg></span><strong>Visit Tracking</strong></button>
+    <button class="demoFeature" onclick="openAdditionWorkspace()"><span class="featureIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M12 8v8M8 12h8"></path></svg></span><strong>New Voter (Supp-2) Report</strong></button>
+    <button class="demoFeature" onclick="openWorkspace('stats')"><span class="featureIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10h3v10M10.5 20V4h3v16M16 20v-7h3v7"></path></svg></span><strong>${String(c.post||"")==="Ward Panch"?"Ward Statistics":"Panchayat Statistics"}</strong></button>
+    <button class="demoFeature" onclick="openAZWorkspace()"><span class="featureIcon featureIconText">A–Z</span><strong>A–Z Voter List</strong></button>
    </div>
    <div class="demoInfoCard">
     <div class="demoTitle">📊 ${String(c.post||"")==="Ward Panch"?"वार्ड की जानकारी":"पंचायत की जानकारी"}</div>
@@ -2936,7 +3103,12 @@ function dashboard(){
   <dialog id="detailDlg"><h3>मतदाता विवरण</h3><div id="detailBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="detailDlg.close()">Close</button></div></dialog>
   <dialog id="houseDlg" class="houseDlg"><h3>🏠 मकान नंबर बदलें</h3><div id="houseBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="houseDlg.close()">बंद करें</button></div></dialog><dialog id="familyShareDlg" class="houseDlg"><h3>📲 Family Voter Slip Share</h3><div id="familyShareBody"></div><div style="margin-top:12px"><button class="btn ghost" onclick="familyShareDlg.close()">बंद करें</button></div></dialog>
  </div>
- <div class="demoBottomNav"><button class="active" onclick="scrollToHome()"><b>⌂</b>Home</button><button onclick="openWorkspace('info')"><b>🔎</b>Search</button><button onclick="openVisitWorkspace()"><b>🚶</b>Visit</button><button onclick="openWorkspace('stats')"><b>📊</b>Stats</button></div>`;
+ <div class="demoBottomNav">
+ <button class="active" onclick="scrollToHome()"><b><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6"></path></svg></b><span>Home</span></button>
+ <button onclick="openWorkspace('info')"><b><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"></circle><path d="m15 15 5 5"></path></svg></b><span>Search</span></button>
+ <button onclick="openVisitWorkspace()"><b><svg viewBox="0 0 24 24"><path d="M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM10 9l4 1 2 4-2 1-2-3-1 4 4 4-2 1-4-4-2 3-2-1 3-5 1-5z"></path></svg></b><span>Visit</span></button>
+ <button onclick="openWorkspace('stats')"><b><svg viewBox="0 0 24 24"><path d="M5 20V10h3v10M10.5 20V4h3v16M16 20v-7h3v7"></path></svg></b><span>Stats</span></button>
+</div>`;
  q.addEventListener("input",()=>{page=1;renderRows()});ward.addEventListener("change",()=>cascade("ward"));colony.addEventListener("change",()=>cascade("colony"));house.addEventListener("change",()=>{page=1;renderRows()});renderRows();renderPanchayatStats();initAZLetters();renderAZ();updateSlipCount();
  restoreDashboardRoute();
 }
