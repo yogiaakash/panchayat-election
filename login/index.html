@@ -2990,6 +2990,44 @@ function applyFullAccessCoupon(){
    if(msg){msg.textContent="Invalid coupon code";msg.style.color="#b42318";}
  }
 }
+async function verifyNativeRazorpayPayment(resp){
+ try{
+  let {data:{session:verifySession}}=await sb.auth.getSession();
+  if(!verifySession?.access_token){
+    const refreshed=await sb.auth.refreshSession();
+    verifySession=refreshed?.data?.session||null;
+  }
+  const vr=await fetch("/api/verify-payment",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+(verifySession?.access_token||"")
+    },
+    body:JSON.stringify(resp||{})
+  });
+  const verified=await vr.json().catch(()=>({}));
+  if(!vr.ok||!verified?.verified){
+    alert("Payment हुआ लेकिन verification failed: "+(verified.error||"Unknown error"));
+    return;
+  }
+  alert("✅ Payment successfully verified. Amount ₹"+Number(verified.amount||0).toLocaleString("en-IN")+".");
+ }catch(err){
+  alert("Payment verification error: "+(err?.message||err));
+ }
+}
+window.onNativeRazorpaySuccess=function(payload){
+ try{
+  const resp=typeof payload==="string"?JSON.parse(payload):payload;
+  verifyNativeRazorpayPayment(resp);
+ }catch(err){alert("Payment response read नहीं हुआ।");}
+};
+window.onNativeRazorpayError=function(payload){
+ try{
+  const err=typeof payload==="string"?JSON.parse(payload):payload;
+  alert("Payment failed: "+(err?.description||"Please try again"));
+ }catch(_){alert("Payment failed. Please try again.");}
+};
+
 async function startRazorpayCheckout(){
  try{
   if(!window.Razorpay){alert("Razorpay Checkout load नहीं हुआ। Page refresh करके फिर try करें।");return}
@@ -3017,6 +3055,37 @@ async function startRazorpayCheckout(){
   }
 
   document.getElementById("fullAccessPayDlg")?.close();
+
+  // Android APK: use Razorpay native SDK so PhonePe / Paytm / Google Pay
+  // can appear as installed UPI apps and open directly via UPI Intent.
+  if(window.AndroidPayment && typeof window.AndroidPayment.startCheckout==="function"){
+    const nativeOptions={
+      key:order.key_id,
+      amount:order.amount,
+      currency:order.currency||"INR",
+      name:"PanchayatX",
+      description:(order.election_post||"Candidate")+" Lifetime Full Access — ₹"+Number(order.rupees||0).toLocaleString("en-IN"),
+      order_id:order.order_id,
+      prefill:{
+        name:candidate?.hindi_name||candidate?.name||"",
+        email:currentUser?.email||"",
+        contact:candidate?.mobile||""
+      },
+      notes:{purpose:"PanchayatX Lifetime Full Access"},
+      config:{
+        display:{
+          blocks:{
+            upi:{name:"UPI Apps",instruments:[{method:"upi"}]}
+          },
+          sequence:["block.upi"],
+          preferences:{show_default_blocks:true}
+        }
+      },
+      theme:{color:"#087451"}
+    };
+    window.AndroidPayment.startCheckout(JSON.stringify(nativeOptions));
+    return;
+  }
 
   const rz=new Razorpay({
     key:order.key_id,
