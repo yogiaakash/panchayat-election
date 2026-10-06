@@ -20,8 +20,12 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import org.json.JSONObject
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -42,8 +46,34 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Android 15+ enforces edge-to-edge for targetSdk 35. Keep the WebView
+        // inside the real usable app area so it never sits under the status bar
+        // or the system navigation buttons.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val root = FrameLayout(this).apply {
+            setBackgroundColor(android.graphics.Color.rgb(246, 248, 247))
+        }
         web = WebView(this)
-        setContentView(web)
+        root.addView(
+            web,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        )
+        setContentView(root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.navigationBars() or
+                    WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(0, bars.top, 0, bars.bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(root)
 
         CookieManager.getInstance().setAcceptCookie(true)
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, true)
@@ -62,7 +92,7 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
             builtInZoomControls = false
             displayZoomControls = false
             textZoom = 100
-            userAgentString = userAgentString + " PanchayatXAndroid/2.6"
+            userAgentString = userAgentString + " PanchayatXAndroid/2.7"
         }
 
         web.addJavascriptInterface(DownloadBridge(), "AndroidDownloader")
