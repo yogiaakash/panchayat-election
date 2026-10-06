@@ -23,10 +23,13 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
+import com.razorpay.Checkout
+import com.razorpay.PaymentData
+import com.razorpay.PaymentResultWithDataListener
 import java.io.File
 import java.io.FileOutputStream
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
     private lateinit var web: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private val fileChooserRequestCode = 1401
@@ -59,10 +62,12 @@ class MainActivity : AppCompatActivity() {
             builtInZoomControls = false
             displayZoomControls = false
             textZoom = 100
-            userAgentString = userAgentString + " PanchayatXAndroid/2.4"
+            userAgentString = userAgentString + " PanchayatXAndroid/2.5"
         }
 
         web.addJavascriptInterface(DownloadBridge(), "AndroidDownloader")
+        web.addJavascriptInterface(PaymentBridge(), "AndroidPayment")
+        Checkout.preload(applicationContext)
 
         web.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -160,6 +165,59 @@ class MainActivity : AppCompatActivity() {
             })();
         """.trimIndent()
         view.evaluateJavascript(js, null)
+    }
+
+    inner class PaymentBridge {
+        @JavascriptInterface
+        fun startCheckout(optionsJson: String) {
+            runOnUiThread {
+                try {
+                    val options = JSONObject(optionsJson)
+                    val checkout = Checkout()
+                    val key = options.optString("key")
+                    if (key.isNotBlank()) checkout.setKeyID(key)
+                    checkout.open(this@MainActivity, options)
+                } catch (e: Exception) {
+                    val message = JSONObject.quote(e.message ?: "Unable to start payment")
+                    web.evaluateJavascript(
+                        "window.onNativeRazorpayError && window.onNativeRazorpayError({description:" + message + "});",
+                        null
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onPaymentSuccess(razorpayPaymentID: String?, paymentData: PaymentData?) {
+        val paymentId = paymentData?.paymentId ?: razorpayPaymentID ?: ""
+        val orderId = paymentData?.orderId ?: ""
+        val signature = paymentData?.signature ?: ""
+        val payload = JSONObject().apply {
+            put("razorpay_payment_id", paymentId)
+            put("razorpay_order_id", orderId)
+            put("razorpay_signature", signature)
+        }
+        web.post {
+            val quoted = JSONObject.quote(payload.toString())
+            web.evaluateJavascript(
+                "window.onNativeRazorpaySuccess && window.onNativeRazorpaySuccess(" + quoted + ");",
+                null
+            )
+        }
+    }
+
+    override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
+        val payload = JSONObject().apply {
+            put("code", code)
+            put("description", response ?: "Payment failed")
+        }
+        web.post {
+            val quoted = JSONObject.quote(payload.toString())
+            web.evaluateJavascript(
+                "window.onNativeRazorpayError && window.onNativeRazorpayError(" + quoted + ");",
+                null
+            )
+        }
     }
 
     private fun handleNavigation(uri: Uri): Boolean {
@@ -319,6 +377,7 @@ class MainActivity : AppCompatActivity() {
         fileChooserCallback?.onReceiveValue(null)
         fileChooserCallback = null
         web.removeJavascriptInterface("AndroidDownloader")
+        web.removeJavascriptInterface("AndroidPayment")
         web.destroy()
         super.onDestroy()
     }
