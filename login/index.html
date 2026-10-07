@@ -2094,7 +2094,14 @@ async function signupFilterPS(){
   const vals=(data||[]).map(x=>x.panchayat_samiti).filter(Boolean);
   ps.innerHTML='<option value="">पंचायत समिति चुनें</option>';
   for(const raw of vals){
-   const hi=await hindiPlaceName(raw);
+   const rawKey=String(raw||"").trim().toUpperCase().replace(/\s+/g," ");
+   const psFixed={
+     "AMBER PANCHAYAT SAMITI":"आमेर पंचायत समिति",
+     "AMER PANCHAYAT SAMITI":"आमेर पंचायत समिति",
+     "ANDHI PANCHAYAT SAMITI":"आंधी पंचायत समिति",
+     "AANDHI PANCHAYAT SAMITI":"आंधी पंचायत समिति"
+   };
+   const hi=psFixed[rawKey] || await hindiPlaceName(raw);
    ps.insertAdjacentHTML("beforeend",'<option value="'+e(raw)+'">'+e(hi)+'</option>');
   }
   ps.disabled=false;
