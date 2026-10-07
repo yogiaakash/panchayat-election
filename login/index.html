@@ -1995,7 +1995,9 @@ async function loadSignupPanchayats(){
   if(!el)throw new Error("District dropdown not found");
   el.innerHTML='<option value="">जिला चुनें</option>';
   for(const x of await hindiPlaceOptions(ds)){
-   el.insertAdjacentHTML("beforeend",'<option value="'+e(x.en)+'">'+e(x.hi)+' <span></span></option>'.replace(" <span></span>",""));
+   const districtKey=String(x.en||"").trim().toUpperCase().replace(/[^A-Z]/g,"");
+   const districtHi=(districtKey==="BARAN" || String(x.hi||"").trim()==="बरन") ? "बारां" : x.hi;
+   el.insertAdjacentHTML("beforeend",'<option value="'+e(x.en)+'">'+e(districtHi)+' <span></span></option>'.replace(" <span></span>",""));
   }
   if(!ds.length)throw new Error("District list empty");
   if(msg)msg.textContent="";
