@@ -2059,7 +2059,7 @@ function signupView(){
       <div class="signupField"><label>Mobile *</label><input id="suMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर"></div>
       <div class="signupField"><label>WhatsApp Number</label><input id="suWhatsApp" type="tel" inputmode="numeric" maxlength="10" placeholder="WhatsApp नंबर"></div>
       <div class="signupField signupFull"><label>Email / Login ID *</label><input id="suEmail" type="email" autocomplete="username" placeholder="name@example.com"></div>
-      <div class="signupField"><label>Password *</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="कम से कम 8 characters"></div>
+      <div class="signupField"><label>Password *</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="कम से कम 6 अक्षर या अंक"></div>
       <div class="signupField"><label>Confirm Password *</label><input id="suPassword2" type="password" autocomplete="new-password" placeholder="Password दोबारा डालें"></div>
     </div>
 
@@ -2300,7 +2300,7 @@ function showRecoveryPasswordForm(session=null){
  document.querySelector("header").style.display="flex";
  logout.classList.add("hidden");
  app.innerHTML=`<div class="card login"><h2>🔐 नया Password बनाएं</h2><p class="muted">आपका password reset link valid है। नया password डालें।</p>
- <label>New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="कम से कम 8 characters">
+ <label>New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="कम से कम 6 अक्षर या अंक">
  <div class="muted" style="font-size:12px;margin-top:5px">कम से कम 8 characters रखें। Capital letter, number या special symbol जरूरी नहीं है।</div>
  <label>Confirm New Password</label><input id="newPassword2" type="password" autocomplete="new-password">
  <button class="btn primary full" style="margin-top:16px" onclick="updateRecoveryPassword()">Password Update करें</button>
@@ -2343,7 +2343,7 @@ async function ensureRecoverySession(){
 }
 async function updateRecoveryPassword(){
  const p=document.getElementById("newPassword").value,p2=document.getElementById("newPassword2").value,msg=document.getElementById("resetMsg");
- if(p.length<8){msg.textContent="Password कम से कम 8 characters का होना चाहिए।";return}
+ if(p.length<6){msg.textContent="Password कम से कम 6 characters का होना चाहिए।";return}
  if(p!==p2){msg.textContent="दोनों passwords समान नहीं हैं।";return}
  msg.textContent="Password update हो रहा है…";
  try{
