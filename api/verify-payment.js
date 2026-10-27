@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const COUPON_EXPIRES_AT = new Date("2026-10-20T23:59:59+05:30");
+const COUPON_EXPIRES_AT = new Date("2026-11-01T00:00:00+05:30");
 
 function priceForPost(post, discounted) {
   const p = String(post || "").trim();
@@ -102,7 +102,10 @@ export default async function handler(req, res) {
     const profile = Array.isArray(profiles) ? profiles[0] : null;
     if (!profile) return res.status(403).json({ error: "Candidate profile not found" });
 
-    const discounted = String(order.notes?.coupon_applied || "") === "yes" && Date.now() < COUPON_EXPIRES_AT.getTime();
+    // Honor the server-issued coupon on an order placed during the offer, even if verification happens after expiry.
+    const orderCreatedDuringOffer = Number.isFinite(Number(order.created_at)) &&
+      Number(order.created_at) * 1000 < COUPON_EXPIRES_AT.getTime();
+    const discounted = String(order.notes?.coupon_applied || "") === "yes" && orderCreatedDuringOffer;
     const expectedRupees = priceForPost(profile.election_post, discounted);
     const expectedPaise = expectedRupees * 100;
 
