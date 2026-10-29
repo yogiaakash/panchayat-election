@@ -1926,6 +1926,8 @@ const hiPlaceCache=new Map();
 async function hindiPlaceName(name){
  const raw=String(name||"").trim();
  if(!raw)return "";
+ // Official spelling for BARAN / CHHABRA / Bhoolon. Never auto-transliterate this name.
+ if(/^(?:BHOOLON|BHULON|भुलोन|भूलोन|भूलों|भुलों)$/i.test(raw)) return "भुलोन";
 
  // Fixed Rajasthan Panchayat Samiti names. Keep these independent of
  // browser cache / external transliteration so official names remain stable.
